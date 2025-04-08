@@ -35,6 +35,7 @@ module WithFileProperties
   end
 
   def analyze
+    raise "Skip job for now" if Feature.active?(:skip_file_analysis) && created_at < 1.day.ago
     return if deleted? || !s3?
 
     clear_properties
