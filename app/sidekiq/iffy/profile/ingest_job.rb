@@ -7,6 +7,8 @@ class Iffy::Profile::IngestJob
   def perform(user_id)
     user = User.find(user_id)
 
+    raise "Skip job for now" if Feature.active?(:skip_iffy_ingest)
+
     Iffy::Profile::IngestService.new(user).perform
   end
 end

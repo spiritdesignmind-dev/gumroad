@@ -7,6 +7,8 @@ class Iffy::Product::IngestJob
   def perform(product_id)
     product = Link.find(product_id)
 
+    raise "Skip job for now" if Feature.active?(:skip_iffy_ingest)
+
     Iffy::Product::IngestService.new(product).perform
   end
 end

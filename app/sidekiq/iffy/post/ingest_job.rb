@@ -6,6 +6,7 @@ class Iffy::Post::IngestJob
 
   def perform(post_id)
     post = Installment.find(post_id)
+    raise "Skip job for now" if Feature.active?(:skip_iffy_ingest)
 
     Iffy::Post::IngestService.new(post).perform
   end
