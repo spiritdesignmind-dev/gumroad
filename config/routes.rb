@@ -538,6 +538,9 @@ Rails.application.routes.draw do
     patch "/library/purchase/:id/unarchive", to: "library#unarchive", as: :library_unarchive
     patch "/library/purchase/:id/delete", to: "library#delete", as: :library_delete
 
+    # help
+    get "/help", to: "help#index", as: :help
+
     # customers
     get "/customers/sales", controller: "customers", action: "customers_paged", format: "json", as: :sales_paged
     get "/customers", controller: "customers", action: "index", format: "html", as: :customers
