@@ -121,22 +121,13 @@ We use Bundler to install Ruby gems.
 
 ```shell
 gem install bundler
+
+# Skip installing gems for staging and production environments
+bundle config set --local without 'staging production'
+
+# Install gems for development environment
+bundle install
 ```
-
-If you have a license for Sidekiq Pro, configure its credentials:
-
-```shell
-bundle config gems.contribsys.com <key>
-```
-
-If you don't have a license for Sidekiq Pro, set the environment variable `GUMROAD_SIDEKIQ_PRO_DISABLED` in your shell:
-
-```shell
-export GUMROAD_SIDEKIQ_PRO_DISABLED=true
-echo "export GUMROAD_SIDEKIQ_PRO_DISABLED=true" >> ~/.bashrc
-```
-
-Run `bundle install` to install the necessary dependencies.
 
 Also make sure to install `dotenv` as it is required for some console commands:
 
