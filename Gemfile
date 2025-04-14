@@ -169,11 +169,9 @@ gem "shakapacker", "~> 8.0"
 gem "sidekiq-cron", "~> 1.9"
 gem "suo", "~> 0.4"
 
-group :development, :test do
+if ENV["GUMROAD_SIDEKIQ_PRO_DISABLED"] == "true"
   gem "sidekiq", "~> 7.2"
-end
-
-group :production do
+else
   source "https://gems.contribsys.com/" do
     gem "sidekiq-pro", "~> 7.2"
   end
