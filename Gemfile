@@ -27,8 +27,10 @@ group :development, :test do
   gem "shoulda-matchers", "~> 6.0"
   gem "spring", "~> 4.0"
   gem "spring-commands-rspec", "~> 1.0"
-  gem "sidekiq", "~> 7.2"
 end
+
+# Use free version of Sidekiq in development, test, and CI environments
+gem "sidekiq", "~> 7.2", groups: [:development, :test]
 
 group :test do
   gem "capybara", "~> 3.38"
