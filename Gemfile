@@ -58,15 +58,16 @@ group :deployer do
   gem "dotenv", "~> 2.8"
 end
 
-group :production do
+group :staging, :production do
   source "https://gems.contribsys.com/" do
     gem "sidekiq-pro", "~> 7.2"
   end
+
+  gem "actionpack-cloudflare", "~> 1.1" # Verify that this works after upgrading the Rails gem version
 end
 
 gem "acme-client", "~> 2.0"
 gem "actionpack-action_caching", "~> 1.2"
-gem "actionpack-cloudflare", "~> 1.1", group: %i[staging production] # Verify that this works after upgrading the Rails gem version
 gem "activerecord-mysql-index-hint", "~> 0.0"
 gem "active_model_otp", "~> 2.3"
 gem "after_commit_everywhere", "~> 1.3"
