@@ -129,12 +129,7 @@ If you have a license for Sidekiq Pro, configure its credentials:
 bundle config gems.contribsys.com <key>
 ```
 
-If you don't have a license for Sidekiq Pro, set the environment variable `GUMROAD_SIDEKIQ_PRO_DISABLED` in your shell:
-
-```shell
-export GUMROAD_SIDEKIQ_PRO_DISABLED=true
-echo "export GUMROAD_SIDEKIQ_PRO_DISABLED=true" >> ~/.bashrc
-```
+For local development and testing environments, the free version of Sidekiq is used by default, so no additional configuration is needed.
 
 Run `bundle install` to install the necessary dependencies.
 
