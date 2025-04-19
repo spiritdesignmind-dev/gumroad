@@ -79,7 +79,7 @@ import WishlistPage from "$app/components/server-components/WishlistPage";
 import WishlistsFollowingPage from "$app/components/server-components/WishlistsFollowingPage";
 import WishlistsPage from "$app/components/server-components/WishlistsPage";
 import WorkflowsPage from "$app/components/server-components/WorkflowsPage";
-import HelpPage from "$app/components/server-components/HelpPage";
+import HelpPage from "$app/components/server-components/HelpPage/index";
 
 ReactOnRails.register({
   AdminNav,
