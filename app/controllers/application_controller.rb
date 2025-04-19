@@ -161,6 +161,10 @@ class ApplicationController < ActionController::Base
     def authenticate_user!
       return if user_signed_in?
 
+      if request.path.start_with?('/help')
+        return
+      end
+
       if %i[json js].include?(request.format.symbol)
         e404_json
       else

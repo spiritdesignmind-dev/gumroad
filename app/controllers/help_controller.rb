@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class HelpController < Sellers::BaseController
+    skip_after_action :verify_authorized
+
     def index
-      authorize Purchase
 
       @title = "Help Center"
       @on_help_page = true
