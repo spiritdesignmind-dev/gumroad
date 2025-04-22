@@ -2,3 +2,5 @@
 //= link_tree ../fonts
 
 //= link_directory ../javascripts .js
+
+//= link style.css
