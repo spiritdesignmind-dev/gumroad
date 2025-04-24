@@ -16,6 +16,7 @@ describe ChargeProcessor do
         "customer-id",
         "payment_method",
         "fingerprint",
+        "card",
         nil,
         nil,
         "4242",
@@ -34,6 +35,7 @@ describe ChargeProcessor do
         },
         "payment_method",
         "fingerprint",
+        "card",
         nil,
         nil,
         "4242",
@@ -51,6 +53,7 @@ describe ChargeProcessor do
         "customer-id",
         "payment_method",
         "fingerprint",
+        "card",
         nil,
         nil,
         "4242",
@@ -69,6 +72,7 @@ describe ChargeProcessor do
         },
         "payment_method",
         "fingerprint",
+        "card",
         nil,
         nil,
         "4242",
@@ -112,7 +116,9 @@ describe ChargeProcessor do
         transfer_group: nil,
         off_session: true,
         setup_future_charges: true,
-        mandate_options: nil
+        mandate_options: nil,
+        ip: "192.168.0.1",
+        guid: "9c16d4c7-da7d-49e0-9bb3-1784da596495"
       )
       ChargeProcessor.create_payment_intent_or_charge!(
         merchant_account,
@@ -123,7 +129,9 @@ describe ChargeProcessor do
         "description",
         statement_description: "statement-description",
         off_session: true,
-        setup_future_charges: true
+        setup_future_charges: true,
+        ip: "192.168.0.1",
+        guid: "9c16d4c7-da7d-49e0-9bb3-1784da596495"
       )
     end
 
@@ -156,7 +164,9 @@ describe ChargeProcessor do
         transfer_group: nil,
         off_session: true,
         setup_future_charges: true,
-        mandate_options:
+        mandate_options:,
+        ip: "192.168.0.1",
+        guid: "9c16d4c7-da7d-49e0-9bb3-1784da596495"
       )
 
       ChargeProcessor.create_payment_intent_or_charge!(
@@ -170,7 +180,9 @@ describe ChargeProcessor do
         statement_description: "statement-description",
         off_session: true,
         setup_future_charges: true,
-        mandate_options:
+        mandate_options:,
+        ip: "192.168.0.1",
+        guid: "9c16d4c7-da7d-49e0-9bb3-1784da596495"
       )
     end
   end
@@ -250,7 +262,7 @@ describe ChargeProcessor do
     end
 
     it "calls setup_future_charges! on the correct charge processor" do
-      expect_any_instance_of(StripeChargeProcessor).to receive(:setup_future_charges!).with(merchant_account, stripe_chargeable, mandate_options: nil)
+      expect_any_instance_of(StripeChargeProcessor).to receive(:setup_future_charges!).with(merchant_account, stripe_chargeable, mandate_options: nil, ip: nil, guid: nil)
       ChargeProcessor.setup_future_charges!(merchant_account, chargeable)
     end
 
@@ -271,7 +283,7 @@ describe ChargeProcessor do
         }
       }
 
-      expect_any_instance_of(StripeChargeProcessor).to receive(:setup_future_charges!).with(merchant_account, stripe_chargeable, mandate_options:)
+      expect_any_instance_of(StripeChargeProcessor).to receive(:setup_future_charges!).with(merchant_account, stripe_chargeable, mandate_options:, ip: nil, guid: nil)
       ChargeProcessor.setup_future_charges!(merchant_account, chargeable, mandate_options:)
     end
   end

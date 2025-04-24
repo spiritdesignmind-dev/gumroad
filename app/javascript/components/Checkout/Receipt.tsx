@@ -261,7 +261,7 @@ export const Receipt = ({
 }) => {
   const user = useLoggedInUser();
   const [state] = useState();
-  if (state.status.type !== "finished") return null;
+  if (state.status.type !== "finished" && state.status.type !== "ordered") return null;
   return (
     <main className="stack">
       <header>
@@ -297,7 +297,9 @@ export const Receipt = ({
           createAccountData={{
             email: state.email,
             cardParams:
-              state.status.paymentMethod.type === "not-applicable" || state.status.paymentMethod.type === "saved"
+              !("paymentMethod" in state.status) ||
+              state.status.paymentMethod.type === "not-applicable" ||
+              state.status.paymentMethod.type === "saved"
                 ? null
                 : state.status.paymentMethod.cardParamsResult.cardParams,
           }}

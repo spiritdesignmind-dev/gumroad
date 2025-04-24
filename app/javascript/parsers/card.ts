@@ -11,7 +11,7 @@ export type CreditCardType =
 
 export type SavedCreditCard = {
   type: CreditCardType;
-  number: string;
-  expiration_date: string;
+  number: string | null;
+  expiration_date: string | null;
   requires_mandate: boolean;
 };

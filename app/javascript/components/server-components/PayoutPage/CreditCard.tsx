@@ -5,7 +5,7 @@ import { createCast } from "ts-safe-cast";
 import { SavedCreditCard } from "$app/parsers/card";
 import { register } from "$app/utils/serverComponentUtil";
 
-import { CreditCardInput } from "$app/components/Checkout/CreditCardInput";
+import { PayoutCardInput } from "$app/components/Payouts/PayoutCardInput";
 import { PayoutDebitCardData } from "$app/components/server-components/Settings/PaymentsPage";
 
 export const PayoutCreditCard = ({
@@ -24,7 +24,7 @@ export const PayoutCreditCard = ({
   }, [useSavedCard, cardElement]);
 
   return (
-    <CreditCardInput
+    <PayoutCardInput
       disabled={is_form_disabled}
       savedCreditCard={saved_card}
       onReady={setCardElement}

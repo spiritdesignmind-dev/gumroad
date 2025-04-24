@@ -272,15 +272,12 @@ export const createPurchasesRequestData = (
 
     const paymentParams = cardParamsResult.cardParams;
     if (paymentParams.status === "success") {
-      if (paymentParams.type === "card" || paymentParams.type === "payment-request") {
+      if (paymentParams.type === "card") {
         data.stripe_payment_method_id = paymentParams.stripe_payment_method_id;
         data.card_country_source = paymentParams.card_country_source;
         data.card_country = paymentParams.card_country || "";
-
-        if (paymentParams.type === "payment-request") {
-          data.wallet_type = paymentParams.wallet_type;
-        }
-
+        data.wallet_type = paymentParams.wallet_type;
+        data.stripe_payment_method_type = paymentParams.stripe_payment_method_type;
         if (paymentParams.reusable) {
           data.stripe_customer_id = paymentParams.stripe_customer_id;
           data.stripe_setup_intent_id = paymentParams.stripe_setup_intent_id;

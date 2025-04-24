@@ -120,7 +120,7 @@ class ReceiptPresenter::PaymentInfo
 
       {
         label: "Payment method",
-        value: "#{orderable.card_type.upcase} *#{orderable.card_visual.delete('*').delete(' ')}"
+        value: "#{orderable.card_type.upcase} *#{orderable.card_visual&.delete('*')&.delete(' ')}"
       }
     end
   end

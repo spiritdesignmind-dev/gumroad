@@ -41,7 +41,7 @@ describe Stripe::SetupIntentsController, :vcr do
                                                                                                               })
                                                                             }
                                                                           }
-                                                                        }).and_call_original
+                                                                        }, ip: instance_of(String), guid: instance_of(String)).and_call_original
 
         post :create, params: card_with_sca.to_stripejs_params.merge!(products: [{ price: 10_00 }, { price: 5_00 }, { price: 7_00 }])
       end

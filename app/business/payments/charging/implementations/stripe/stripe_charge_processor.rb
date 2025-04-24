@@ -38,17 +38,17 @@ class StripeChargeProcessor
     if params[:stripe_token].present?
       StripeChargeableToken.new(params[:stripe_token], zip_code, product_permalink:)
     elsif params[:stripe_payment_method_id].present?
-      StripeChargeablePaymentMethod.new(params[:stripe_payment_method_id], customer_id: params[:stripe_customer_id],
+      StripeChargeablePaymentMethod.new(params[:stripe_payment_method_id], customer_id: params[:stripe_customer_id], stripe_payment_method_type: params[:stripe_payment_method_type],
                                                                            stripe_setup_intent_id: params[:stripe_setup_intent_id],
                                                                            zip_code:, product_permalink:)
     end
   end
 
-  def get_chargeable_for_data(reusable_token, payment_method_id, fingerprint,
+  def get_chargeable_for_data(reusable_token, payment_method_id, fingerprint, payment_method_type,
                               stripe_setup_intent_id, stripe_payment_intent_id,
                               last4, number_length, visual, expiry_month, expiry_year,
                               card_type, country, zip_code = nil, merchant_account: nil)
-    StripeChargeableCreditCard.new(merchant_account, reusable_token, payment_method_id, fingerprint,
+    StripeChargeableCreditCard.new(merchant_account, reusable_token, payment_method_id, fingerprint, payment_method_type,
                                    stripe_setup_intent_id, stripe_payment_intent_id,
                                    last4, number_length, visual, expiry_month, expiry_year, card_type,
                                    country, zip_code)
@@ -167,9 +167,12 @@ class StripeChargeProcessor
     end
   end
 
-  def setup_future_charges!(merchant_account, chargeable, mandate_options: nil)
+  def setup_future_charges!(merchant_account, chargeable, mandate_options: nil, ip: nil, guid: nil)
     params = {
-      payment_method_types: ["card"],
+      automatic_payment_methods: {
+        enabled: true,
+        allow_redirects: chargeable.requires_mandate_data? ? "always" : "never"
+      },
       usage: "off_session"
     }
     params.merge!(chargeable.stripe_charge_params)
@@ -198,7 +201,25 @@ class StripeChargeProcessor
         setup_intent = Stripe::SetupIntent.create(params)
       end
 
-      setup_intent.confirm if setup_intent.status == StripeIntentStatus::REQUIRES_CONFIRMATION
+      confirm_params = if chargeable.requires_mandate_data?
+        {
+          mandate_data: {
+            customer_acceptance: {
+              type: "online",
+              accepted_at: Time.current.to_i,
+              online: {
+                ip_address: ip,
+                user_agent: guid
+              }
+            }
+          },
+          return_url: Rails.application.routes.url_helpers.confirm_stripe_payment_confirmations_url(host: UrlService.domain_with_protocol)
+        }
+      else
+        {}
+      end
+
+      setup_intent.confirm(confirm_params) if setup_intent.status == StripeIntentStatus::REQUIRES_CONFIRMATION
 
       StripeSetupIntent.new(setup_intent)
     end
@@ -206,7 +227,7 @@ class StripeChargeProcessor
 
   def create_payment_intent_or_charge!(merchant_account, chargeable, amount_cents, amount_for_gumroad_cents, reference,
                                        description, metadata: nil, statement_description: nil,
-                                       transfer_group: nil, off_session: true, setup_future_charges: false, mandate_options: nil)
+                                       transfer_group: nil, off_session: true, setup_future_charges: false, mandate_options: nil, ip: nil, guid: nil)
     should_setup_future_usage = setup_future_charges && !off_session # attempting to set up future usage during an off-session charge will result in an invalid request
 
     params = {
@@ -217,11 +238,27 @@ class StripeChargeProcessor
         purchase: reference
       },
       transfer_group:,
-      payment_method_types: ["card"],
+      automatic_payment_methods: {
+        enabled: true,
+        allow_redirects: chargeable.requires_mandate_data? ? "always" : "never"
+      },
       off_session:,
       setup_future_usage: ("off_session" if should_setup_future_usage)
     }
 
+    params.merge!({
+                    mandate_data: {
+                      customer_acceptance: {
+                        type: "online",
+                        accepted_at: Time.current.to_i,
+                        online: {
+                          ip_address: ip,
+                          user_agent: guid
+                        }
+                      }
+                    },
+                    return_url: Rails.application.routes.url_helpers.confirm_stripe_payment_confirmations_url(host: UrlService.domain_with_protocol) + "?reference=#{reference}"
+                  }) if off_session && chargeable.requires_mandate_data?
     params.merge!(confirm: true) if off_session
 
     params.merge!(mandate_options) if mandate_options.present?
@@ -265,7 +302,25 @@ class StripeChargeProcessor
         payment_intent = Stripe::PaymentIntent.create(params)
       end
 
-      payment_intent.confirm if payment_intent.status == StripeIntentStatus::REQUIRES_CONFIRMATION
+      confirm_params = if chargeable.requires_mandate_data?
+        {
+          mandate_data: {
+            customer_acceptance: {
+              type: "online",
+              accepted_at: Time.current.to_i,
+              online: {
+                ip_address: ip,
+                user_agent: guid
+              }
+            }
+          },
+          return_url: Rails.application.routes.url_helpers.confirm_stripe_payment_confirmations_url(host: UrlService.domain_with_protocol) + "?reference=#{reference}"
+        }
+      else
+        {}
+      end
+      confirm_params.merge!({ payment_method_options: { wechat_pay: { client: "web" } } }) if chargeable.payment_method_type == "wechat_pay"
+      payment_intent.confirm(confirm_params) if payment_intent.status == StripeIntentStatus::REQUIRES_CONFIRMATION
 
       StripeChargeIntent.new(payment_intent:, merchant_account:)
     end

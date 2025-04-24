@@ -29,7 +29,7 @@ FactoryBot.define do
       self.card[:cvc] = cvc
       self.card[:cc_zipcode] = cc_zipcode
       Chargeable.new([
-                       StripeChargeablePaymentMethod.new(self.card.to_stripejs_payment_method_id, zip_code: self.card[:cc_zipcode], product_permalink:)
+                       StripeChargeablePaymentMethod.new(self.card.to_stripejs_payment_method_id, stripe_payment_method_type: "card", zip_code: self.card[:cc_zipcode], product_permalink:)
                      ])
     end
 

@@ -8,7 +8,6 @@ class StripeChargeIntent < ChargeIntent
     self.payment_intent = payment_intent
 
     load_charge(payment_intent, merchant_account) if succeeded?
-    validate_next_action
   end
 
   def succeeded?
@@ -16,7 +15,7 @@ class StripeChargeIntent < ChargeIntent
   end
 
   def requires_action?
-    payment_intent.status == StripeIntentStatus::REQUIRES_ACTION && payment_intent.next_action.type == StripeIntentStatus::ACTION_TYPE_USE_SDK
+    payment_intent.status == StripeIntentStatus::REQUIRES_ACTION
   end
 
   def canceled?
@@ -40,11 +39,5 @@ class StripeChargeIntent < ChargeIntent
       raise "Expected a charge for payment intent #{payment_intent.id}, but got nil" unless charge_id.present?
 
       self.charge = StripeChargeProcessor.new.get_charge(charge_id, merchant_account:)
-    end
-
-    def validate_next_action
-      if payment_intent.status == StripeIntentStatus::REQUIRES_ACTION && payment_intent.next_action.type != StripeIntentStatus::ACTION_TYPE_USE_SDK
-        Bugsnag.notify "Stripe charge intent #{id} requires an unsupported action: #{payment_intent.next_action.type}"
-      end
     end
 end

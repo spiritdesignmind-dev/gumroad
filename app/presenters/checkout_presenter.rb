@@ -8,6 +8,7 @@ class CheckoutPresenter
   include CurrencyHelper
   include PreorderHelper
   include CardParamsHelper
+  include Order::ResponseHelpers
 
   attr_reader :logged_in_user, :ip
 
@@ -38,10 +39,11 @@ class CheckoutPresenter
       **add_single_product_props(params:, user:),
       **checkout_wishlist_props(params:),
       **checkout_wishlist_gift_props(params:),
-      cart: CartPresenter.new(logged_in_user:, ip:, browser_guid:).cart_props,
+      cart: CartPresenter.new(logged_in_user:, ip:, browser_guid:, order: params[:order_id]).cart_props,
       max_allowed_cart_products: Cart::MAX_ALLOWED_CART_PRODUCTS,
       tip_options: TipOptionsService.get_tip_options,
       default_tip_option: TipOptionsService.get_default_tip_option,
+      order: order_props(params:),
     }
   end
 
@@ -325,5 +327,39 @@ class CheckoutPresenter
 
     def purchases
       @_purchases ||= logged_in_user&.purchases&.map { |purchase| { product: purchase.link, variant: purchase.variant_attributes.first } } || []
+    end
+
+    def order_props(params:)
+      return nil if params[:order_id].blank?
+
+      order = Order.find_by_external_id(params[:order_id])
+
+      purchase_responses = {}
+      offer_codes = {}
+      order.purchases.each do |purchase|
+        key = purchase.link.unique_permalink
+        key = key + " " + purchase.variant_attributes.first.external_id if purchase.variant_attributes.first.present?
+        if purchase.failed?
+          purchase_responses[key] = error_response(purchase.errors.first&.message || "Sorry, something went wrong. Please try again.", purchase:)
+          if purchase.offer_code.present?
+            offer_codes[purchase.offer_code.code] ||= {}
+            offer_codes[purchase.offer_code.code][purchase.link.unique_permalink] = { permalink: purchase.link.unique_permalink,
+                                                                                      quantity: purchase.quantity,
+                                                                                      discount_code: purchase.offer_code.code }
+          end
+        else
+          purchase_responses[key] = purchase.purchase_response
+        end
+      end
+
+      offer_codes = offer_codes.filter_map do |offer_code, products|
+        response = { code: offer_code, result: OfferCodeDiscountComputingService.new(offer_code, products).process }
+        next if response[:result][:error_code].present?
+        { code: response[:code], products: response[:result][:products_data].transform_values { _1[:discount] } }
+      end
+      can_buyer_sign_up = !logged_in_user && User.alive.where(email: params[:email]).none?
+
+
+      { lineItems: purchase_responses, canBuyerSignUp: can_buyer_sign_up, offerCodes: offer_codes }
     end
 end

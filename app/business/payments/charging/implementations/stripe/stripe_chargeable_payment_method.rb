@@ -3,14 +3,16 @@
 class StripeChargeablePaymentMethod
   include StripeErrorHandler
 
-  attr_reader :payment_method_id, :stripe_setup_intent_id, :stripe_payment_intent_id
+  attr_reader :payment_method_id, :stripe_setup_intent_id, :stripe_payment_intent_id, :payment_method_type
 
   def initialize(payment_method_id, customer_id: nil,
+                 stripe_payment_method_type: nil,
                  stripe_setup_intent_id: nil,
                  stripe_payment_intent_id: nil,
                  zip_code:, product_permalink:)
     @payment_method_id = payment_method_id
     @customer_id = customer_id
+    @payment_method_type = stripe_payment_method_type
     @stripe_setup_intent_id = stripe_setup_intent_id
     @stripe_payment_intent_id = stripe_payment_intent_id
     @zip_code = zip_code
@@ -73,7 +75,11 @@ class StripeChargeablePaymentMethod
   end
 
   def card_type
-    StripeCardType.to_new_card_type(card[:brand]) if card.present? && card[:brand].present?
+    if card.present? && card[:brand].present?
+      StripeCardType.to_new_card_type(card[:brand])
+    else
+      CardType::UNKNOWN
+    end
   end
 
   def country
@@ -81,7 +87,7 @@ class StripeChargeablePaymentMethod
   end
 
   def card
-    @merchant_account&.is_a_stripe_connect_account? ? @payment_method_on_connect_account&.card : @payment_method&.card
+    @merchant_account&.is_a_stripe_connect_account? ? @payment_method_on_connect_account.try(:card) : @payment_method.try(:card)
   end
 
   def reusable_token!(user)
@@ -108,6 +114,10 @@ class StripeChargeablePaymentMethod
 
   def requires_mandate?
     country == "IN"
+  end
+
+  def requires_mandate_data?
+    @payment_method_type.present? && "card" != @payment_method_type
   end
 
   private

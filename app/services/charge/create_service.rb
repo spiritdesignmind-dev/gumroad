@@ -2,12 +2,12 @@
 
 class Charge::CreateService
   attr_accessor :order, :seller, :merchant_account, :chargeable, :purchases, :amount_cents, :gumroad_amount_cents,
-                :setup_future_charges, :off_session, :statement_description, :charge, :mandate_options
+                :setup_future_charges, :off_session, :statement_description, :charge, :mandate_options, :ip, :guid
 
   def initialize(order:, seller:, merchant_account:, chargeable:,
                  purchases:, amount_cents:, gumroad_amount_cents:,
                  setup_future_charges:, off_session:,
-                 statement_description:, mandate_options: nil)
+                 statement_description:, mandate_options: nil, ip: nil, guid: nil)
     @order = order
     @seller = seller
     @merchant_account = merchant_account
@@ -19,6 +19,8 @@ class Charge::CreateService
     @off_session = off_session
     @statement_description = statement_description
     @mandate_options = mandate_options
+    @ip = ip
+    @guid = guid
   end
 
   def perform
@@ -47,7 +49,9 @@ class Charge::CreateService
                                                        off_session:,
                                                        setup_future_charges:,
                                                        metadata: StripeMetadata.build_metadata_large_list(purchases.map(&:external_id), key: :purchases, separator: ","),
-                                                       mandate_options:)
+                                                       mandate_options:,
+                                                       ip:,
+                                                       guid:)
     end
 
     if charge_intent.present?

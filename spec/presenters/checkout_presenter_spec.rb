@@ -35,6 +35,7 @@ describe CheckoutPresenter do
         recaptcha_key: GlobalConfig.get("RECAPTCHA_MONEY_SITE_KEY"),
         paypal_client_id: PAYPAL_PARTNER_CLIENT_ID,
         cart: nil,
+        order: nil,
         max_allowed_cart_products: Cart::MAX_ALLOWED_CART_PRODUCTS,
         tip_options: [5, 15, 25],
         default_tip_option: 15,
@@ -149,6 +150,7 @@ describe CheckoutPresenter do
           accepted_offer: nil,
           pay_in_installments: false
         }],
+        order: nil,
         max_allowed_cart_products: Cart::MAX_ALLOWED_CART_PRODUCTS,
         tip_options: [5, 15, 25],
         default_tip_option: 15,

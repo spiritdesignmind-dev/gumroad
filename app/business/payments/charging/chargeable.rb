@@ -68,6 +68,11 @@ class Chargeable
     @chargeables.values.first.payment_method_id
   end
 
+  def payment_method_type
+    chargeable = @chargeables.values.first
+    chargeable.respond_to?(:payment_method_type) ? chargeable.payment_method_type : nil
+  end
+
   def stripe_setup_intent_id
     chargeable = @chargeables.values.first
     chargeable.respond_to?(:stripe_setup_intent_id) ? chargeable.stripe_setup_intent_id : nil

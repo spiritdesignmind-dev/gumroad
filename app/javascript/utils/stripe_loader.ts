@@ -84,13 +84,13 @@ const loadStripeConnectInstance = () => {
   return instance;
 };
 
-const extractRgbValues = (name: string) => getCssVariable(name).trim().split(" ").join(", ");
+export const extractRgbValues = (name: string) => getCssVariable(name).trim().split(" ").join(", ");
 
-const getRgbCssVariable = (name: string) => `rgb(${extractRgbValues(name)})`;
+export const getRgbCssVariable = (name: string) => `rgb(${extractRgbValues(name)})`;
 
-const appendAlpha = (color: string, alpha: string) => `rgba(${color}, ${alpha})`;
+export const appendAlpha = (color: string, alpha: string) => `rgba(${color}, ${alpha})`;
 
-const getBorder = () => {
+export const getBorder = () => {
   const color = extractRgbValues("color");
   const alpha = getCssVariable("border-alpha");
   return appendAlpha(color, alpha);

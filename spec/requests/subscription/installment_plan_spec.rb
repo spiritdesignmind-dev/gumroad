@@ -13,7 +13,7 @@ describe "Installment Plans", type: :feature, js: true do
 
   RSpec.shared_context "setup installment plan subscription" do |started_at: Time.current|
     let(:subscription) { create(:subscription, is_installment_plan: true, credit_card:, user: buyer, link: product) }
-    let(:purchase) { create(:installment_plan_purchase, subscription:, link: product, credit_card:, purchaser: buyer) }
+    let(:purchase) { create(:installment_plan_purchase, subscription:, link: product, credit_card:, purchaser: buyer, country: "United States", zip_code: "10110") }
 
     before do
       travel_to(started_at) do

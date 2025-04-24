@@ -248,6 +248,7 @@ class Subscription < ApplicationRecord
     purchase.variant_attributes = original_purchase.variant_attributes
 
     purchase.offer_code = original_purchase.offer_code if discount_applies_to_next_charge?
+    purchase.build_purchase_wallet_type(wallet_type: original_purchase.purchase_wallet_type.wallet_type) if original_purchase.purchase_wallet_type.present?
 
     purchase.purchaser = user
     purchase.link = link

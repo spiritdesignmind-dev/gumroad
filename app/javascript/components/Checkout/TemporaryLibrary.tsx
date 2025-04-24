@@ -24,7 +24,7 @@ export const TemporaryLibrary = ({ results, canBuyerSignUp }: { results: Result[
     showAlert(`Your purchase was successful! We sent a receipt to ${state.email}.`, "success");
   });
 
-  if (state.status.type !== "finished") return null;
+  if (state.status.type !== "finished" && state.status.type !== "ordered") return null;
   return (
     <main>
       <header>
@@ -39,6 +39,7 @@ export const TemporaryLibrary = ({ results, canBuyerSignUp }: { results: Result[
                   createAccountData={{
                     email: state.email,
                     cardParams:
+                      !("paymentMethod" in state.status) ||
                       state.status.paymentMethod.type === "not-applicable" ||
                       state.status.paymentMethod.type === "saved"
                         ? null

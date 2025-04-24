@@ -21,6 +21,8 @@ describe "Non Tiered Membership Subscriptions", type: :feature, js: true do
                                                  link: product)
         create(:purchase, is_original_subscription_purchase: true,
                           link: product,
+                          country: "United States",
+                          zip_code: "10110",
                           subscription: @subscription_without_purchaser,
                           credit_card: @subscription_without_purchaser.credit_card)
 
@@ -29,6 +31,8 @@ describe "Non Tiered Membership Subscriptions", type: :feature, js: true do
         @subscription_with_purchaser = create(:subscription, credit_card: @credit_card, user: @purchaser, link: product, price: @quarterly_price)
         @purchase = create(:purchase, is_original_subscription_purchase: true,
                                       link: product,
+                                      country: "United States",
+                                      zip_code: "10110",
                                       subscription: @subscription_with_purchaser,
                                       credit_card: @credit_card,
                                       price: @quarterly_price,
@@ -215,12 +219,32 @@ describe "Non Tiered Membership Subscriptions", type: :feature, js: true do
                                                  cancelled_at: 1.week.from_now,
                                                  deactivated_at: 1.week.from_now,
                                                  cancelled_by_buyer: true)
-        create(:purchase, is_original_subscription_purchase: true, link: product, subscription: @subscription_without_purchaser, created_at: 1.month.ago, credit_card: @credit_card)
+        create(:purchase,
+               is_original_subscription_purchase: true,
+               link: product,
+               country: "United States",
+               zip_code: "10110",
+               subscription: @subscription_without_purchaser,
+               created_at: 1.month.ago,
+               credit_card: @credit_card)
 
         @purchaser = create(:user, credit_card: @credit_card)
         @subscription_with_purchaser = create(:subscription, credit_card: @credit_card, user: @purchaser, link: product, failed_at: Time.current, deactivated_at: Time.current)
-        create(:purchase, is_original_subscription_purchase: true, link: product, subscription: @subscription_with_purchaser, created_at: 1.month.ago, credit_card: @credit_card)
-        create(:purchase, link: product, subscription: @subscription_with_purchaser, purchase_state: "failed", credit_card: @credit_card)
+        create(:purchase,
+               is_original_subscription_purchase: true,
+               link: product,
+               country: "United States",
+               zip_code: "10110",
+               subscription: @subscription_with_purchaser,
+               created_at: 1.month.ago,
+               credit_card: @credit_card)
+        create(:purchase,
+               link: product,
+               country: "United States",
+               zip_code: "10110",
+               subscription: @subscription_with_purchaser,
+               purchase_state: "failed",
+               credit_card: @credit_card)
       end
 
       setup_subscription_token(subscription: @subscription_with_purchaser)
@@ -337,8 +361,21 @@ describe "Non Tiered Membership Subscriptions", type: :feature, js: true do
       product = create(:subscription_product)
       credit_card = create(:credit_card, chargeable: build(:chargeable, card: StripePaymentMethodHelper.success))
       subscription = create(:subscription, user: nil, credit_card:, link: product)
-      create(:purchase, is_original_subscription_purchase: true, link: product, subscription:, created_at: 1.month.ago, credit_card:)
-      create(:purchase, link: product, subscription:, purchase_state: "failed", credit_card:)
+      create(:purchase,
+             is_original_subscription_purchase: true,
+             link: product,
+             country: "United States",
+             zip_code: "10110",
+             subscription:,
+             created_at: 1.month.ago,
+             credit_card:)
+      create(:purchase,
+             link: product,
+             country: "United States",
+             zip_code: "10110",
+             subscription:,
+             purchase_state: "failed",
+             credit_card:)
       travel_back
 
       setup_subscription_token(subscription: subscription)

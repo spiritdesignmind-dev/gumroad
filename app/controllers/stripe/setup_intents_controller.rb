@@ -47,12 +47,12 @@ class Stripe::SetupIntentsController < ApplicationController
       } : nil
     end
 
-    setup_intent = ChargeProcessor.setup_future_charges!(merchant_account, chargeable, mandate_options:)
+    setup_intent = ChargeProcessor.setup_future_charges!(merchant_account, chargeable, mandate_options:, ip: request.remote_ip, guid: cookies[:_gumroad_guid])
 
     if setup_intent.succeeded?
       render json: { success: true, reusable_token:, setup_intent_id: setup_intent.id }
     elsif setup_intent.requires_action?
-      render json: { success: true, reusable_token:, setup_intent_id: setup_intent.id, requires_card_setup: true, client_secret: setup_intent.client_secret }
+      render json: { success: true, reusable_token:, setup_intent_id: setup_intent.id, requires_card_setup: true, client_secret: setup_intent.client_secret, return_url: Rails.application.routes.url_helpers.confirm_stripe_payment_confirmations_url(host: UrlService.domain_with_protocol) }
     else
       render json: { success: false, error_message: "Sorry, something went wrong." }, status: :unprocessable_entity
     end

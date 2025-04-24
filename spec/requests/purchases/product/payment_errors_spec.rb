@@ -105,40 +105,31 @@ describe("Purchase from a product page", type: :feature, js: true) do
     add_to_cart(product)
 
     click_on "Pay"
+    wait_for_ajax
+
+    click_on "Pay"
     within_fieldset "Card information" do
-      within_frame { expect_focused find_field("Card number") }
+      within_frame { expect(page).to have_text("Your card number is incomplete.") }
     end
 
     fill_in_credit_card(expiry: nil, cvc: nil)
     click_on "Pay"
     within_fieldset "Card information" do
-      within_frame { expect_focused find_field("MM / YY") }
+      within_frame { expect(page).to have_text("Your card’s expiration date is incomplete.") }
     end
 
-    fill_in_credit_card(cvc: nil)
+    fill_in_credit_card(expiry: "12/28", cvc: nil)
     click_on "Pay"
     within_fieldset "Card information" do
-      within_frame { expect_focused find_field("CVC") }
+      within_frame { expect(page).to have_text("Your card’s security code is incomplete.") }
     end
 
     fill_in_credit_card
     click_on "Pay"
-    expect_focused find_field("Your email address")
-
-    fill_in "Your email address", with: "gumroad@example.com"
-    click_on "Pay"
-    expect_focused find_field("Full name")
-
-    fill_in "Full name", with: "G McGumroadson"
-    click_on "Pay"
-    expect_focused find_field("Street address")
-
-    fill_in "Street address", with: "123 Main St"
-    click_on "Pay"
-    expect_focused find_field("City")
-
-    fill_in "City", with: "San Francisco"
-    click_on "Pay"
-    expect_focused find_field("ZIP code")
+    expect(page).to have_field("Email address", aria: { invalid: true })
+    expect(page).to have_field("Full name", aria: { invalid: true })
+    expect(page).to have_field("Street address", aria: { invalid: true })
+    expect(page).to have_field("City", aria: { invalid: true })
+    expect(page).to have_field("ZIP code", aria: { invalid: true })
   end
 end

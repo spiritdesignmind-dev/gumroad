@@ -1,12 +1,6 @@
 import { loadScript as loadPaypal, PayPalNamespace } from "@paypal/paypal-js";
-import { useStripe } from "@stripe/react-stripe-js";
-import {
-  CanMakePaymentResult,
-  PaymentRequestPaymentMethodEvent,
-  PaymentRequestShippingAddress,
-  PaymentRequestShippingAddressEvent,
-  StripeCardElement,
-} from "@stripe/stripe-js";
+import { useStripe, useElements } from "@stripe/react-stripe-js";
+import { StripePaymentElement } from "@stripe/stripe-js";
 import { DataCollector, PayPal } from "braintree-web";
 import * as BraintreeClient from "braintree-web/client";
 import * as BraintreeDataCollector from "braintree-web/data-collector";
@@ -15,11 +9,8 @@ import cx from "classnames";
 import * as React from "react";
 
 import { useBraintreeToken } from "$app/data/braintree_client_token_data";
-import { preparePaymentRequestPaymentMethodData } from "$app/data/card_payment_method_data";
 import {
   getReusablePaymentMethodResult,
-  getPaymentRequestPaymentMethodResult,
-  getReusablePaymentRequestPaymentMethodResult,
   getPaymentMethodResult,
   SelectedPaymentMethod,
 } from "$app/data/payment_method_result";
@@ -430,7 +421,6 @@ const CustomerDetails = () => {
   const isLoggedIn = !!useLoggedInUser();
   const [state, dispatch] = useState();
   const uid = React.useId();
-  const payLabel = usePayLabel();
   const fail = useFail();
 
   const [addressVerification, setAddressVerification] = React.useState<VerificationResult | null>(null);
@@ -590,11 +580,6 @@ const CustomerDetails = () => {
       {state.products.length === 1 && state.products[0]?.canGift && !state.products[0]?.payInInstallments ? (
         <GiftForm isMembership={state.products[0]?.nativeType === "membership"} />
       ) : null}
-      <div>
-        <Button color="primary" onClick={() => dispatch({ type: "offer" })} disabled={isSubmitDisabled(state)}>
-          {payLabel}
-        </Button>
-      </div>
     </>
   );
 };
@@ -605,7 +590,10 @@ const CreditCard = () => {
   const isLoggedIn = !!useLoggedInUser();
 
   const uid = React.useId();
-  const cardElementRef = React.useRef<StripeCardElement | null>(null);
+  const payLabel = usePayLabel();
+  const stripe = useStripe();
+  const elements = useElements();
+  const paymentElementRef = React.useRef<StripePaymentElement | null>(null);
   const [useSavedCard, setUseSavedCard] = React.useState(!!state.savedCreditCard);
   const [nameOnCard, setNameOnCard] = React.useState("");
   const [keepOnFile, setKeepOnFile] = React.useState(isLoggedIn);
@@ -632,7 +620,7 @@ const CreditCard = () => {
   React.useEffect(() => {
     if (state.status.type !== "starting" || state.paymentMethod !== "card") return;
     (async () => {
-      if (!useSavedCard && !cardElementRef.current) {
+      if (!useSavedCard && !paymentElementRef.current) {
         setCardError(true);
         return dispatch({ type: "cancel" });
       }
@@ -641,10 +629,11 @@ const CreditCard = () => {
         : {
             type: "card",
             element: assertDefined(
-              cardElementRef.current,
-              "`cardElementRef.current` should be defined when the payment method is an unsaved card",
+              paymentElementRef.current,
+              "`paymentElementRef.current` should be defined when the payment method is an unsaved card",
             ),
             zipCode: state.zipCode,
+            country: state.country,
             keepOnFile,
             fullName: nameOnCard,
             email: state.email,
@@ -701,15 +690,28 @@ const CreditCard = () => {
           <CreditCardInput
             savedCreditCard={state.savedCreditCard}
             disabled={isProcessing(state)}
-            onReady={(element) => (cardElementRef.current = element)}
+            onReady={(element) => (paymentElementRef.current = element)}
             invalid={cardError}
             useSavedCard={useSavedCard}
             setUseSavedCard={setUseSavedCard}
-            onChange={(evt) => setCardError(!!evt.error)}
+            onChange={(evt) => setCardError(evt.empty)}
           />
         </div>
       </div>
       <CustomerDetails />
+      <div>
+        <Button
+          color="primary"
+          onClick={asyncVoid(async () => {
+            if (!stripe || !elements) return;
+            await elements.submit();
+            dispatch({ type: "offer" });
+          })}
+          disabled={isSubmitDisabled(state)}
+        >
+          {payLabel}
+        </Button>
+      </div>
     </>
   );
 };
@@ -1018,140 +1020,16 @@ const PayPal = () => {
   );
 };
 
-const StripePaymentRequest = () => {
+const FreePurchase = () => {
   const [state, dispatch] = useState();
-  const stripe = useStripe();
-  const fail = useFail();
   const payLabel = usePayLabel();
-
-  const [shippingAddressChangeEvent, setShippingAddressChangeEvent] =
-    React.useState<PaymentRequestShippingAddressEvent | null>(null);
-  const [paymentMethodEvent, setPaymentMethodEvent] = React.useState<PaymentRequestPaymentMethodEvent | null>(null);
-  const [paymentMethods, setPaymentMethods] = React.useState<CanMakePaymentResult | null>(null);
-
-  const getTotalItem = () => ({ amount: getTotalPrice(state) ?? 0, label: "Gumroad" });
-  const stateRef = useRefToLatest(state);
-
-  const paymentRequest = React.useMemo(() => {
-    if (!stripe) return null;
-    const paymentRequest = stripe.paymentRequest({
-      country: "US",
-      currency: "usd",
-      total: getTotalItem(),
-      requestPayerEmail: true,
-      requestShipping: state.products.some((item) => item.requireShipping),
-      requestPayerName: true,
-    });
-    const getAddress = (address: PaymentRequestShippingAddress) => ({
-      state: (address.region || address.city) ?? "",
-      address: address.addressLine?.join(", ") ?? "",
-      city: address.city ?? "",
-      fullName: address.recipient ?? "",
-      zipCode: address.postalCode ?? "",
-      country: address.country ?? "",
-    });
-    paymentRequest.canMakePayment().then(setPaymentMethods, () => setPaymentMethods(null));
-    paymentRequest.on("shippingaddresschange", (e) => {
-      dispatch({ type: "set-value", ...getAddress(e.shippingAddress) });
-      setShippingAddressChangeEvent(e);
-    });
-    paymentRequest.on("cancel", () => dispatch({ type: "cancel" }));
-    paymentRequest.on("paymentmethod", (e) =>
-      (async () => {
-        const state = stateRef.current;
-        if (hasShipping(state) && e.shippingAddress) dispatch({ type: "set-value", ...getAddress(e.shippingAddress) });
-        if (!hasShipping(state) && e.paymentMethod.billing_details.address?.country === "US") {
-          dispatch({ type: "set-value", country: "US" });
-          dispatch({ type: "set-value", zipCode: e.paymentMethod.billing_details.address.postal_code || undefined });
-        }
-        dispatch({ type: "set-value", fullName: e.payerName, ...(state.email ? {} : { email: e.payerEmail }) });
-        setPaymentMethodEvent(e);
-        const selectedPaymentMethod = preparePaymentRequestPaymentMethodData(e);
-        dispatch({
-          type: "set-payment-method",
-          paymentMethod: requiresReusablePaymentMethod(state)
-            ? await getReusablePaymentRequestPaymentMethodResult(selectedPaymentMethod, { products: state.products })
-            : getPaymentRequestPaymentMethodResult(selectedPaymentMethod),
-        });
-      })().catch(fail),
-    );
-    return paymentRequest;
-  }, [stripe]);
-  useOnChangeSync(() => {
-    // use a layout effect because `paymentRequest.show` needs to be called synchronously
-    if (state.paymentMethod !== "stripePaymentRequest") return;
-    if (state.status.type === "validating") dispatch({ type: "start-payment" });
-    else if (state.status.type === "starting") paymentRequest?.show();
-    else if (paymentMethodEvent) {
-      const errors = getErrors(state);
-      if (state.status.type === "captcha") paymentMethodEvent.complete("success");
-      else if (state.status.type === "input") {
-        if (errors.has("email")) paymentMethodEvent.complete("invalid_payer_email");
-        else if (errors.has("fullName")) paymentMethodEvent.complete("invalid_payer_name");
-        else if (addressFields.some((field) => errors.has(field)))
-          paymentMethodEvent.complete("invalid_shipping_address");
-        else paymentMethodEvent.complete("fail");
-      } else return;
-      setPaymentMethodEvent(null);
-    }
+  React.useEffect(() => {
+    if (state.status.type === "starting")
+      dispatch({ type: "set-payment-method", paymentMethod: { type: "not-applicable" } });
   }, [state.status.type]);
-  React.useEffect(() => {
-    if (!paymentRequest) return;
-    if (shippingAddressChangeEvent) {
-      shippingAddressChangeEvent.updateWith(
-        state.surcharges.type === "loaded"
-          ? {
-              status: "success",
-              shippingOptions: [
-                {
-                  id: "standard",
-                  label: "Standard Shipping",
-                  detail: "",
-                  amount: state.surcharges.result.shipping_rate_cents,
-                },
-              ],
-              total: getTotalItem(),
-            }
-          : { status: "invalid_shipping_address" },
-      );
-      setShippingAddressChangeEvent(null);
-    } else if (
-      // This guard prevents us from updating the total while the Apple
-      // Pay payment sheet is open, which throws an error. We need this
-      // because the surcharges are reloaded after we update the ZIP code
-      // to the Apple Pay billing ZIP code during payment.
-      (state.status.type === "input" || state.status.type === "validating") &&
-      state.surcharges.type === "loaded"
-    )
-      paymentRequest.update({ total: getTotalItem() });
-  }, [state.surcharges, shippingAddressChangeEvent]);
-  const canPay = paymentMethods && (paymentMethods.googlePay || paymentMethods.applePay);
-  React.useEffect(() => {
-    if (!canPay) return;
-    dispatch({
-      type: "add-payment-method",
-      paymentMethod: {
-        type: "stripePaymentRequest",
-        button: (
-          <PaymentMethodRadio paymentMethod="stripePaymentRequest">
-            <span
-              className={cx("brand-icon", {
-                "brand-icon-google": paymentMethods.googlePay,
-                "brand-icon-apple": paymentMethods.applePay,
-              })}
-            />
-            <h4>{paymentMethods.googlePay ? "Google Pay" : "Apple Pay"}</h4>
-          </PaymentMethodRadio>
-        ),
-      },
-    });
-  }, [canPay]);
-  if (!canPay || state.paymentMethod !== "stripePaymentRequest") return null;
-
   return (
     <>
-      <SharedInputs />
-      {isTippingEnabled(state) ? <TipSelector /> : null}
+      <CustomerDetails />
       <div>
         <Button color="primary" onClick={() => dispatch({ type: "offer" })} disabled={isSubmitDisabled(state)}>
           {payLabel}
@@ -1159,15 +1037,6 @@ const StripePaymentRequest = () => {
       </div>
     </>
   );
-};
-
-const FreePurchase = () => {
-  const [state, dispatch] = useState();
-  React.useEffect(() => {
-    if (state.status.type === "starting")
-      dispatch({ type: "set-payment-method", paymentMethod: { type: "not-applicable" } });
-  }, [state.status.type]);
-  return <CustomerDetails />;
 };
 
 export const PaymentForm = ({
@@ -1180,6 +1049,11 @@ export const PaymentForm = ({
 
   const paymentFormRef = React.useRef<HTMLDivElement | null>(null);
   const recaptcha = useRecaptcha({ siteKey: state.recaptchaKey });
+  const getPaymentDetails = () => ({
+    amount: getTotalPrice(state) ?? 0,
+    setupFutureUsage: requiresReusablePaymentMethod(state),
+    setupOnly: (getTotalPrice(state) ?? 0) === 0 && requiresPayment(state),
+  });
 
   React.useEffect(() => {
     if (paymentFormRef.current && state.status.type === "input") {
@@ -1237,10 +1111,13 @@ export const PaymentForm = ({
               </div>
             </div>
           ) : null}
-          <CreditCard />
           <PayPal />
-          <StripeElementsProvider>
-            <StripePaymentRequest />
+          <StripeElementsProvider
+            amount={getPaymentDetails().amount}
+            setupFutureUsage={getPaymentDetails().setupFutureUsage}
+            setupOnly={getPaymentDetails().setupOnly}
+          >
+            <CreditCard />
           </StripeElementsProvider>
         </>
       )}

@@ -6,7 +6,6 @@ class StripeSetupIntent < SetupIntent
 
   def initialize(setup_intent)
     self.setup_intent = setup_intent
-    validate_next_action
   end
 
   def succeeded?
@@ -14,17 +13,10 @@ class StripeSetupIntent < SetupIntent
   end
 
   def requires_action?
-    setup_intent.status == StripeIntentStatus::REQUIRES_ACTION && setup_intent.next_action.type == StripeIntentStatus::ACTION_TYPE_USE_SDK
+    setup_intent.status == StripeIntentStatus::REQUIRES_ACTION
   end
 
   def canceled?
     setup_intent.status == StripeIntentStatus::CANCELED
   end
-
-  private
-    def validate_next_action
-      if setup_intent.status == StripeIntentStatus::REQUIRES_ACTION && setup_intent.next_action.type != StripeIntentStatus::ACTION_TYPE_USE_SDK
-        Bugsnag.notify "Stripe setup intent #{id} requires an unsupported action: #{setup_intent.next_action.type}"
-      end
-    end
 end

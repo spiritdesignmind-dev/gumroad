@@ -91,7 +91,7 @@ describe BraintreeChargeProcessor, :vcr do
                                                      .with(braintree_chargeable.reusable_token_for!(BraintreeChargeProcessor.charge_processor_id, nil), nil, nil, nil, nil, nil, nil, nil, nil, nil)
                                                      .and_call_original
 
-        expect(subject.get_chargeable_for_data(braintree_chargeable.reusable_token_for!(BraintreeChargeProcessor.charge_processor_id, nil), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil))
+        expect(subject.get_chargeable_for_data(braintree_chargeable.reusable_token_for!(BraintreeChargeProcessor.charge_processor_id, nil), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil))
             .to be_a(BraintreeChargeableCreditCard)
       end
     end

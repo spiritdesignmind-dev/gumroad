@@ -5,19 +5,12 @@ export type CardPaymentMethodParams = {
   type: "card";
   reusable: false;
   stripe_payment_method_id: string;
+  stripe_payment_method_type: string;
   card_country: string | null;
   card_country_source: "stripe";
-};
-export type PaymentRequestPaymentMethodParams = {
-  wallet_type: string;
-  status: "success";
-  type: "payment-request";
-  reusable: false;
-  stripe_payment_method_id: string;
-  card_country: string | null;
-  card_country_source: "stripe";
-  email: string | null;
-  zip_code: string | null;
+  wallet_type?: string | null | undefined;
+  email?: string | null;
+  zip_code?: string | null;
 };
 export type PayPalNativePaymentMethodParams = {
   status: "success";
@@ -32,12 +25,6 @@ export type ReusableCardPaymentMethodParams = { stripe_customer_id: string; stri
   CardPaymentMethodParams,
   "reusable"
 > & {
-    reusable: true;
-  };
-export type ReusablePaymentRequestPaymentMethodParams = {
-  stripe_customer_id: string;
-  stripe_setup_intent_id: string;
-} & Omit<PaymentRequestPaymentMethodParams, "reusable"> & {
     reusable: true;
   };
 export type ReusablePayPalBraintreePaymentMethodParams = {
@@ -64,21 +51,11 @@ export type AnyPayPalMethodParams =
 
 export type StripeErrorParams = { status: "error"; stripe_error: StripeError };
 
-export type AnyPaymentMethodParams =
-  | CardPaymentMethodParams
-  | ReusableCardPaymentMethodParams
-  | PaymentRequestPaymentMethodParams
-  | ReusablePaymentRequestPaymentMethodParams
-  | AnyPayPalMethodParams;
+export type AnyPaymentMethodParams = CardPaymentMethodParams | ReusableCardPaymentMethodParams | AnyPayPalMethodParams;
 
 export const isSuccessfulParams = (
   cardParams: AnyPaymentMethodParams | StripeErrorParams,
 ): cardParams is AnyPaymentMethodParams => cardParams.status === "success";
-
-export const isPaymentRequestParams = (
-  cardParams: AnyPaymentMethodParams | StripeErrorParams,
-): cardParams is PaymentRequestPaymentMethodParams | ReusablePaymentRequestPaymentMethodParams =>
-  cardParams.status === "success" && cardParams.type === "payment-request";
 
 export const isPayPalNativeParams = (
   cardParams: AnyPaymentMethodParams | StripeErrorParams,

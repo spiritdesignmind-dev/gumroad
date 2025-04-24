@@ -3,10 +3,10 @@
 class CartPresenter
   attr_reader :logged_in_user, :ip, :cart
 
-  def initialize(logged_in_user:, ip:, browser_guid:)
+  def initialize(logged_in_user:, ip:, browser_guid:, order: nil)
     @logged_in_user = logged_in_user
     @ip = ip
-    @cart = Cart.fetch_by(user: logged_in_user, browser_guid:)
+    @cart = (order && Order.find_by_external_id(order).cart).presence || Cart.fetch_by(user: logged_in_user, browser_guid:)
   end
 
   def cart_props

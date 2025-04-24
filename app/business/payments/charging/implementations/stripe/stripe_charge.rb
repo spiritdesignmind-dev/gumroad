@@ -37,6 +37,8 @@ class StripeCharge < BaseProcessorCharge
       payment_method_details = stripe_charge[:payment_method_details]
       billing_details = stripe_charge[:billing_details]
       payment_card = payment_method_details[:card]
+      return if payment_card.blank?
+
       self.card_fingerprint = payment_card[:fingerprint]
       self.card_instance_id = stripe_charge[:payment_method]
       self.card_last4 = payment_card[:last4]

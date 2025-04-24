@@ -121,7 +121,7 @@ class Order::ChargeService
 
     if merchant_account.charge_processor_id == StripeChargeProcessor.charge_processor_id && !card_already_saved
       mandate_options = mandate_options_for_stripe(purchases:, with_currency: true)
-      self.setup_intent = ChargeProcessor.setup_future_charges!(merchant_account, chargeable, mandate_options:)
+      self.setup_intent = ChargeProcessor.setup_future_charges!(merchant_account, chargeable, mandate_options:, ip: purchases.last.ip_address, guid: purchases.last.browser_guid)
 
       if setup_intent.present?
         purchases.each do |purchase|
@@ -194,6 +194,8 @@ class Order::ChargeService
         off_session:,
         statement_description:,
         mandate_options: setup_future_charges ? mandate_options : nil,
+        ip: params[:ip_address],
+        guid: params[:browser_guid]
       ).perform
 
       self.charge_intent = charge.charge_intent
@@ -265,7 +267,8 @@ class Order::ChargeService
           order: {
             id: order.external_id,
             stripe_connect_account_id: order.charges.last.merchant_account.is_a_stripe_connect_account? ? order.charges.last.merchant_account.charge_processor_merchant_id : nil
-          }
+          },
+          return_url: Rails.application.routes.url_helpers.confirm_stripe_payment_confirmations_url(host: UrlService.domain_with_protocol) + "?reference=#{purchase.order.external_id}",
         }
       elsif setup_intent&.requires_action?
         charge_responses[line_item_uid] ||= {
@@ -275,7 +278,8 @@ class Order::ChargeService
           order: {
             id: order.external_id,
             stripe_connect_account_id: order.purchases.last.merchant_account.is_a_stripe_connect_account? ? order.purchases.last.merchant_account.charge_processor_merchant_id : nil
-          }
+          },
+          return_url: Rails.application.routes.url_helpers.confirm_stripe_payment_confirmations_url(host: UrlService.domain_with_protocol) + "?reference=#{purchase.order.external_id}",
         }
       else
         charge_responses[line_item_uid] ||= purchase.purchase_response

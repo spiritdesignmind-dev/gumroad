@@ -30,7 +30,11 @@ class OrdersController < ApplicationController
     purchase_responses.merge!(charge_responses)
 
     order.purchases.each { create_purchase_event_and_recommendation_info(_1) }
-    order.send_charge_receipts unless purchase_responses.any? { |_k, v| v[:requires_card_action] || v[:requires_card_setup] }
+
+    unless purchase_responses.any? { |_k, v| v[:requires_card_action] || v[:requires_card_setup] }
+      order.cart.mark_deleted! if order.cart.present?
+      order.send_charge_receipts
+    end
 
     render json: { success: true, line_items: purchase_responses, offer_codes:, can_buyer_sign_up: }
   end
@@ -49,6 +53,7 @@ class OrdersController < ApplicationController
       purchase = Purchase.find(purchase_id)
       create_purchase_event_and_recommendation_info(purchase)
     end
+    order.cart.mark_deleted! if order.cart.present?
     order.send_charge_receipts
 
     render json: { success: true, line_items: confirm_responses, offer_codes:, can_buyer_sign_up: }
@@ -81,7 +86,7 @@ class OrdersController < ApplicationController
     def valid_wallet_payment?
       return false if [params[:wallet_type], params[:stripe_payment_method_id]].any?(&:blank?)
       payment_method = Stripe::PaymentMethod.retrieve(params[:stripe_payment_method_id])
-      payment_method&.card&.wallet&.type == params[:wallet_type]
+      payment_method&.type == params[:wallet_type] || payment_method&.card&.wallet&.type == params[:wallet_type]
     rescue Stripe::StripeError
       render_error("Sorry, something went wrong.")
     end
@@ -92,7 +97,7 @@ class OrdersController < ApplicationController
         :friend, :locale, :plugins, :save_card, :card_data_handling_mode, :card_data_handling_error,
         :card_country, :card_country_source, :wallet_type, :cc_zipcode, :vat_id, :email, :tax_country_election,
         :save_shipping_address, :card_expiry_month, :card_expiry_year, :stripe_status, :visual,
-        :billing_agreement_id, :paypal_order_id, :stripe_payment_method_id, :stripe_customer_id, :stripe_error,
+        :billing_agreement_id, :paypal_order_id, :stripe_payment_method_id, :stripe_payment_method_type, :stripe_customer_id, :stripe_error,
         :braintree_transient_customer_store_key, :braintree_device_data, :use_existing_card, :paymentToken,
         :url_parameters, :is_gift, :giftee_email, :giftee_id, :gift_note, :referrer,
         purchase: [:full_name, :street_address, :city, :state, :zip_code, :country],

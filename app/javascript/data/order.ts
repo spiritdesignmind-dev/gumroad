@@ -18,12 +18,14 @@ type OrderRequiresCardActionResponse = {
   requires_card_action: true;
   client_secret: string;
   order: { id: string; stripe_connect_account_id: string | null };
+  return_url: string | null;
 };
 type OrderRequiresCardSetupResponse = {
   success: true;
   requires_card_setup: true;
   client_secret: string;
   order: { id: string; stripe_connect_account_id: string | null };
+  return_url: string | null;
 };
 type LineItemResponse =
   | PurchaseErrorResponse
@@ -44,11 +46,14 @@ type ConfirmOrderResponse = {
   offer_codes: OfferCodes;
 };
 type OrderErrorResponse = { success: false; error_message: string };
+type OrderPendingResponse = { pending: true };
 
 // Initiates a request to create an order to purchase all the line items in the cart.
 // Handles SCA actions where appropriate.
 // Result object is guaranteed to have a result for each line item in the request.
-export const startOrderCreation = async (requestData: StartCartPurchaseRequestPayload): Promise<CartPurchaseResult> => {
+export const startOrderCreation = async (
+  requestData: StartCartPurchaseRequestPayload,
+): Promise<CartPurchaseResult | OrderPendingResponse> => {
   try {
     const response = await createOrder(requestData);
     if (!response.success) {
@@ -62,11 +67,13 @@ export const startOrderCreation = async (requestData: StartCartPurchaseRequestPa
     if (lineItemRequiringSCA) {
       const orderId = lineItemRequiringSCA.order.id;
       const clientSecret = lineItemRequiringSCA.client_secret;
+      const returnUrl = lineItemRequiringSCA.return_url;
       const stripeConnectAccountId = lineItemRequiringSCA.order.stripe_connect_account_id;
       const requiresCardAction = "requires_card_action" in lineItemRequiringSCA;
       const orderConfirmResponse = await confirmOrder(
         orderId,
         clientSecret,
+        returnUrl,
         stripeConnectAccountId,
         requiresCardAction,
       );
@@ -169,6 +176,7 @@ const doesLineItemRequireSCA = (
 const confirmOrder = async (
   orderId: string,
   clientSecret: string,
+  returnUrl: string | null,
   stripeConnectAccountId: string | null,
   requiresCardAction: boolean,
 ): Promise<ConfirmOrderResponse> => {
@@ -178,11 +186,13 @@ const confirmOrder = async (
     ? await getConnectedAccountStripeInstance(stripeConnectAccountId)
     : await getStripeInstance();
 
+  const confirmParams = returnUrl ? { return_url: returnUrl } : {};
+
   if (requiresCardAction) {
-    const stripeResult = await stripe.confirmCardPayment(clientSecret);
+    const stripeResult = await stripe.confirmPayment({ clientSecret, confirmParams, redirect: "if_required" });
     stripeError = stripeResult.error;
   } else {
-    const stripeResult = await stripe.confirmCardSetup(clientSecret);
+    const stripeResult = await stripe.confirmSetup({ clientSecret, confirmParams, redirect: "if_required" });
     stripeError = stripeResult.error;
   }
 

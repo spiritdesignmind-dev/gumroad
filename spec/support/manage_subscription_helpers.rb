@@ -147,6 +147,8 @@ module ManageSubscriptionHelpers
                                  email: @user.email,
                                  is_free_trial_purchase: gift ? false : @product.free_trial_enabled?,
                                  offer_code:,
+                                 country: "United States",
+                                 zip_code: "10110",
                                  purchase_state: "in_progress",
                                  was_product_recommended:)
       if pwyw

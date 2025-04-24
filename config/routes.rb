@@ -134,6 +134,11 @@ Rails.application.routes.draw do
 
     namespace :stripe do
       resources :setup_intents, only: :create
+      resources :payment_confirmations, only: [] do
+        collection do
+          get :confirm
+        end
+      end
     end
 
     post "/shipments/verify_shipping_address", to: "shipments#verify_shipping_address"
@@ -990,6 +995,11 @@ Rails.application.routes.draw do
 
     namespace :stripe do
       resources :setup_intents, only: :create
+      resources :payment_confirmations, only: [] do
+        collection do
+          get :confirm
+        end
+      end
     end
 
     namespace :custom_domain do

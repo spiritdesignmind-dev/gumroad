@@ -1,4 +1,4 @@
-import { StripeCardElement } from "@stripe/stripe-js";
+import { StripePaymentElement } from "@stripe/stripe-js";
 
 import { prepareBraintreePaymentMethodData } from "$app/data/braintree_payment_method_data";
 import {
@@ -9,8 +9,6 @@ import {
 import {
   CardPaymentMethodParams,
   ReusableCardPaymentMethodParams,
-  PaymentRequestPaymentMethodParams,
-  ReusablePaymentRequestPaymentMethodParams,
   StripeErrorParams,
   AnyPayPalMethodParams,
 } from "$app/data/payment_method_params";
@@ -25,11 +23,12 @@ import { Product } from "$app/components/Checkout/payment";
 export type SavedSelectedPaymentMethod = { type: "saved" };
 export type NewCardSelectedPaymentMethod = {
   type: "card";
-  element: StripeCardElement;
+  element: StripePaymentElement;
   fullName: string;
   email: string;
   keepOnFile: null | boolean;
   zipCode: null | string;
+  country: null | string;
 };
 export type NewPayPalBraintreeSelectedPaymentMethod = {
   type: "paypal-braintree";
@@ -77,32 +76,12 @@ type PayPalPaymentMethodResult = {
   type: "new";
   cardParamsResult: { type: "paypal"; cardParams: AnyPayPalMethodParams; keepOnFile: null | boolean };
 };
-type OneOffPaymentRequestPaymentMethodResult = {
-  type: "new";
-  cardParamsResult:
-    | {
-        type: "cc-payment-request";
-        cardParams: PaymentRequestPaymentMethodParams;
-      }
-    | { type: "error"; cardParams: StripeErrorParams };
-};
-type ReusablePaymentRequestPaymentMethodResult = {
-  type: "new";
-  cardParamsResult:
-    | {
-        type: "cc-payment-request";
-        cardParams: ReusablePaymentRequestPaymentMethodParams;
-      }
-    | { type: "error"; cardParams: StripeErrorParams };
-};
 
 export type AnyPaymentMethodResult =
   | SavedPaymentMethodResult
   | PayPalPaymentMethodResult
   | OneOffNewCardPaymentMethodResult
-  | ReusableNewCardPaymentMethodResult
-  | OneOffPaymentRequestPaymentMethodResult
-  | ReusablePaymentRequestPaymentMethodResult;
+  | ReusableNewCardPaymentMethodResult;
 
 // FIXME: overloads will not properly type the cases where an argument is a union
 // see https://github.com/microsoft/TypeScript/issues/33912
@@ -163,9 +142,11 @@ export async function getPaymentMethodResult(
     }
     case "card": {
       const paymentMethodData = await prepareCardPaymentMethodData({
-        cardElement: selected.element,
+        paymentElement: selected.element,
         email: selected.email,
         name: selected.fullName,
+        zipCode: selected.zipCode,
+        country: selected.country,
       });
       if (paymentMethodData.status === "success") {
         return {
@@ -249,34 +230,3 @@ export async function getReusablePaymentMethodResult(
     }
   }
 }
-
-export const getPaymentRequestPaymentMethodResult = (
-  paymentRequestParams: PaymentRequestPaymentMethodParams,
-): OneOffPaymentRequestPaymentMethodResult => ({
-  type: "new",
-  cardParamsResult: {
-    type: "cc-payment-request",
-    cardParams: paymentRequestParams,
-  },
-});
-
-export const getReusablePaymentRequestPaymentMethodResult = async (
-  paymentRequestParams: PaymentRequestPaymentMethodParams,
-  { products }: { products: Product[] },
-): Promise<ReusablePaymentRequestPaymentMethodResult> => {
-  const cardParams = await prepareFutureCharges({
-    products,
-    cardParams: paymentRequestParams,
-  }).then(confirmCardIfNeeded);
-
-  if (cardParams.status === "success") {
-    return {
-      type: "new",
-      cardParamsResult: {
-        type: "cc-payment-request",
-        cardParams,
-      },
-    };
-  }
-  return { type: "new", cardParamsResult: { type: "error", cardParams } };
-};

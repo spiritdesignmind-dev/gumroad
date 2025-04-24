@@ -147,16 +147,5 @@ describe StripeChargeIntent, :vcr do
 
       expect(stripe_charge_intent.charge).to be_blank
     end
-
-    context "when next action type is unsupported" do
-      before do
-        allow(processor_payment_intent.next_action).to receive(:type).and_return "redirect_to_url"
-      end
-
-      it "notifies us via Bugsnag" do
-        expect(Bugsnag).to receive(:notify).with(/requires an unsupported action/)
-        described_class.new(payment_intent: processor_payment_intent)
-      end
-    end
   end
 end

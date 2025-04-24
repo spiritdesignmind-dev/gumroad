@@ -46,7 +46,7 @@ class Order::CreateService
           common_params
             .except(
               :billing_agreement_id, :paypal_order_id, :visual, :stripe_payment_method_id, :stripe_customer_id,
-              :stripe_error, :braintree_transient_customer_store_key, :braintree_device_data,
+              :stripe_payment_method_type, :stripe_error, :braintree_transient_customer_store_key, :braintree_device_data,
               :use_existing_card, :paymentToken
             )
             .merge(line_item_params.except(:uid, :permalink))
@@ -78,8 +78,7 @@ class Order::CreateService
     end
 
     if order.persisted? && (cart = Cart.fetch_by(user: buyer, browser_guid: params[:browser_guid]))
-      cart.order = order
-      cart.mark_deleted!
+      cart.update!(order:)
     end
 
     offer_codes = offer_codes

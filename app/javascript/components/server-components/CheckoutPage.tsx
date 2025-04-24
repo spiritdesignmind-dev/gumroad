@@ -4,7 +4,7 @@ import { createCast, cast } from "ts-safe-cast";
 
 import { SurchargesResponse } from "$app/data/customer_surcharge";
 import { startOrderCreation } from "$app/data/order";
-import { LineItemResult } from "$app/data/purchase";
+import { CartPurchaseResult, LineItemResult } from "$app/data/purchase";
 import { getPlugins, trackUserActionEvent, trackUserProductAction } from "$app/data/user_action_event";
 import { SavedCreditCard } from "$app/parsers/card";
 import { CardProduct, COMMISSION_DEPOSIT_PROPORTION, CustomFieldDescriptor } from "$app/parsers/product";
@@ -89,6 +89,7 @@ type Props = {
   max_allowed_cart_products: number;
   tip_options: number[];
   default_tip_option: number;
+  order: CartPurchaseResult | null;
 };
 
 export type Result = { item: CartItem; result: LineItemResult };
@@ -207,6 +208,7 @@ export const CheckoutPage = ({
     }
     return initialCart;
   });
+  const order = props.order;
   const reducer = createReducer({
     country,
     email,
@@ -444,6 +446,18 @@ export const CheckoutPage = ({
         }),
       };
       const result = await startOrderCreation(requestData);
+      if ("pending" in result) return;
+      handleOrderCompletion(result);
+    } catch (e) {
+      assertResponseError(e);
+      showAlert("Sorry, something went wrong. Please try again.", "error");
+      dispatch({ type: "cancel" });
+    }
+  }
+  React.useEffect(() => void pay(), [state.status]);
+
+  const handleOrderCompletion = (result: CartPurchaseResult) => {
+    try {
       const results = Object.entries(result.lineItems).flatMap(([key, result]) => {
         const [permalink, optionId] = key.split(" ");
         const item = cart.items.find(
@@ -531,8 +545,12 @@ export const CheckoutPage = ({
       showAlert("Sorry, something went wrong. Please try again.", "error");
       dispatch({ type: "cancel" });
     }
-  }
-  React.useEffect(() => void pay(), [state.status]);
+  };
+  React.useEffect(() => {
+    if (!order) return;
+    dispatch({ type: "order-completed" });
+    handleOrderCompletion(order);
+  }, [order]);
 
   const debouncedSaveCartState = useDebouncedCallback(
     asyncVoid(async () => {

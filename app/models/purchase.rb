@@ -69,6 +69,7 @@ class Purchase < ApplicationRecord
   attr_json_data_accessor :chargeback_reason
   attr_json_data_accessor :perceived_price_cents
   attr_json_data_accessor :recommender_model_name
+  attr_json_data_accessor :payment_method
 
   belongs_to :link, optional: true
   has_one :url_redirect
@@ -810,11 +811,7 @@ class Purchase < ApplicationRecord
   end
 
   def email_digest
-    if email.present?
-      key = GlobalConfig.get("OBFUSCATE_IDS_CIPHER_KEY")
-      token_data = "#{id}:#{email}"
-      Base64.urlsafe_encode64(OpenSSL::HMAC.digest("SHA256", key, token_data))
-    end
+    Digest::SHA256.hexdigest(email) if email.present?
   end
 
   def transaction_url_for_seller
@@ -2874,7 +2871,9 @@ class Purchase < ApplicationRecord
     def create_setup_intent(chargeable)
       with_charge_processor_error_handler do
         self.setup_intent = ChargeProcessor.setup_future_charges!(self.merchant_account, chargeable,
-                                                                  mandate_options: mandate_options_for_stripe(with_currency: true))
+                                                                  mandate_options: mandate_options_for_stripe(with_currency: true),
+                                                                  ip: ip_address,
+                                                                  guid: browser_guid)
         return unless setup_intent.present?
 
         self.processor_setup_intent_id = setup_intent.id
@@ -2904,7 +2903,9 @@ class Purchase < ApplicationRecord
                                                                          transfer_group: id,
                                                                          off_session:,
                                                                          setup_future_charges:,
-                                                                         mandate_options:)
+                                                                         mandate_options:,
+                                                                         ip: ip_address,
+                                                                         guid: browser_guid)
 
         if charge_intent.id.present?
           if processor_payment_intent.present?
@@ -3068,7 +3069,7 @@ class Purchase < ApplicationRecord
       return if self.price_cents > 0 &&
                 stripe_transaction_id.present? &&
                 merchant_account.present? &&
-                (stripe_fingerprint.present? || paypal_order_id) &&
+                (stripe_fingerprint.present? || paypal_order_id || card_type == "generic_card") &&
                 charge_processor_id.present?
 
       return if (self.price_cents == 0 || self.price_cents.nil?) &&

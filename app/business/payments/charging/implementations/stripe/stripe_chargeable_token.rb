@@ -116,6 +116,10 @@ class StripeChargeableToken
     country == "IN"
   end
 
+  def requires_mandate_data?
+    card.blank?
+  end
+
   private
     def get_merchant_account(permalink)
       return unless permalink

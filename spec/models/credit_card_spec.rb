@@ -109,11 +109,13 @@ describe CreditCard do
       it "saves stripe_setup_intent_id if it present on the chargeable" do
         credit_card = CreditCard.create(chargeable)
         expect(credit_card.stripe_setup_intent_id).to eq "seti_1234567890"
+        expect(credit_card.payment_method_type).to eq "card"
       end
 
       it "saves stripe_payment_intent_id if it present on the chargeable" do
         credit_card = CreditCard.create(chargeable)
         expect(credit_card.stripe_payment_intent_id).to eq "pi_1234567890"
+        expect(credit_card.payment_method_type).to eq "card"
       end
     end
 
@@ -123,11 +125,13 @@ describe CreditCard do
       it "does not save stripe_setup_intent_id even if it present on the chargeable" do
         credit_card = CreditCard.create(chargeable)
         expect(credit_card.stripe_setup_intent_id).to be nil
+        expect(credit_card.payment_method_type).to eq "card"
       end
 
       it "does not save stripe_payment_intent_id even if it present on the chargeable" do
         credit_card = CreditCard.create(chargeable)
         expect(credit_card.stripe_payment_intent_id).to be nil
+        expect(credit_card.payment_method_type).to eq "card"
       end
     end
   end

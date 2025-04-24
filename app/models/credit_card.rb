@@ -12,9 +12,10 @@ class CreditCard < ApplicationRecord
 
   attr_accessor :error_code, :stripe_error_code
 
-  validates :stripe_fingerprint, presence: true
-  validates :visual, :card_type, presence: true
-  validates :stripe_customer_id, :expiry_month, :expiry_year, presence: true, if: -> { card_type != CardType::PAYPAL }
+  validates :stripe_fingerprint, presence: true, if: -> { card_type != CardType::UNKNOWN }
+  validates :visual, :card_type, presence: true, if: -> { card_type != CardType::UNKNOWN }
+  validates :expiry_month, :expiry_year, presence: true, if: -> { card_type != CardType::PAYPAL && card_type != CardType::UNKNOWN }
+  validates :stripe_customer_id, presence: true, if: -> { card_type != CardType::PAYPAL }
   validates :braintree_customer_id, presence: true, if: -> { charge_processor_id == BraintreeChargeProcessor.charge_processor_id }
   validates :paypal_billing_agreement_id, presence: true, if: -> { charge_processor_id == PaypalChargeProcessor.charge_processor_id }
   validates :charge_processor_id, presence: true
@@ -70,6 +71,11 @@ class CreditCard < ApplicationRecord
         credit_card.json_data = { stripe_setup_intent_id: chargeable.try(:stripe_setup_intent_id), stripe_payment_intent_id: chargeable.try(:stripe_payment_intent_id) }
       end
 
+      if chargeable.respond_to?(:payment_method_type)
+        credit_card.json_data ||= {}
+        credit_card.json_data[:stripe_payment_method_type] = chargeable.payment_method_type
+      end
+
       credit_card.save!
     rescue ChargeProcessorInvalidRequestError, ChargeProcessorUnavailableError => e
       logger.error("Error while persisting card with #{credit_card.charge_processor_id}: #{e.message} - card visual: #{credit_card.visual}")
@@ -100,10 +106,11 @@ class CreditCard < ApplicationRecord
       reusable_tokens,
       processor_payment_method_id,
       stripe_fingerprint,
+      payment_method_type,
       stripe_setup_intent_id,
       stripe_payment_intent_id,
       ChargeableVisual.is_cc_visual(visual) ? ChargeableVisual.get_card_last4(visual) : nil,
-      visual.gsub(/\s/, "").length,
+      visual.present? ? visual.gsub(/\s/, "").length : nil,
       visual,
       expiry_month,
       expiry_year,
@@ -127,5 +134,9 @@ class CreditCard < ApplicationRecord
 
   def stripe_payment_intent_id
     json_data && json_data.deep_symbolize_keys[:stripe_payment_intent_id]
+  end
+
+  def payment_method_type
+    json_data && json_data.deep_symbolize_keys[:stripe_payment_method_type]
   end
 end

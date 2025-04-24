@@ -463,7 +463,7 @@ class PaypalChargeProcessor
     end
   end
 
-  def get_chargeable_for_data(reusable_token, _payment_method_id, _fingerprint,
+  def get_chargeable_for_data(reusable_token, _payment_method_id, _fingerprint, _payment_method_type,
                               _stripe_setup_intent_id, _stripe_payment_intent_id,
                               _last4, _number_length, visual, _expiry_month, _expiry_year, _card_type,
                               country, _zip_code = nil, merchant_account: nil)

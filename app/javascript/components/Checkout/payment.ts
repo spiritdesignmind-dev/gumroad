@@ -18,7 +18,7 @@ import { useRunOnce } from "$app/components/useRunOnce";
 
 enableMapSet();
 
-export type PaymentMethodType = "paypal" | "stripePaymentRequest" | "card";
+export type PaymentMethodType = "paypal" | "card";
 export type PaymentMethod = { type: PaymentMethodType; button: React.ReactElement };
 
 export type Product = {
@@ -67,8 +67,8 @@ export type State = {
   gift: Gift | null;
   customFieldValues: Record<string, string>;
   surcharges:
-    | { type: "error" | "pending" }
-    | { type: "loading"; abort: () => void }
+    | { type: "error" | "pending"; result?: SurchargesResponse | undefined }
+    | { type: "loading"; abort: () => void; result?: SurchargesResponse | undefined }
     | { type: "loaded"; result: SurchargesResponse };
   availablePaymentMethods: PaymentMethod[];
   paymentMethod: PaymentMethodType;
@@ -79,6 +79,7 @@ export type State = {
     | { type: "validating" }
     | { type: "starting" }
     | { type: "captcha"; paymentMethod: PurchasePaymentMethod }
+    | { type: "ordered" }
     | { type: "finished"; recaptchaResponse: string; paymentMethod: PurchasePaymentMethod };
   payLabel?: string;
   recaptchaKey: string;
@@ -114,6 +115,7 @@ type PublicAction =
   | { type: "start-payment" }
   | { type: "set-recaptcha-response"; recaptchaResponse: string }
   | { type: "set-payment-method"; paymentMethod: PurchasePaymentMethod }
+  | { type: "order-completed" }
   | {
       type: "update-products";
       products: Product[];
@@ -129,7 +131,9 @@ export function usePayLabel() {
 }
 
 export function requiresPayment(state: State) {
-  return getTotalPrice(state) !== 0 || state.products.some((item) => item.requirePayment);
+  return (
+    (getTotalPrice(state) !== null && getTotalPrice(state) !== 0) || state.products.some((item) => item.requirePayment)
+  );
 }
 
 export function requiresReusablePaymentMethod(state: State) {
@@ -180,7 +184,7 @@ export function computeTipForPrice(state: State, price: number) {
 }
 
 export function getTotalPrice(state: State) {
-  return state.surcharges.type === "loaded"
+  return state.surcharges.result
     ? state.surcharges.result.subtotal + state.surcharges.result.tax_cents + state.surcharges.result.shipping_rate_cents
     : null;
 }
@@ -249,13 +253,7 @@ export function createReducer(initial: {
         errors.add(`customFields.${field.key}`);
     }
     if (isTippingEnabled(state) && state.tip.type === "fixed" && state.tip.amount === null) errors.add("tip");
-    if (
-      requiresPayment(state) &&
-      state.paymentMethod !== "stripePaymentRequest" &&
-      !hasShipping(state) &&
-      state.country === "US" &&
-      !state.zipCode
-    )
+    if (requiresPayment(state) && !hasShipping(state) && state.country === "US" && !state.zipCode)
       errors.add("zipCode");
     if (state.gift?.type === "normal" && !isValidEmail(state.gift.email)) errors.add("gift");
     return errors;
@@ -277,7 +275,7 @@ export function createReducer(initial: {
             "tip" in action
           ) {
             if (state.surcharges.type === "loading") state.surcharges.abort();
-            state.surcharges = { type: "pending" };
+            state.surcharges = { type: "pending", result: state.surcharges.result };
           }
           if (state.status.type === "input") {
             for (const key in action) state.status.errors.delete(key);
@@ -333,6 +331,9 @@ export function createReducer(initial: {
           if (state.surcharges.type === "loading") state.surcharges.abort();
           state.surcharges = action.surcharges ? { type: "loaded", result: action.surcharges } : { type: "pending" };
           break;
+        case "order-completed":
+          state.status = { type: "ordered" };
+          break;
       }
     }),
     null,
@@ -380,13 +381,16 @@ export function createReducer(initial: {
       if (!state.products.length) return;
       try {
         const abort = new AbortController();
-        dispatch({ type: "set-value", surcharges: { type: "loading", abort: () => abort.abort() } });
+        dispatch({
+          type: "set-value",
+          surcharges: { type: "loading", abort: () => abort.abort(), result: state.surcharges.result },
+        });
         const result = await loadSurcharges(state);
         dispatch({ type: "set-value", surcharges: { type: "loaded", result } });
       } catch (e) {
         if (e instanceof AbortError) return;
         assertResponseError(e);
-        dispatch({ type: "set-value", surcharges: { type: "error" } });
+        dispatch({ type: "set-value", surcharges: { type: "error", result: state.surcharges.result } });
         showAlert("Sorry, something went wrong. Please try again.", "error");
       }
     }),

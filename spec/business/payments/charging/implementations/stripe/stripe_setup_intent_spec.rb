@@ -80,16 +80,5 @@ describe StripeSetupIntent, :vcr do
     it "requires action" do
       expect(stripe_setup_intent.requires_action?).to eq(true)
     end
-
-    context "when next action type is unsupported" do
-      before do
-        allow(processor_setup_intent.next_action).to receive(:type).and_return "redirect_to_url"
-      end
-
-      it "notifies us via Bugsnag" do
-        expect(Bugsnag).to receive(:notify).with(/requires an unsupported action/)
-        described_class.new(processor_setup_intent)
-      end
-    end
   end
 end

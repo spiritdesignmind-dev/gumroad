@@ -95,6 +95,8 @@ describe Charge::CreateService, :vcr do
           }
         }
       }
+      ip = "192.168.0.1"
+      guid = "9c16d4c7-da7d-49e0-9bb3-1784da596495"
 
       expect(ChargeProcessor).to receive(:create_payment_intent_or_charge!).with(merchant_account,
                                                                                  chargeable,
@@ -107,7 +109,9 @@ describe Charge::CreateService, :vcr do
                                                                                  off_session:,
                                                                                  setup_future_charges:,
                                                                                  metadata: purchase_details,
-                                                                                 mandate_options:).and_call_original
+                                                                                 mandate_options:,
+                                                                                 ip:,
+                                                                                 guid:).and_call_original
 
       expect do
         expect do
@@ -115,7 +119,7 @@ describe Charge::CreateService, :vcr do
             charge = Charge::CreateService.new(order:, seller: seller_1, merchant_account:, chargeable:,
                                                purchases:, amount_cents:, gumroad_amount_cents:,
                                                setup_future_charges:, off_session:,
-                                               statement_description:, mandate_options:).perform
+                                               statement_description:, mandate_options:, ip:, guid:).perform
 
             charge_intent = charge.charge_intent
             expect(charge_intent.succeeded?).to be true
@@ -169,6 +173,8 @@ describe Charge::CreateService, :vcr do
           }
         }
       }
+      ip = "192.168.0.1"
+      guid = "9c16d4c7-da7d-49e0-9bb3-1784da596495"
 
       expect(ChargeProcessor).to receive(:create_payment_intent_or_charge!).with(merchant_account,
                                                                                  chargeable,
@@ -181,7 +187,9 @@ describe Charge::CreateService, :vcr do
                                                                                  off_session:,
                                                                                  setup_future_charges:,
                                                                                  metadata: purchase_details,
-                                                                                 mandate_options:).and_call_original
+                                                                                 mandate_options:,
+                                                                                 ip:,
+                                                                                 guid:).and_call_original
 
       expect do
         expect do
@@ -189,7 +197,7 @@ describe Charge::CreateService, :vcr do
             charge = Charge::CreateService.new(order:, seller: seller_1, merchant_account:, chargeable:,
                                                purchases:, amount_cents:, gumroad_amount_cents:,
                                                setup_future_charges:, off_session:,
-                                               statement_description:, mandate_options:).perform
+                                               statement_description:, mandate_options:, ip:, guid:).perform
 
             expect(charge.charge_intent).to be nil
             expect(charge.reload.purchases.in_progress.count).to eq 3

@@ -6,15 +6,16 @@ class StripeChargeableCreditCard
 
   attr_reader :fingerprint, :payment_method_id, :last4, :visual, :number_length,
               :expiry_month, :expiry_year, :zip_code, :card_type, :country,
-              :stripe_setup_intent_id, :stripe_payment_intent_id
+              :stripe_setup_intent_id, :stripe_payment_intent_id, :payment_method_type
 
-  def initialize(merchant_account, reusable_token, payment_method_id, fingerprint,
+  def initialize(merchant_account, reusable_token, payment_method_id, fingerprint, payment_method_type,
                  stripe_setup_intent_id, stripe_payment_intent_id,
                  last4, number_length, visual, expiry_month, expiry_year, card_type,
                  country, zip_code = nil)
     @merchant_account = merchant_account
     @customer_id = reusable_token
     @payment_method_id = payment_method_id
+    @payment_method_type = payment_method_type
     @fingerprint = fingerprint
     @stripe_setup_intent_id = stripe_setup_intent_id
     @stripe_payment_intent_id = stripe_payment_intent_id
@@ -62,6 +63,10 @@ class StripeChargeableCreditCard
 
   def requires_mandate?
     country == "IN"
+  end
+
+  def requires_mandate_data?
+    @payment_method_type.present? && "card" != @payment_method_type
   end
 
   # We always save the payment methods linked to our platform account. They must be

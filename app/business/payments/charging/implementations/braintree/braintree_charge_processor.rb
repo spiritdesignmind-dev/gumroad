@@ -34,7 +34,7 @@ class BraintreeChargeProcessor
     braintree_chargeable
   end
 
-  def get_chargeable_for_data(reusable_token, _payment_method_id, fingerprint,
+  def get_chargeable_for_data(reusable_token, _payment_method_id, fingerprint, _payment_method_type,
                               _stripe_setup_intent_id, _stripe_payment_intent_id,
                               last4, number_length, visual, expiry_month, expiry_year,
                               card_type, country, zip_code = nil, merchant_account: nil)
