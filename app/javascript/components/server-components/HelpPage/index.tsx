@@ -76,7 +76,7 @@ const HelpPage = ({}) => {
   return (
     <main>
       <header>
-        <h1>Help</h1>
+        <h1>Help Center</h1>
       </header>
       <div className="pt-10">
         <div className="w-full">
