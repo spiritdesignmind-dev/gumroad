@@ -540,7 +540,7 @@ Rails.application.routes.draw do
 
     # help
     get "/help", to: "help#index", as: :help
-    get "/help/why-gumroad", to: "help#why_gumroad", as: :why_gumroad
+    get "/help/*slug", to: "help#article", as: :help_article
 
     # customers
     get "/customers/sales", controller: "customers", action: "customers_paged", format: "json", as: :sales_paged

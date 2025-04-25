@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class HelpController < Sellers::BaseController
-  skip_after_action :verify_authorized
+  before_action :skip_authorization
 
   def index
     @title = "Help"
@@ -9,8 +9,12 @@ class HelpController < Sellers::BaseController
     @body_class = "help-container"
   end
 
-  def why_gumroad
-    @title = "Why Gumroad"
-    @on_help_page = true
+  def article
+    slug = params[:slug]
+
+    render template: "help/#{slug}"
+  rescue ActionView::MissingTemplate => e
+    render file: "#{Rails.root}/public/404.html", status: :not_found, layout: false
   end
+
 end

@@ -5,7 +5,7 @@ import { register } from "$app/utils/serverComponentUtil";
 import { categoryGroups } from "./category-groups";
 import { Button } from "$app/components/Button";
 
-type CategoryGroups = { [key: string]: string[] };
+type CategoryGroups = { [key: string]: { url: string; title: string }[] };
 interface SearchState {
   flag: boolean;
   data: CategoryGroups;
@@ -28,7 +28,7 @@ const HelpPage = ({}) => {
         filteredGroups[category] = articles;
       } else {
         // Otherwise, filter article titles
-        const matchingArticles = articles.filter((article) => article.toLowerCase().includes(slug));
+        const matchingArticles = articles.filter((article) => article.title.toLowerCase().includes(slug));
 
         if (matchingArticles.length > 0) {
           filteredGroups[category] = matchingArticles;
@@ -67,6 +67,10 @@ const HelpPage = ({}) => {
     else return `Found ${totalArticles} articles`;
   }
 
+  function getNavigateUrl(url: string): string {
+    return "/help" + url;
+  }
+
   const searchData: CategoryGroups = search.flag === true ? search.data : categoryGroups;
 
   return (
@@ -95,9 +99,14 @@ const HelpPage = ({}) => {
                 gap: "1rem",
               }}
             >
-              {articles.map((txt: string) => (
-                <Button color="filled" style={{ height: "120px" }}>
-                  <h3 className="text-center">{highlightText(txt, search.slug)}</h3>
+              {articles.map((article) => (
+                <Button color="filled" style={{ height: "140px", padding: 0 }}>
+                  <a
+                    href={getNavigateUrl(article.url)}
+                    className="m-0 flex h-full w-full items-center justify-center no-underline"
+                  >
+                    <h3 className="text-center">{highlightText(article.title, search.slug)}</h3>
+                  </a>
                 </Button>
               ))}
             </div>
