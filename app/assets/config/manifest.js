@@ -3,4 +3,4 @@
 
 //= link_directory ../javascripts .js
 
-//= link style.css
+//= link style.scss
