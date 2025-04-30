@@ -47,7 +47,7 @@ SidekiqUniqueJobs.configure do |config|
 end
 
 # https://github.com/mperham/sidekiq/wiki/Pro-Reliability-Client
-Sidekiq::Client.reliable_push! if defined?(Sidekiq::Pro) && !Rails.env.test?
+Sidekiq::Client.reliable_push! if defined?(Sidekiq::Pro) && !Rails.env.test? && ENV["GUMROAD_SIDEKIQ_PRO_DISABLED"] != "true"
 
 # Store exception backtrace
 # https://github.com/mperham/sidekiq/wiki/Error-Handling#backtrace-logging
