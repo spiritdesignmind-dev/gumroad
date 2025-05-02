@@ -1,6 +1,6 @@
+import axios from "axios";
 import * as React from "react";
 import { useState } from "react";
-import axios from "axios";
 
 type ReportButtonProps = {
   productId: string;
@@ -17,17 +17,17 @@ export default function ReportButton({ productId }: ReportButtonProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       const response = await axios.post(`/products/${productId}/reports`, {
         reason,
         description,
-        original_product_id: originalProductId || undefined
+        original_product_id: originalProductId || undefined,
       });
-      
+
       setMessage(response.data.message);
       setIsOpen(false);
-    } catch (error) {
+    } catch (_error) {
       setMessage("Error submitting report. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -36,26 +36,22 @@ export default function ReportButton({ productId }: ReportButtonProps) {
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className="text-red-600 text-sm hover:underline"
-      >
+      <button type="button" onClick={() => setIsOpen(true)} className="text-red-600 text-sm hover:underline">
         Report impersonation
       </button>
-      
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full">
-            <h2 className="text-xl font-bold mb-4">Report product</h2>
-            
+
+      {isOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-lg rounded-lg bg-white p-6">
+            <h2 className="mb-4 text-xl font-bold">Report product</h2>
+
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label className="block mb-2">Reason</label>
+                <label className="mb-2 block">Reason</label>
                 <select
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  className="w-full border p-2 rounded"
+                  className="w-full rounded border p-2"
                 >
                   <option value="impersonation">Impersonation</option>
                   <option value="copyright_violation">Copyright violation</option>
@@ -63,50 +59,42 @@ export default function ReportButton({ productId }: ReportButtonProps) {
                   <option value="other">Other</option>
                 </select>
               </div>
-              
+
               <div className="mb-4">
-                <label className="block mb-2">Description</label>
+                <label className="mb-2 block">Description</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full border p-2 rounded"
+                  className="w-full rounded border p-2"
                   required
                   rows={4}
                 />
               </div>
-              
+
               <div className="mb-4">
-                <label className="block mb-2">Original product URL/ID (if known)</label>
+                <label className="mb-2 block">Original product URL/ID (if known)</label>
                 <input
                   type="text"
                   value={originalProductId}
                   onChange={(e) => setOriginalProductId(e.target.value)}
-                  className="w-full border p-2 rounded"
+                  className="w-full rounded border p-2"
                 />
               </div>
-              
+
               <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="mr-2 px-4 py-2 border rounded"
-                >
+                <button type="button" onClick={() => setIsOpen(false)} className="mr-2 rounded border px-4 py-2">
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-4 py-2 bg-red-600 text-white rounded"
-                >
+                <button type="submit" disabled={isSubmitting} className="bg-red-600 rounded px-4 py-2 text-white">
                   {isSubmitting ? "Submitting..." : "Submit report"}
                 </button>
               </div>
             </form>
-            
-            {message && <p className="mt-4 text-center">{message}</p>}
+
+            {message ? <p className="mt-4 text-center">{message}</p> : null}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
