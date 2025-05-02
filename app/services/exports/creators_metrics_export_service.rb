@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Exports::CreatorsMetricsExportService
+  include CurrencyHelper
+  
   CREATOR_FIELDS = [
     "Creator ID", "Name", "Username", "Email", "Total Sales ($)", "Total Earnings ($)",
     "Account Created At", "Profile URL"
@@ -59,8 +61,8 @@ class Exports::CreatorsMetricsExportService
         "Name" => user.name.presence || user.username,
         "Username" => user.username,
         "Email" => user.email,
-        "Total Sales ($)" => MoneyFormatter.format(total_sales_cents, :usd, symbol: false),
-        "Total Earnings ($)" => MoneyFormatter.format(total_earnings_cents, :usd, symbol: false),
+        "Total Sales ($)" => formatted_dollar_amount(total_sales_cents, with_currency: false),
+        "Total Earnings ($)" => formatted_dollar_amount(total_earnings_cents, with_currency: false),
         "Account Created At" => user.created_at.to_date,
         "Profile URL" => user.profile_url
       }
