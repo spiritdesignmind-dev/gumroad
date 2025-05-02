@@ -47,6 +47,7 @@ import { DiscountExpirationCountdown } from "$app/components/Product/DiscountExp
 import { PriceTag } from "$app/components/Product/PriceTag";
 import { ShareSection } from "$app/components/Product/ShareSection";
 import { Thumbnail } from "$app/components/Product/Thumbnail";
+import ReportButton from "$app/components/Product/ReportButton";
 import { PublicFilesSettingsContext } from "$app/components/ProductEdit/ProductTab/DescriptionEditor";
 import { InstallmentPlan } from "$app/components/ProductEdit/state";
 import { RatingStars } from "$app/components/RatingStars";
@@ -586,6 +587,9 @@ export const Product = ({
             </div>
           ) : null}
           <ShareSection product={product} selection={selection} wishlists={wishlists} />
+          <div className="mt-4">
+            <ReportButton productId={product.id} />
+          </div>
           {product.refund_policy ? (
             <RefundPolicyInfo refundPolicy={product.refund_policy} permalink={product.permalink} />
           ) : null}
