@@ -474,6 +474,16 @@ class ContactingCreatorMailer < ApplicationMailer
     @subject = "#{@buyer} reviewed #{@product.name}"
   end
 
+  def product_unpublished_due_to_similarity(product_id)
+    @product = Link.find(product_id)
+    @user = @product.user
+    
+    mail(
+      to: @user.email,
+      subject: "Your product has been unpublished due to similarity concerns"
+    )
+  end
+
   def upcoming_call_reminder(call_id)
     call = Call.find(call_id)
     return do_not_send unless call.eligible_for_reminder?

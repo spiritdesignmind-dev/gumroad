@@ -124,6 +124,8 @@ class LinksController < ApplicationController
 
     begin
       @product.save!
+      # Schedule duplicate detection for non-draft products
+      Iffy::Product::IngestJob.perform_async(@product.id) if !@product.draft?
     rescue ActiveRecord::RecordNotSaved, ActiveRecord::RecordInvalid, Link::LinkInvalid
       @error_message = if @product&.errors&.any?
         @product.errors.full_messages.first

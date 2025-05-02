@@ -390,6 +390,10 @@ Rails.application.routes.draw do
     end
 
     resources :tags, only: [:index]
+    
+    resources :products, only: [] do
+      resources :reports, only: [:create], controller: 'product_reports'
+    end
 
     namespace :admin do
       get "/", to: "base#index"
@@ -398,6 +402,8 @@ Rails.application.routes.draw do
       get :redirect_to_stripe_dashboard, to: "base#redirect_to_stripe_dashboard"
       get "helper_actions/impersonate/:user_id", to: "helper_actions#impersonate", as: :impersonate_helper_action
       get "helper_actions/stripe_dashboard/:user_id", to: "helper_actions#stripe_dashboard", as: :stripe_dashboard_helper_action
+
+      resources :reported_products, only: [:index, :show, :update]
 
       constraints(lambda { |request| request.env["warden"].authenticate? && request.env["warden"].user.is_team_member? }) do
         mount SidekiqWebCSP.new(Sidekiq::Web) => :sidekiq, as: :sidekiq_web

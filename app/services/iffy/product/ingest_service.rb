@@ -37,7 +37,9 @@ class Iffy::Product::IngestService
             entity: "Product",
             text:,
             fileUrls: image_urls,
-            user: user_data
+            user: user_data,
+            checkForDuplication: true,
+            similarityThreshold: 0.8
           }.to_json,
           headers: {
             "Authorization" => "Bearer #{GlobalConfig.get("IFFY_API_KEY")}"
