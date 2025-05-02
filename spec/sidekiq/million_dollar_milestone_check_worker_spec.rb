@@ -9,6 +9,7 @@ describe MillionDollarMilestoneCheckWorker do
 
     it "sends Slack notification if million dollar milestone is reached with no compliance info" do
       allow_any_instance_of(User).to receive(:gross_sales_cents_total_as_seller).and_return(1_000_000_00)
+      allow_any_instance_of(User).to receive(:sales_cents_total).and_return(700_000_00)
       allow_any_instance_of(User).to receive(:alive_user_compliance_info).and_return(nil)
       create(:purchase, seller:, link: product, created_at: 15.days.ago)
 
@@ -17,12 +18,15 @@ describe MillionDollarMilestoneCheckWorker do
       message = "<#{seller.profile_url}|#{seller.name_or_username}> has crossed $1M in earnings :tada:\n" \
                 "• Name: #{seller.name}\n" \
                 "• Username: #{seller.username}\n" \
-                "• Email: #{seller.email}\n"
+                "• Email: #{seller.email}\n" \
+                "• Total Sales: $1,000,000.00\n" \
+                "• Total Earnings: $700,000.00\n"
       expect(SlackMessageWorker).to have_enqueued_sidekiq_job("awards", "Gumroad Awards", message, "hotpink")
     end
 
     it "sends Slack notification if million dollar milestone is reached with compliance info" do
       allow_any_instance_of(User).to receive(:gross_sales_cents_total_as_seller).and_return(1_000_000_00)
+      allow_any_instance_of(User).to receive(:sales_cents_total).and_return(700_000_00)
       compliance_info = instance_double(
         "UserComplianceInfo",
         first_name: "John",
@@ -42,6 +46,8 @@ describe MillionDollarMilestoneCheckWorker do
                 "• Name: #{seller.name}\n" \
                 "• Username: #{seller.username}\n" \
                 "• Email: #{seller.email}\n" \
+                "• Total Sales: $1,000,000.00\n" \
+                "• Total Earnings: $700,000.00\n" \
                 "• First name: John\n" \
                 "• Last name: Doe\n" \
                 "• Street address: 123 Main St\n" \

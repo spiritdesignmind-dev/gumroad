@@ -3,6 +3,7 @@
 class MillionDollarMilestoneCheckWorker
   include Sidekiq::Job
   include Rails.application.routes.url_helpers
+  include CurrencyHelper
 
   MILLION_DOLLARS_IN_CENTS = 1_000_000_00
 
@@ -19,11 +20,15 @@ class MillionDollarMilestoneCheckWorker
       next if user.gross_sales_cents_total_as_seller < MILLION_DOLLARS_IN_CENTS
 
       compliance_info = user.alive_user_compliance_info
-
+      total_sales_cents = user.gross_sales_cents_total_as_seller
+      total_earnings_cents = user.sales_cents_total
+      
       message = "<#{user.profile_url}|#{user.name_or_username}> has crossed $1M in earnings :tada:\n" \
                 "• Name: #{user.name}\n" \
                 "• Username: #{user.username}\n" \
-                "• Email: #{user.email}\n"
+                "• Email: #{user.email}\n" \
+                "• Total Sales: #{formatted_dollar_amount(total_sales_cents)}\n" \
+                "• Total Earnings: #{formatted_dollar_amount(total_earnings_cents)}\n"
 
       if compliance_info.present?
         message += "• First name: #{compliance_info.first_name}\n" \

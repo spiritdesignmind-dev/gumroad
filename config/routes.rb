@@ -398,6 +398,7 @@ Rails.application.routes.draw do
       get :redirect_to_stripe_dashboard, to: "base#redirect_to_stripe_dashboard"
       get "helper_actions/impersonate/:user_id", to: "helper_actions#impersonate", as: :impersonate_helper_action
       get "helper_actions/stripe_dashboard/:user_id", to: "helper_actions#stripe_dashboard", as: :stripe_dashboard_helper_action
+      get "creators/export_metrics", to: "creators#export_metrics", as: :creators_export_metrics
 
       constraints(lambda { |request| request.env["warden"].authenticate? && request.env["warden"].user.is_team_member? }) do
         mount SidekiqWebCSP.new(Sidekiq::Web) => :sidekiq, as: :sidekiq_web
