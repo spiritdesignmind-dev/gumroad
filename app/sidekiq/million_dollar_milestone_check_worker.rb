@@ -22,7 +22,7 @@ class MillionDollarMilestoneCheckWorker
       compliance_info = user.alive_user_compliance_info
       total_sales_cents = user.gross_sales_cents_total_as_seller
       total_earnings_cents = user.sales_cents_total
-      
+
       message = "<#{user.profile_url}|#{user.name_or_username}> has crossed $1M in earnings :tada:\n" \
                 "• Name: #{user.name}\n" \
                 "• Username: #{user.username}\n" \

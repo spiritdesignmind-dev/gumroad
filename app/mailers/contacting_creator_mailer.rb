@@ -463,7 +463,7 @@ class ContactingCreatorMailer < ApplicationMailer
       @subscribers_file_url = file_or_url[:url]
     end
   end
-  
+
   def creators_metrics_data(recipient:, tempfile:, filename:)
     @subject = "Your Creators Metrics Export Is Ready"
     @creator = recipient

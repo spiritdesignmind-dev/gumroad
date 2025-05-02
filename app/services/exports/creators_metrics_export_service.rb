@@ -53,7 +53,7 @@ class Exports::CreatorsMetricsExportService
     def creator_row(user)
       total_sales_cents = user.gross_sales_cents_total_as_seller
       total_earnings_cents = user.sales_cents_total
-      
+
       data = {
         "Creator ID" => user.external_id_numeric,
         "Name" => user.name.presence || user.username,

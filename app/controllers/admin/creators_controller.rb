@@ -5,11 +5,11 @@ class Admin::CreatorsController < ApplicationController
 
   def export_metrics
     authorize :creator, :export_metrics?
-    
+
     result = Exports::CreatorsMetricsExportService.export(
       recipient: impersonating_user || logged_in_user,
     )
-    
+
     if result
       # Synchronous export
       send_data result.tempfile.read,
