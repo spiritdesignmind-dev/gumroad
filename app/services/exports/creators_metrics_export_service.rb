@@ -2,7 +2,7 @@
 
 class Exports::CreatorsMetricsExportService
   include CurrencyHelper
-  
+
   CREATOR_FIELDS = [
     "Creator ID", "Name", "Username", "Email", "Total Sales ($)", "Total Earnings ($)",
     "Account Created At", "Profile URL"

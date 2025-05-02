@@ -471,7 +471,7 @@ class ContactingCreatorMailer < ApplicationMailer
     @subject = "Your Creators Metrics Export Is Ready"
     tempfile.rewind
     attachments[filename] = tempfile.read
-    
+
     deliver_email
   end
 
