@@ -466,13 +466,13 @@ class ContactingCreatorMailer < ApplicationMailer
 
   def creators_metrics_data(recipient:, tempfile:, filename:)
     @creator = recipient
+    @seller = recipient
+    @recipient = recipient
+    @subject = "Your Creators Metrics Export Is Ready"
     tempfile.rewind
     attachments[filename] = tempfile.read
     
-    mail(
-      to: recipient.email,
-      subject: "Your Creators Metrics Export Is Ready"
-    )
+    deliver_email
   end
 
   def review_submitted(review_id)
