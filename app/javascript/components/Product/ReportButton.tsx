@@ -6,6 +6,11 @@ type ReportButtonProps = {
   productId: string;
 };
 
+interface ReportResponse {
+  success: boolean;
+  message: string;
+}
+
 export default function ReportButton({ productId }: ReportButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [reason, setReason] = useState("impersonation");
@@ -14,24 +19,26 @@ export default function ReportButton({ productId }: ReportButtonProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    try {
-      const response = await axios.post(`/products/${productId}/reports`, {
+    axios
+      .post<ReportResponse>(`/products/${productId}/reports`, {
         reason,
         description,
         original_product_id: originalProductId || undefined,
+      })
+      .then((response) => {
+        setMessage(response.data.message);
+        setIsOpen(false);
+      })
+      .catch(() => {
+        setMessage("Error submitting report. Please try again.");
+      })
+      .finally(() => {
+        setIsSubmitting(false);
       });
-
-      setMessage(response.data.message);
-      setIsOpen(false);
-    } catch (_error) {
-      setMessage("Error submitting report. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return (
