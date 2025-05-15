@@ -56,6 +56,34 @@
       <% end %>
       <%= twitter_post_card(@post).html_safe %>
     <% end %>
+  <% elsif @is_on_blog_post_page && @post.present? %>
+    <% og_title_value = @post.title %>
+    <meta content="website" property="og:type">
+    <meta content="article" property="og:type">
+    <meta content="<%= @post.excerpt %>" name="description">
+    <meta content="<%= @post.excerpt %>" property="og:description">
+    <meta content="<%= request.original_url %>" property="og:url">
+    <meta content="<%= @post.date.to_datetime.iso8601 %>" property="article:published_time">
+    <% if @post.featured_image %>
+      <% og_image_url = image_url(@post.featured_image) %>
+      <% og_image_alt = @post.title %>
+    <% end %>
+    <% @post.tags.each do |tag| %>
+      <meta content="<%= tag %>" property="article:tag">
+    <% end %>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<%= og_title_value %>">
+    <meta name="twitter:description" content="<%= @post.excerpt %>">
+    <meta name="twitter:image" content="<%= og_image_url %>">
+  <% elsif @is_on_blog_index_page %>
+    <% og_title_value = @title %>
+    <meta content="website" property="og:type">
+    <meta content="Explore the latest articles, tutorials, and updates from the Gumroad team." name="description">
+    <meta content="Explore the latest articles, tutorials, and updates from the Gumroad team." property="og:description">
+    <meta content="<%= request.original_url %>" property="og:url">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="<%= og_title_value %>">
+    <meta name="twitter:description" content="Explore the latest articles, tutorials, and updates from the Gumroad team.">
   <% elsif @user && (@is_on_user_profile_page || @is_on_user_posts_page || @is_on_user_membership_page) %>
     <meta content="Gumroad" property="og:site_name">
     <meta content="website" property="og:type">
@@ -99,7 +127,8 @@
   <% end %>
   <meta property="og:image" content="<%= og_image_url %>">
   <meta property="og:image:alt" content="<%= og_image_alt %>">
-  <meta property="og:title" content="<%= og_title %>">
+  <meta property="og:title" content="<%= defined?(og_title_value) ? og_title_value : @title %>">
+  <meta property="og:site_name" content="<%= og_site_name %>">
   <% third_party_analytics_enabled = !@disable_third_party_analytics && is_third_party_analytics_enabled?(seller: @user, logged_in_seller: @on_checkout_page ? nil : current_seller) %>
   <meta property="gr:google_analytics:enabled" content="<%= third_party_analytics_enabled.to_s %>">
   <meta property="gr:fb_pixel:enabled" content="<%= third_party_analytics_enabled.to_s %>">

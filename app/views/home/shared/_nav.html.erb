@@ -1,6 +1,6 @@
 <%
-  def nav_link(text, path, options = {})
-    is_current = current_page?(path)
+  def nav_link(text, path, active_on_controller: nil, **options)
+    is_current = current_page?(path) || (active_on_controller && controller_name == active_on_controller)
     if options[:category] == "button"
       link_to text, path, class: "flex w-full items-center justify-center #{
         if text == 'Dashboard'
@@ -55,6 +55,7 @@
   def nav_links
     content_tag :div, class: "flex flex-col justify-center items-center lg:flex-row lg:gap-4 lg:px-8" do
       nav_link("Discover", discover_path) +
+      nav_link("Blog", blog_index_path, active_on_controller: "posts") +
       nav_link("About", about_path) +
       nav_link("Features", features_path) +
       nav_link("Pricing", pricing_path)
