@@ -30,14 +30,11 @@ module Blog
     end
 
     def show
-      if @post.nil? || !@post.published
+      if @post.nil? || !@post.published # Ensure post exists in manifest and is published
         return render_404
       end
 
-      @title = "#{@post.title} - Gumroad Blog" if @post.title.present?
-      @is_on_blog_post_page = true
-
-      render "blog/posts/show"
+      render "blog/posts/#{params[:slug]}"
     end
 
     private
