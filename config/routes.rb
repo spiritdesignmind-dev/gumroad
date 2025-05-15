@@ -965,11 +965,11 @@ Rails.application.routes.draw do
     post "/grmc-webhook", to: "foreign_webhooks#grmc"
     post "/resend-webhook", to: "foreign_webhooks#resend"
 
-    namespace :blog, path: '/blog' do
-      root to: 'posts#index', as: :index
-      get ':slug', to: 'posts#show', as: :post
-      get 'category/:category_name', to: 'posts#index', as: :category
-      get 'tag/:tag_name', to: 'posts#index', as: :tag
+    namespace :blog, path: "/blog" do
+      root to: "posts#index", as: :index
+      get ":slug", to: "posts#show", as: :post
+      get "category/:category_name", to: "posts#index", as: :category
+      get "tag/:tag_name", to: "posts#index", as: :tag
     end
 
     # TODO (chris): review and replace usage of routes below with UserCustomDomainConstraint routes

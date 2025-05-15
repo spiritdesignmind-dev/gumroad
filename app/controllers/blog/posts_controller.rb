@@ -26,7 +26,7 @@ module Blog
 
       # Category pills in the view are now static links; controller doesn't need to provide @categories or @tags for filtering.
 
-      render 'blog/posts/index'
+      render "blog/posts/index"
     end
 
     def show
@@ -37,22 +37,21 @@ module Blog
       @title = "#{@post.title} - Gumroad Blog" if @post.title.present?
       @is_on_blog_post_page = true
 
-      render 'blog/posts/show'
+      render "blog/posts/show"
     end
 
     private
+      def set_hide_layouts
+        @hide_layouts = true
+      end
 
-    def set_hide_layouts
-      @hide_layouts = true
-    end
+      def load_blog_post_from_manifest
+        @post = BlogService.find_by_slug(params[:slug])
+        @meta_data = {}
+      end
 
-    def load_blog_post_from_manifest
-      @post = BlogService.find_by_slug(params[:slug])
-      @meta_data = {}
-    end
-
-    def render_404
-      render file: Rails.root.join('public', '404.html'), layout: false, status: :not_found
-    end
+      def render_404
+        render file: Rails.root.join("public", "404.html"), layout: false, status: :not_found
+      end
   end
 end
