@@ -2,53 +2,57 @@
 
 module Blog
   class PostsController < ApplicationController
-    layout "home" # Use the home layout
+    layout "home"
+    before_action :set_hide_layouts
+    before_action :load_blog_post_from_manifest, only: [:show]
 
     # TODO: Potentially skip authentication for public blog pages
     # skip_before_action :authenticate_user!, only: [:index, :show]
 
     def index
-      @title = "Gumroad Blog" # Set title for blog index
-      @is_on_blog_index_page = true # Flag for layout
-      @meta_data = {} # Initialize for home layout
-      all_blog_posts = BlogService.all_posts # Fetch all published posts initially
+      @title = "Gumroad Blog"
+      @is_on_blog_index_page = true
+      @meta_data = {}
 
-      if params[:category_name].present?
-        @active_category = params[:category_name]
-        @title = "#{@active_category.titleize} - Gumroad Blog"
-        @posts = all_blog_posts.filter { |p| p.category == @active_category }
-      elsif params[:tag_name].present?
-        @active_tag = params[:tag_name]
-        @title = "Posts tagged '#{@active_tag.titleize}' - Gumroad Blog"
-        @posts = all_blog_posts.filter { |p| p.tags.include?(@active_tag) }
-      else
-        @posts = all_blog_posts
-      end
-
+      # Load all post metadata from the manifest
+      # The view will be responsible for how it displays featured, recent, and the main grid
+      # based on the data in these instance variables.
+      all_posts_meta = BlogService.all_posts
+      @posts = all_posts_meta # Display all published posts by default
       @featured_post = BlogService.featured_post
-      # Ensure featured post is not duplicated in the main list if it would also appear there
-      @posts = @posts.reject { |p| @featured_post && p.slug == @featured_post.slug } if @featured_post
+      # Ensure featured post is not duplicated in the main list if it wasn't already handled by view logic
+      @posts = @posts.reject { |p| @featured_post && p.slug == @featured_post.slug } if @featured_post && @posts.include?(@featured_post)
+      @recent_updates = BlogService.recent_posts(5)
 
-      @recent_updates = BlogService.recent_posts(5) # Get 5 recent posts for the sidebar
-      @categories = BlogService.categories
-      @tags = BlogService.tags
+      # Category pills in the view are now static links; controller doesn't need to provide @categories or @tags for filtering.
 
       render 'blog/posts/index'
     end
 
     def show
-      @post = BlogService.find_by_slug(params[:slug])
-      @meta_data = {} # Initialize for home layout
       if @post.nil? || !@post.published
-        render file: Rails.root.join('public', '404.html'), layout: false, status: :not_found
-      else
-        @title = "#{@post.title} - Gumroad Blog" if @post.title.present? # Set title for individual post
-        @is_on_blog_post_page = true # Flag for layout
-        # For potential breadcrumbs or related posts, you might want these too:
-        # @categories = BlogService.categories
-        # @tags = BlogService.tags
-        render 'blog/posts/show'
+        return render_404
       end
+
+      @title = "#{@post.title} - Gumroad Blog" if @post.title.present?
+      @is_on_blog_post_page = true
+
+      render 'blog/posts/show'
+    end
+
+    private
+
+    def set_hide_layouts
+      @hide_layouts = true
+    end
+
+    def load_blog_post_from_manifest
+      @post = BlogService.find_by_slug(params[:slug])
+      @meta_data = {}
+    end
+
+    def render_404
+      render file: Rails.root.join('public', '404.html'), layout: false, status: :not_found
     end
   end
 end

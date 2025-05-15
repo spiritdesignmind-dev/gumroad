@@ -69,7 +69,7 @@ export const Nav = ({ title, children, footer, compact }: Props) => {
   const [open, setOpen] = React.useState(false);
 
   return (
-    <nav aria-label="Main" className={cx({ compact, open })}>
+    <nav id="seller-sidebar" aria-label="Main" className={cx({ compact, open })}>
       <div className="navbar">
         <a href={Routes.root_url()}>
           <span className="logo-g">&nbsp;</span>

@@ -1,39 +1,23 @@
 # frozen_string_literal: true
 
 require 'yaml'
-require 'redcarpet'
+require 'erb' # Required for ERB processing in YAML
 
 class BlogService
-  # Placeholder for path to blog content
-  CONTENT_PATH = Rails.root.join("content", "blog")
+  MANIFEST_PATH = Rails.root.join("config", "data", "blog_manifest.yml")
 
-  # Define a struct to hold post data
   PostData = Struct.new(:slug, :title, :date, :category, :tags, :featured_image, :excerpt, :published, :featured, :html_content, :file_path, keyword_init: true) do
-    def id
-      slug # or derive from file_path if slug is not guaranteed unique by itself
-    end
-
-    def persisted?
-      true # Mimics ActiveRecord for form helpers, etc.
-    end
-
-    def to_param
-      slug
-    end
+    def id; slug; end
+    def persisted?; true; end
+    def to_param; slug; end
   end
 
-  # Returns only published posts, sorted
   def self.all_posts
-    loaded_posts = _load_all_parsed_posts
-    loaded_posts.filter(&:published).sort_by(&:date).reverse
+    _load_posts_from_manifest.filter(&:published).sort_by(&:date).reverse
   end
 
-  # Finds a post by slug, regardless of published status (for potential previews)
-  # but controller currently only shows published ones.
   def self.find_by_slug(slug)
-    _load_all_parsed_posts.find do |post|
-      post.slug == slug # Slug from frontmatter (or filename if frontmatter slug is missing) should be primary key
-    end
+    _load_posts_from_manifest.find { |p| p.slug == slug }
   end
 
   def self.categories
@@ -45,7 +29,7 @@ class BlogService
   end
 
   def self.featured_post
-    all_posts.find(&:featured) # Assumes featured posts are also published
+    all_posts.find(&:featured)
   end
 
   def self.recent_posts(limit = 5)
@@ -54,82 +38,48 @@ class BlogService
 
   private
 
-  # Memoized method to load and parse all .md files once per request/class load.
-  # Returns an array of PostData objects (both published and unpublished).
-  def self._load_all_parsed_posts
-    # In development, this cache will clear on class reload.
-    # For production, a more robust Rails.cache strategy based on file mtimes
-    # or a deployment hook would be needed if posts change without server restart.
-    @_cached_all_parsed_posts ||= Dir.glob(CONTENT_PATH.join("*.md")).map do |file_path|
-      parse_file(file_path)
-    end.compact
-  end
+  def self._load_posts_from_manifest
+    return [] unless File.exist?(MANIFEST_PATH)
 
-  def self.parse_file(file_path)
-    begin
-      content = File.read(file_path)
-      match = content.match(/\A(---\s*\n(.*?)\n---\s*\n)(.*)/m)
+    @_cached_manifest_posts ||= begin
+      yaml_content = File.read(MANIFEST_PATH)
+      # Process ERB in the YAML file (for dynamic dates in our sample)
+      # In a real scenario, dates in manifest would likely be static.
+      erb_processed_yaml = ERB.new(yaml_content).result
 
-      if match
-        frontmatter_yaml = match[2]
-        markdown_content = match[3]
-      else
-        Rails.logger.warn "No YAML frontmatter found or incorrect format in #{file_path}. Treating as full Markdown content."
-        frontmatter_yaml = ""
-        markdown_content = content
-      end
-
-      frontmatter = YAML.safe_load(frontmatter_yaml, permitted_classes: [Date, Time, Symbol], aliases: true) || {}
-
-      raw_date = frontmatter['date']
-      date = nil
-      if raw_date.present?
-        if raw_date.is_a?(Date)
-          date = raw_date
-        else
+      posts_data = YAML.safe_load(erb_processed_yaml, permitted_classes: [Date, Symbol], aliases: true)
+      (posts_data || []).map do |post_hash|
+        # Convert string dates from YAML to Date objects if they are not already
+        parsed_date = post_hash['date']
+        if parsed_date.is_a?(String)
           begin
-            date = Date.parse(raw_date.to_s)
-          rescue ArgumentError => e
-            Rails.logger.error "Error parsing date '#{raw_date}' in #{file_path}: #{e.message}"
+            parsed_date = Date.parse(parsed_date)
+          rescue ArgumentError
+            Rails.logger.error "[BlogService] Invalid date string '#{post_hash['date']}' for post with slug '#{post_hash['slug']}' in manifest. Setting date to nil."
+            parsed_date = nil
           end
         end
+
+        PostData.new(
+          slug: post_hash['slug'],
+          title: post_hash['title'],
+          date: parsed_date,
+          category: post_hash['category'],
+          tags: post_hash['tags'] || [],
+          featured_image: post_hash['featured_image'],
+          excerpt: post_hash['excerpt'],
+          published: post_hash.fetch('published', false),
+          featured: post_hash.fetch('featured', false),
+          html_content: nil,
+          file_path: nil
+        )
       end
-
-      renderer = Redcarpet::Render::HTML.new(hard_wrap: true, filter_html: true, link_attributes: { rel: 'noopener noreferrer', target: '_blank' })
-      markdown = Redcarpet::Markdown.new(renderer,
-        autolink: true,
-        tables: true,
-        fenced_code_blocks: true,
-        strikethrough: true,
-        superscript: true,
-        underline: true,
-        highlight: true,
-        quote: true,
-        footnotes: true
-      )
-
-      html_content = markdown.render(markdown_content.to_s)
-      base_slug = frontmatter['slug'] || File.basename(file_path, ".md")
-
-      PostData.new(
-        slug: base_slug,
-        title: frontmatter['title'],
-        date: date,
-        category: frontmatter['category'],
-        tags: frontmatter['tags'] || [],
-        featured_image: frontmatter['featured_image'],
-        excerpt: frontmatter['excerpt'],
-        published: frontmatter.fetch('published', false),
-        featured: frontmatter.fetch('featured', false),
-        html_content: html_content,
-        file_path: file_path.to_s
-      )
-    rescue Psych::SyntaxError => e
-      Rails.logger.error "Error parsing YAML frontmatter from #{file_path}: #{e.message}"
-      nil
-    rescue StandardError => e
-      Rails.logger.error "Error parsing Markdown file #{file_path}: #{e.message}"
-      nil
     end
+  rescue Psych::SyntaxError => e
+    Rails.logger.error "[BlogService] Error parsing blog_manifest.yml: #{e.message}"
+    []
+  rescue StandardError => e
+    Rails.logger.error "[BlogService] Failed to load posts from manifest: #{e.message}"
+    []
   end
 end

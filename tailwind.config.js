@@ -1,4 +1,56 @@
 import typography from "@tailwindcss/typography";
+import fs from "node:fs";
+import module from "node:module";
+import postcss from "postcss";
+import tailwindPlugin from "tailwindcss/plugin";
+
+const require = module.createRequire(import.meta.url);
+
+/**
+ * Custom Tailwind CSS plugin to scope Preflight styles.
+ * Based on the solution by Roman86: https://github.com/tailwindlabs/tailwindcss/discussions/10332#discussioncomment-6981274
+ * @param {string} preflightScopeSelector - The CSS selector to scope Preflight styles to (e.g., '.tailwind-preflight').
+ */
+const scopedPreflightPlugin = (preflightScopeSelector) => {
+  if (!preflightScopeSelector) {
+    throw new Error("Selector to manually enable the Tailwind CSS preflight is not provided");
+  }
+
+  // Get the path to Tailwind's preflight.css
+  // This relies on require.resolve which should work in the Node.js context where Tailwind CLI/PostCSS runs.
+  let preflightCssPath;
+  try {
+    preflightCssPath = require.resolve("tailwindcss/lib/css/preflight.css");
+  } catch {
+    // Fallback: Manually copy preflight.css to your project root or a known path
+    // and update this to path.join(__dirname, 'your-local-preflight.css')
+    // For now, we'll let it fail if not found, to make the issue clear.
+    throw new Error("Could not find Tailwind's preflight.css.");
+  }
+
+  return tailwindPlugin(({ addBase }) => {
+    const preflightStyles = postcss.parse(fs.readFileSync(preflightCssPath, "utf8"));
+
+    preflightStyles.walkRules((rule) => {
+      rule.selectors = rule.selectors.map((s) => {
+        const trimmedSelector = s.trim();
+        if (trimmedSelector.toLowerCase() === ":root") {
+          return `${preflightScopeSelector}`;
+        }
+        if (trimmedSelector.includes(",")) {
+          return trimmedSelector
+            .split(",")
+            .map((part) => `${preflightScopeSelector} :where(${part.trim()})`)
+            .join(", ");
+        }
+        return `${preflightScopeSelector} :where(${trimmedSelector})`;
+      });
+      rule.selector = rule.selectors.join(", ");
+    });
+
+    addBase(preflightStyles.nodes);
+  });
+};
 
 export default {
   content: ["./app/javascript/**/*.{ts,tsx}", "./app/views/**/*.erb", "./public/help/**/*.html"],
@@ -26,5 +78,5 @@ export default {
       },
     },
   },
-  plugins: [typography],
+  plugins: [typography, scopedPreflightPlugin(".blog-scope")],
 };
