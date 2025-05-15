@@ -1,3 +1,5 @@
+import typography from "@tailwindcss/typography";
+
 export default {
   content: ["./app/javascript/**/*.{ts,tsx}", "./app/views/**/*.erb", "./public/help/**/*.html"],
   corePlugins: {
@@ -24,5 +26,5 @@ export default {
       },
     },
   },
-  plugins: [require("@tailwindcss/typography")],
+  plugins: [typography],
 };

@@ -22,47 +22,48 @@ class BlogService
     end
   end
 
+  # Returns only published posts, sorted
   def self.all_posts
-    # TODO: Implement logic to read all .md files, parse frontmatter,
-    # filter for published: true, and sort by date.
-    posts = Dir.glob(CONTENT_PATH.join("*.md")).map do |file_path|
-      parse_file(file_path)
-    end.compact
-    posts.filter(&:published).sort_by(&:date).reverse
+    loaded_posts = _load_all_parsed_posts
+    loaded_posts.filter(&:published).sort_by(&:date).reverse
   end
 
+  # Finds a post by slug, regardless of published status (for potential previews)
+  # but controller currently only shows published ones.
   def self.find_by_slug(slug)
-    # TODO: Implement logic to find a specific post by its slug.
-    file_path = Dir.glob(CONTENT_PATH.join("*.md")).find do |fp|
-      # Attempt to parse slug from filename or frontmatter
-      # This logic might need refinement based on how slugs are determined
-      data = read_frontmatter(fp)
-      data && data['slug'] == slug || File.basename(fp, '.md') == slug
+    _load_all_parsed_posts.find do |post|
+      post.slug == slug || File.basename(post.file_path, '.md') == slug
     end
-    file_path ? parse_file(file_path) : nil
   end
 
   def self.categories
-    # TODO: Implement logic to get all unique categories.
     all_posts.map(&:category).compact.uniq.sort
   end
 
   def self.tags
-    # TODO: Implement logic to get all unique tags.
     all_posts.flat_map(&:tags).compact.uniq.sort
   end
 
   def self.featured_post
-    # TODO: Implement logic to find the latest featured post.
-    all_posts.find(&:featured)
+    all_posts.find(&:featured) # Assumes featured posts are also published
   end
 
   def self.recent_posts(limit = 5)
-    # TODO: Implement logic to get recent posts.
     all_posts.take(limit)
   end
 
   private
+
+  # Memoized method to load and parse all .md files once per request/class load.
+  # Returns an array of PostData objects (both published and unpublished).
+  def self._load_all_parsed_posts
+    # In development, this cache will clear on class reload.
+    # For production, a more robust Rails.cache strategy based on file mtimes
+    # or a deployment hook would be needed if posts change without server restart.
+    @_cached_all_parsed_posts ||= Dir.glob(CONTENT_PATH.join("*.md")).map do |file_path|
+      parse_file(file_path)
+    end.compact
+  end
 
   def self.read_frontmatter(file_path)
     content = File.read(file_path)

@@ -58,7 +58,7 @@
     <% end %>
   <% elsif @is_on_blog_post_page && @post.present? %>
     <% og_title_value = @post.title %>
-+    <meta content="article" property="og:type">
+    <meta content="article" property="og:type">
     <meta content="<%= @post.excerpt %>" name="description">
     <meta content="<%= @post.excerpt %>" property="og:description">
     <meta content="<%= request.original_url %>" property="og:url">
@@ -126,7 +126,7 @@
   <% end %>
   <meta property="og:image" content="<%= og_image_url %>">
   <meta property="og:image:alt" content="<%= og_image_alt %>">
-  <meta property="og:title" content="<%= defined?(og_title_value) ? og_title_value : @title %>">
+  <meta property="og:title" content="<%= defined?(og_title_value) ? og_title_value : (@title.presence || og_title) %>">
   <meta property="og:site_name" content="<%= og_site_name %>">
   <% third_party_analytics_enabled = !@disable_third_party_analytics && is_third_party_analytics_enabled?(seller: @user, logged_in_seller: @on_checkout_page ? nil : current_seller) %>
   <meta property="gr:google_analytics:enabled" content="<%= third_party_analytics_enabled.to_s %>">
