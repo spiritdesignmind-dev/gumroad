@@ -32,7 +32,7 @@ class BlogService
   # but controller currently only shows published ones.
   def self.find_by_slug(slug)
     _load_all_parsed_posts.find do |post|
-      post.slug == slug || File.basename(post.file_path, '.md') == slug
+      post.slug == slug # Slug from frontmatter (or filename if frontmatter slug is missing) should be primary key
     end
   end
 
@@ -65,15 +65,6 @@ class BlogService
     end.compact
   end
 
-  def self.read_frontmatter(file_path)
-    content = File.read(file_path)
-    match = content.match(/\A(---\s*\n(.*?)\n---\s*\n)/m)
-    match ? YAML.safe_load(match[2], permitted_classes: [Date, Time, Symbol], aliases: true) : {}
-  rescue Psych::SyntaxError => e
-    Rails.logger.error "Error parsing YAML frontmatter from #{file_path}: #{e.message}"
-    nil
-  end
-
   def self.parse_file(file_path)
     begin
       content = File.read(file_path)
@@ -83,7 +74,6 @@ class BlogService
         frontmatter_yaml = match[2]
         markdown_content = match[3]
       else
-        # Handle files with no frontmatter or incorrect format
         Rails.logger.warn "No YAML frontmatter found or incorrect format in #{file_path}. Treating as full Markdown content."
         frontmatter_yaml = ""
         markdown_content = content
@@ -91,12 +81,20 @@ class BlogService
 
       frontmatter = YAML.safe_load(frontmatter_yaml, permitted_classes: [Date, Time, Symbol], aliases: true) || {}
 
-      # Ensure date is parsed correctly
-      date = frontmatter['date']
-      date = Date.parse(date.to_s) if date.present? && !date.is_a?(Date)
+      raw_date = frontmatter['date']
+      date = nil
+      if raw_date.present?
+        if raw_date.is_a?(Date)
+          date = raw_date
+        else
+          begin
+            date = Date.parse(raw_date.to_s)
+          rescue ArgumentError => e
+            Rails.logger.error "Error parsing date '#{raw_date}' in #{file_path}: #{e.message}"
+          end
+        end
+      end
 
-      # Initialize Redcarpet Markdown renderer
-      # Adjust these options as needed for your desired Markdown features
       renderer = Redcarpet::Render::HTML.new(hard_wrap: true, filter_html: true, link_attributes: { rel: 'noopener noreferrer', target: '_blank' })
       markdown = Redcarpet::Markdown.new(renderer,
         autolink: true,
