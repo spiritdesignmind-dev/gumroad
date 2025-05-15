@@ -28,9 +28,3 @@ def hello
 end
 ```
 
-Also, create a placeholder image at `app/assets/images/blog/placeholder.jpg`. If you don't have one handy, just any small JPG will do for now.
-
-2.  **Update `Blog::PostsController`:**
-    Once the sample post is in place, we'll uncomment and fill in the logic in `Blog::PostsController` to use the `BlogService` methods to fetch data for the views.
-
-Let me know when you've created the sample Markdown file and placeholder image!
