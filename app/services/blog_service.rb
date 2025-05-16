@@ -10,6 +10,7 @@ class BlogService
     def id; slug; end
     def persisted?; true; end
     def to_param; slug; end
+    def to_model; self; end
   end
 
   def self.all_posts
@@ -53,9 +54,11 @@ class BlogService
           if parsed_date.is_a?(String)
             begin
               parsed_date = Date.parse(parsed_date)
+              post_hash["date"] = parsed_date
             rescue ArgumentError
               Rails.logger.error "[BlogService] Invalid date string '#{post_hash['date']}' for post with slug '#{post_hash['slug']}' in manifest. Setting date to nil."
               parsed_date = nil
+              post_hash["date"] = nil
             end
           end
 

@@ -34,8 +34,7 @@
       <% end %>
 
       <div class="prose prose-lg max-w-none text-gray-800">
-        <%# Dynamically render the content partial based on the slug %>
-        <% content_partial_path = "blog/posts/#{params[:slug]}_content" %>
+        <% content_partial_path = "blog/posts/#{params[:slug].gsub('-', '_')}_content" %>
         <% if lookup_context.template_exists?(content_partial_path, [], true) %>
           <%= render partial: content_partial_path %>
         <% else %>

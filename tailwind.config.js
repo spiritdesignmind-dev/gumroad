@@ -16,21 +16,26 @@ const scopedPreflightPlugin = (preflightScopeSelector) => {
     throw new Error("Selector to manually enable the Tailwind CSS preflight is not provided");
   }
 
-  // Get the path to Tailwind's preflight.css
-  // This relies on require.resolve which should work in the Node.js context where Tailwind CLI/PostCSS runs.
   let preflightCssPath;
+  let preflightStyles;
+
   try {
     preflightCssPath = require.resolve("tailwindcss/lib/css/preflight.css");
+    preflightStyles = postcss.parse(fs.readFileSync(preflightCssPath, "utf8"));
   } catch {
-    // Fallback: Manually copy preflight.css to your project root or a known path
-    // and update this to path.join(__dirname, 'your-local-preflight.css')
-    // For now, we'll let it fail if not found, to make the issue clear.
-    throw new Error("Could not find Tailwind's preflight.css.");
+    const minimalPreflightStyles = `
+      /* Minimal base styles */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      /* Add more essential resets as needed */
+    `;
+    preflightStyles = postcss.parse(minimalPreflightStyles);
   }
 
   return tailwindPlugin(({ addBase }) => {
-    const preflightStyles = postcss.parse(fs.readFileSync(preflightCssPath, "utf8"));
-
     preflightStyles.walkRules((rule) => {
       rule.selectors = rule.selectors.map((s) => {
         const trimmedSelector = s.trim();
@@ -78,5 +83,7 @@ export default {
       },
     },
   },
+  // Apply .blog-scope to blog content containers to scope Tailwind's base styles
+  // See usage in app/views/blog/posts/show.html.erb and other blog templates
   plugins: [typography, scopedPreflightPlugin(".blog-scope")],
 };

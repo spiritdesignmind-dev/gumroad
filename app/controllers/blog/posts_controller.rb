@@ -21,7 +21,7 @@ module Blog
       @posts = all_posts_meta # Display all published posts by default
       @featured_post = BlogService.featured_post
       # Ensure featured post is not duplicated in the main list if it wasn't already handled by view logic
-      @posts = @posts.reject { |p| @featured_post && p.slug == @featured_post.slug } if @featured_post && @posts.include?(@featured_post)
+      @posts = @posts - [@featured_post] if @featured_post
       @recent_updates = BlogService.recent_posts(5)
 
       # Category pills in the view are now static links; controller doesn't need to provide @categories or @tags for filtering.
@@ -33,6 +33,9 @@ module Blog
       if @post.nil? || !@post.published # Ensure post exists in manifest and is published
         return render_404
       end
+
+      @title = "#{@post.title} - Gumroad Blog" if @post.title.present?
+      @is_on_blog_post_page = true
 
       render "blog/posts/show"
     end
