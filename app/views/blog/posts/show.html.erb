@@ -39,8 +39,22 @@
         <% if lookup_context.template_exists?(content_partial_path, [], true) %>
           <%= render partial: content_partial_path %>
         <% else %>
-          <p class="text-red-500">Error: Content for this post could not be found. Expected partial: <%= content_partial_path %></p>
-          <p>Please ensure a file named an underscore followed by the slug and then _content.html.erb (e.g., <code>_my-first-post_content.html.erb</code>) exists in <code>app/views/blog/posts/</code>.</p>
+          <% if Rails.env.development? || Rails.env.test? %>
+            <p class="text-red-500">
+              Error: Content for this post could not be found. Expected partial:
+              <%= content_partial_path %>
+            </p>
+            <p>
+              Please ensure a file named an underscore followed by the slug and then
+              <code>_content.html.erb</code> (e.g.,
+              <code>_my-first-post_content.html.erb</code>) exists in
+              <code>app/views/blog/posts/</code>.
+            </p>
+          <% else %>
+            <p class="text-red-500">
+              Sorry, this post is currently unavailable.
+            </p>
+          <% end %>
         <% end %>
       </div>
 

@@ -34,7 +34,7 @@ module Blog
         return render_404
       end
 
-      render "blog/posts/#{params[:slug]}"
+      render 'blog/posts/show'
     end
 
     private
