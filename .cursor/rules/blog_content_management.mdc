@@ -1,0 +1,28 @@
+---
+description: For making any CRUD updates to the blog
+globs:
+alwaysApply: false
+---
+# Blog Content Management Workflow
+
+This outlines the process for creating, updating, and managing blog post content under the new static HTML-centric system.
+
+1.  **Metadata Management (Source of Truth for Listings):**
+    *   All metadata for blog posts (title, slug, date, category, tags, featured_image path, excerpt, published status, featured status) is managed in the YAML manifest file: [`config/data/blog_manifest.yml`](mdc:config/data/blog_manifest.yml).
+    *   To add a new post to the blog index or update its listing details (like title or excerpt), this manifest file must be edited.
+    *   The `slug` defined here must match the filename of the corresponding content partial (excluding the `_` prefix and `_content.html.erb` suffix).
+
+2.  **Post Content (Body HTML):**
+    *   The actual body content for each blog post is stored in an individual ERB partial file located in the [`app/views/blog/posts/`](mdc:app/views/blog/posts) directory.
+    *   **Naming Convention:** These files **must** follow the pattern `_SLUG_content.html.erb` (e.g., `_new-upsells-2-0_content.html.erb`). The `SLUG` part must match the `slug` specified in the `blog_manifest.yml`.
+    *   **Editing Content:** To edit the body of a blog post, directly modify the HTML within its corresponding `_SLUG_content.html.erb` file. Tools like Cursor or Devin can be used for this HTML editing.
+    *   These partials should **only** contain the HTML for the main article body. They should **not** include `<% @title = ... %>` or `<% @is_on_blog_post_page = ... %>` tags, as these are handled by the controller and the main `show.html.erb` wrapper view.
+
+3.  **Publishing a New Post:**
+    *   Add an entry to [`config/data/blog_manifest.yml`](mdc:config/data/blog_manifest.yml) with all required metadata, ensuring `published: true`.
+    *   Create the corresponding content partial `app/views/blog/posts/_YOUR-NEW-SLUG_content.html.erb` with the HTML body.
+    *   Commit both files and deploy.
+
+4.  **Featured Images:**
+    *   Store featured images in a suitable subdirectory within `app/assets/images/` (e.g., `app/assets/images/blog/`).
+    *   Reference them in `blog_manifest.yml` using a path relative to `app/assets/images/` (e.g., `featured_image: "blog/my-image.jpg"`).

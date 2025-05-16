@@ -1,25 +1,23 @@
-<%# app/views/blog/posts/show.html.erb %>
-<%# This view now acts as a wrapper and renders a content partial based on the slug %>
-
-<%# @post is set by the controller from the blog_manifest.yml for metadata %>
-<%# The actual post content is in a partial like _my-first-post-content.html.erb %>
-
 <div class="blog-scope">
-  <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
     <article class="max-w-3xl mx-auto">
-      <header class="mb-8 text-center">
+      <header class="mb-8 md:mb-12 text-center">
         <% if @post.category.present? %>
-          <p class="text-pink-600 font-semibold uppercase tracking-wider mb-2"><%= @post.category %></p>
+          <p class="text-sm font-semibold text-pink-600 uppercase tracking-wider mb-2">
+            <%= link_to @post.category, blog_category_path(category_name: @post.category.parameterize), class: "hover:text-pink-700" %>
+          </p>
         <% end %>
-        <h1 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-3"><%= @post.title || "Untitled Post" %></h1>
-        <p class="text-gray-500 text-sm">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
+          <%= @post.title || "Untitled Post" %>
+        </h1>
+        <p class="text-gray-500 text-sm mb-4">
           Published on <%= @post.date ? @post.date.strftime("%B %d, %Y") : "Date N/A" %>
         </p>
         <% if @post.tags&.any? %>
           <div class="mt-4 flex flex-wrap justify-center gap-2">
             <% @post.tags.each do |tag|
                next if tag.blank? %>
-              <span class="inline-block bg-gray-100 rounded-full px-3 py-1 text-xs font-semibold text-gray-700">
+              <span class="inline-block bg-gray-100 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-200">
                 <%= tag.titleize %>
               </span>
             <% end %>
@@ -28,13 +26,13 @@
       </header>
 
       <% if @post.featured_image %>
-        <div class="mb-8 rounded-lg overflow-hidden shadow-lg">
+        <div class="mb-8 md:mb-12 rounded-lg overflow-hidden shadow-xl">
           <%= image_tag @post.featured_image, alt: (@post.title || "Featured image"), class: "w-full h-auto object-cover" %>
         </div>
       <% end %>
 
-      <div class="prose prose-lg max-w-none text-gray-800">
-        <% content_partial_path = "blog/posts/#{params[:slug].gsub('-', '_')}_content" %>
+      <div class="prose prose-lg lg:prose-xl max-w-none text-gray-800">
+        <% content_partial_path = "blog/posts/#{params[:slug]}_content" %>
         <% if lookup_context.template_exists?(content_partial_path, [], true) %>
           <%= render partial: content_partial_path %>
         <% else %>
@@ -61,11 +59,11 @@
       <%# TODO: Add social sharing buttons %>
       <%# TODO: Add comments section if planned %>
 
-      <div class="mt-12 pt-8 border-t border-gray-200">
-        <%= link_to "← Back to Blog", blog_index_path, class: "text-pink-600 hover:text-pink-800 font-semibold" %>
+      <div class="mt-12 md:mt-16 pt-8 border-t border-gray-200 text-center">
+        <%= link_to "← Back to Blog", blog_index_path, class: "text-pink-600 hover:text-pink-800 font-semibold text-lg" %>
       </div>
     </article>
-  </div> <%# Closes .container %>
-</div> <%# Closes .blog-scope %>
+  </div>
+</div>
 
 <%= render "home/shared/footer" %>

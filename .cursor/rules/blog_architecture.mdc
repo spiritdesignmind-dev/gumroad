@@ -1,0 +1,26 @@
+---
+description: For making any controller or functionality updates to the blog
+globs:
+alwaysApply: false
+---
+# Blog Architecture Overview
+
+The blog section is designed as a semi-static site, with content metadata managed through a central manifest and individual post content as separate HTML/ERB files.
+
+## Key Components:
+
+*   **Routes:** Defined in `config/routes.rb`, under the `/blog` path, handled by the `Blog::PostsController`.
+    *   Main index: `/blog` -> `Blog::PostsController#index`
+    *   Individual posts: `/blog/:slug` -> `Blog::PostsController#show`
+*   **Controller:** [`app/controllers/blog/posts_controller.rb`](mdc:app/controllers/blog/posts_controller.rb) is responsible for:
+    *   Rendering the blog index page, populating it with data from the blog manifest.
+    *   Rendering individual blog post pages by displaying a specific ERB view file for each post, with metadata also sourced from the manifest.
+*   **Service Layer:** [`app/services/blog_service.rb`](mdc:app/services/blog_service.rb) is responsible for:
+    *   Reading and parsing the blog manifest file: [`config/data/blog_manifest.yml`](mdc:config/data/blog_manifest.yml).
+    *   Providing post metadata (titles, dates, excerpts, tags, categories, featured status) to the controller.
+    *   It does **not** handle Markdown parsing anymore.
+*   **Views - Layout:** Blog pages use the `home` layout defined in [`app/views/layouts/home.html.erb`](mdc:app/views/layouts/home.html.erb), which includes shared navigation ([`app/views/home/shared/_nav.html.erb`](mdc:app/views/home/shared/_nav.html.erb)) and expects the footer to be rendered by the specific view.
+*   **Views - Index Page:** [`app/views/blog/posts/index.html.erb`](mdc:app/views/blog/posts/index.html.erb) displays the list of all blog posts, a featured post, and recent updates.
+*   **Views - Show Page Wrapper:** [`app/views/blog/posts/show.html.erb`](mdc:app/views/blog/posts/show.html.erb) acts as a generic wrapper for individual blog posts. It displays metadata from the manifest and dynamically renders a content-specific partial.
+*   **Views - Individual Post Content:** The actual HTML body for each blog post is stored in its own ERB partial within the [`app/views/blog/posts/`](mdc:app/views/blog/posts) directory, following the naming convention `_SLUG_content.html.erb` (e.g., [`_new-upsells-2-0_content.html.erb`](mdc:app/views/blog/posts/_new-upsells-2-0_content.html.erb)).
+

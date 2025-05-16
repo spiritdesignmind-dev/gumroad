@@ -6,11 +6,6 @@ import tailwindPlugin from "tailwindcss/plugin";
 
 const require = module.createRequire(import.meta.url);
 
-/**
- * Custom Tailwind CSS plugin to scope Preflight styles.
- * Based on the solution by Roman86: https://github.com/tailwindlabs/tailwindcss/discussions/10332#discussioncomment-6981274
- * @param {string} preflightScopeSelector - The CSS selector to scope Preflight styles to (e.g., '.tailwind-preflight').
- */
 const scopedPreflightPlugin = (preflightScopeSelector) => {
   if (!preflightScopeSelector) {
     throw new Error("Selector to manually enable the Tailwind CSS preflight is not provided");
@@ -24,13 +19,11 @@ const scopedPreflightPlugin = (preflightScopeSelector) => {
     preflightStyles = postcss.parse(fs.readFileSync(preflightCssPath, "utf8"));
   } catch {
     const minimalPreflightStyles = `
-      /* Minimal base styles */
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
-      /* Add more essential resets as needed */
     `;
     preflightStyles = postcss.parse(minimalPreflightStyles);
   }
@@ -83,7 +76,5 @@ export default {
       },
     },
   },
-  // Apply .blog-scope to blog content containers to scope Tailwind's base styles
-  // See usage in app/views/blog/posts/show.html.erb and other blog templates
   plugins: [typography, scopedPreflightPlugin(".blog-scope")],
 };

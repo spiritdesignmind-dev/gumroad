@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "yaml"
-require "erb" # Required for ERB processing in YAML
+require "erb"
 
 class BlogService
   MANIFEST_PATH = Rails.root.join("config", "data", "blog_manifest.yml")
@@ -14,7 +14,7 @@ class BlogService
   end
 
   def self.all_posts
-    _load_posts_from_manifest.filter(&:published).sort_by(&:date).reverse
+    _load_posts_from_manifest.filter(&:published).sort_by { |post| post.date || Date.new(1970) }.reverse
   end
 
   def self.find_by_slug(slug)
@@ -43,13 +43,10 @@ class BlogService
 
       @_cached_manifest_posts ||= begin
         yaml_content = File.read(MANIFEST_PATH)
-        # Process ERB in the YAML file (for dynamic dates in our sample)
-        # In a real scenario, dates in manifest would likely be static.
         erb_processed_yaml = ERB.new(yaml_content).result
 
         posts_data = YAML.safe_load(erb_processed_yaml, permitted_classes: [Date, Symbol], aliases: true)
         (posts_data || []).map do |post_hash|
-          # Convert string dates from YAML to Date objects if they are not already
           parsed_date = post_hash["date"]
           if parsed_date.is_a?(String)
             begin
