@@ -1,0 +1,29 @@
+<%= link_to blog_post_path(slug: post.slug),
+    class: "block no-underline text-black bg-white border border-black rounded-lg grid override overflow-hidden transition-all duration-200 ease-in-out hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_#000] #{defined?(custom_classes) ? custom_classes : ''}" do %>
+  <% if post.featured_image %>
+    <figure class="overflow-hidden border-b border-black">
+      <%= image_tag post.featured_image, alt: (post.title.presence || "Blog post image"), class: "w-full h-auto object-cover" %>
+    </figure>
+  <% end %>
+  <header class="flex flex-col p-6">
+    <div>
+      <h3 class="<%= defined?(title_size_class) ? title_size_class : 'text-2xl' %> leading-tight mb-1">
+        <%= post.title.presence || "Untitled Post" %>
+      </h3>
+      <% if post.date %>
+        <p class="text-md text-gray-600 mb-2"><%= format_blog_date(post.date) %></p>
+      <% end %>
+    </div>
+
+    <div class="mt-auto pt-2 flex flex-wrap -mb-2">
+      <% combined_tags_and_category = [] %>
+      <% combined_tags_and_category << post.category if post.category.present? %>
+      <% combined_tags_and_category.concat(post.tags || []) %>
+
+      <% combined_tags_and_category.each_with_index do |tag_or_category_name, index|
+        break if tag_or_category_name.blank? %>
+      <%= render 'blog/shared/tag', tag_name: tag_or_category_name, is_primary: (index == 0) %>
+      <% end %>
+    </div>
+  </header>
+<% end %>

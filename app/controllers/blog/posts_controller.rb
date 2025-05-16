@@ -12,10 +12,33 @@ module Blog
       @meta_data = {}
 
       all_posts_meta = BlogService.all_posts
-      @posts = all_posts_meta
-      @featured_post = BlogService.featured_post
-      @posts = @posts - [@featured_post] if @featured_post
-      @recent_updates = BlogService.recent_posts(5)
+      @active_category = params[:category_name]
+
+      if @active_category.present?
+        parameterized_category_from_param = @active_category.parameterize
+        @title = "#{@active_category.titleize} - Gumroad Blog"
+        @posts = all_posts_meta.filter { |p| p.category&.parameterize == parameterized_category_from_param }
+                               .sort { |a, b| (b.date || Time.at(0)) <=> (a.date || Time.at(0)) }
+        @featured_post = nil
+        @product_updates = []
+      else
+        @posts = all_posts_meta
+        @featured_post = BlogService.featured_post
+
+        if @featured_post
+          current_posts_array = @posts.is_a?(Array) ? @posts.dup : Array(@posts).dup
+          current_posts_array.delete(@featured_post)
+          @posts = current_posts_array
+        end
+
+        @posts.sort! { |a, b| (b.date || Time.at(0)) <=> (a.date || Time.at(0)) }
+
+        # Fetch and sort only "Product Update" category posts for the sidebar
+        @product_updates = all_posts_meta
+                             .filter { |p| p.category&.parameterize == "product-updates" }
+                             .sort { |a, b| (b.date || Time.at(0)) <=> (a.date || Time.at(0)) }
+                             .first(4)
+      end
 
       render "blog/posts/index"
     end

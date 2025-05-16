@@ -40,4 +40,10 @@ module ApplicationHelper
       format: "%n%u"
     )
   end
+
+  def format_blog_date(date_obj)
+    return nil if date_obj.blank?
+
+    date_obj.strftime("%B #{date_obj.day}, %Y")
+  end
 end

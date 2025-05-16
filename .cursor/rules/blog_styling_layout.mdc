@@ -11,7 +11,7 @@ This rule describes how styling and overall page layout are handled for the blog
 
 *   Blog pages (both index and individual posts) are rendered within the `home` layout: [`app/views/layouts/home.html.erb`](mdc:app/views/layouts/home.html.erb).
 *   This `home` layout, in turn, renders the shared navigation partial [`app/views/home/shared/_nav.html.erb`](mdc:app/views/home/shared/_nav.html.erb) and is itself rendered within the main [`app/views/layouts/application.html.erb`](mdc:app/views/layouts/application.html.erb) layout.
-*   The shared footer [`app/views/home/shared/_footer.html.erb`](mdc:app/views/home/shared/_footer.html.erb) is rendered at the end of the blog's `index.html.erb` and `show.html.erb` views.
+*   The shared footer [`app/views/home/shared/_footer.html.erb`](mdc:app/views/home/shared/_footer.html.erb) is rendered at the end of the blog's `index.html.erb` and `show.html.erb` views, outside the main `.blog-scope`.
 
 ## Styling
 
@@ -20,8 +20,12 @@ This rule describes how styling and overall page layout are handled for the blog
     *   [`app/views/blog/posts/show.html.erb`](mdc:app/views/blog/posts/show.html.erb)
     *   Individual content partials (e.g., [`_new-upsells-2-0_content.html.erb`](mdc:app/views/blog/posts/_new-upsells-2-0_content.html.erb))
 *   **Tailwind Typography:** The `@tailwindcss/typography` plugin is used to style the HTML content rendered from blog post bodies. This is applied via the `.prose` (and `prose-lg`, `lg:prose-xl`) classes in [`app/views/blog/posts/show.html.erb`](mdc:app/views/blog/posts/show.html.erb) which wraps the content partials.
-*   **Scoped Preflight:** To provide a clean styling base for the blog section without affecting the rest of the application, a custom scoped Preflight is implemented:
-    *   Global Preflight is disabled in [`tailwind.config.js`](mdc:tailwind.config.js) (`corePlugins: { preflight: false }`).
-    *   A custom plugin in [`tailwind.config.js`](mdc:tailwind.config.js) (named `scopedPreflightPlugin`) applies Tailwind's base (Preflight) styles only to elements within a container having the class `.blog-scope`.
-    *   This `.blog-scope` class is applied to the main content wrapper for blog pages within the [`app/views/layouts/home.html.erb`](mdc:app/views/layouts/home.html.erb) layout, ensuring it does not affect the shared nav and footer.
-*   **Existing SCSS:** Be aware that global styles from files like `_global.scss` or component-specific SCSS like `_nav.scss` may still apply. The scoped Preflight helps Tailwind utilities win within `.blog-scope`, but structural SCSS for shared components like the nav will still be active.
+*   **Scoped Preflight:** To provide a clean styling base for the blog section without affecting the rest of the application, a custom scoped Preflight is implemented.
+    *   **Global Preflight Disabled:** In [`tailwind.config.js`](mdc:tailwind.config.js), `corePlugins: { preflight: false }` disables Tailwind's default global Preflight.
+    *   **Custom Plugin (`scopedPreflightPlugin`):** A custom plugin within [`tailwind.config.js`](mdc:tailwind.config.js) is responsible for scoping Preflight styles.
+        *   It reads the standard `preflight.css` from the `tailwindcss` module.
+        *   It uses PostCSS to iterate through all rules in `preflight.css` and prepends the `.blog-scope` selector to each rule's selectors (e.g., `h1 { ... }` becomes `.blog-scope :where(h1) { ... }`). The `:where()` pseudo-class is used to keep the specificity of these scoped base styles low, allowing Tailwind utility classes to easily override them.
+        *   These modified, scoped base styles are then added using Tailwind's `addBase` function.
+    *   **Usage (`.blog-scope` class):** The class `.blog-scope` is applied to a wrapping `div` within [`app/views/layouts/home.html.erb`](mdc:app/views/layouts/home.html.erb). This `div` specifically wraps the `yield`ed content for blog pages. This ensures that the scoped Preflight styles only affect the main content area of the blog (index and show pages), and do *not* affect the shared navigation or footer rendered by the `home` layout itself or by the blog views outside this scope.
+    *   **Effect:** This provides a Tailwind-friendly reset and base styling environment *only* for the blog content, preventing conflicts with the application's existing global styles.
+*   **Existing SCSS:** Global styles (e.g., from `_global.scss`) or component-specific SCSS (e.g., `_nav.scss` for [`app/views/home/shared/_nav.html.erb`](mdc:app/views/home/shared/_nav.html.erb)) will still apply to shared elements like the navigation and footer as they are outside the `.blog-scope` or have their own established styles.
