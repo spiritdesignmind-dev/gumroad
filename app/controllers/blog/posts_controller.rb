@@ -9,16 +9,29 @@ module Blog
     def index
       @title = "Gumroad Blog"
       @is_on_blog_index_page = true
-      @meta_data = {}
+      @meta_data = {
+        description: "Explore the latest insights, updates, and resources from the Gumroad team."
+      }
 
       all_posts_meta = BlogService.all_posts
+      @all_posts_count = all_posts_meta.size # Count for "All Posts"
+
+      # Calculate counts for static categories
+      @static_category_names = ["Creators", "Tips & tricks", "Product updates", "Community"]
+      @category_counts = @static_category_names.each_with_object({}) do |name, counts|
+        param_name = name.parameterize
+        counts[param_name] = all_posts_meta.count { |p| p.category&.parameterize == param_name }
+      end
+
       @active_category = params[:category_name]
 
       if @active_category.present?
         parameterized_category_from_param = @active_category.parameterize
         @title = "#{@active_category.titleize} - Gumroad Blog"
-        @posts = all_posts_meta.filter { |p| p.category&.parameterize == parameterized_category_from_param }
-                               .sort { |a, b| (b.date || Time.at(0)) <=> (a.date || Time.at(0)) }
+        @meta_data[:description] = "Explore #{@active_category.titleize} posts from the Gumroad team."
+        @posts = all_posts_meta
+                   .filter { |p| p.category&.parameterize == parameterized_category_from_param }
+                   .sort_by { |p| p.date || Time.at(0) }.reverse
         @featured_post = nil
         @product_updates = []
       else
@@ -26,17 +39,15 @@ module Blog
         @featured_post = BlogService.featured_post
 
         if @featured_post
-          current_posts_array = @posts.is_a?(Array) ? @posts.dup : Array(@posts).dup
-          current_posts_array.delete(@featured_post)
-          @posts = current_posts_array
+          @posts = @posts.reject { |p| p == @featured_post }
         end
 
-        @posts.sort! { |a, b| (b.date || Time.at(0)) <=> (a.date || Time.at(0)) }
+        @posts.sort_by! { |p| p.date || Time.at(0) }
+        @posts.reverse!
 
-        # Fetch and sort only "Product Update" category posts for the sidebar
         @product_updates = all_posts_meta
                              .filter { |p| p.category&.parameterize == "product-updates" }
-                             .sort { |a, b| (b.date || Time.at(0)) <=> (a.date || Time.at(0)) }
+                             .sort_by { |p| p.date || Time.at(0) }.reverse
                              .first(4)
       end
 
@@ -50,6 +61,33 @@ module Blog
 
       @title = "#{@post.title} - Gumroad Blog" if @post.title.present?
       @is_on_blog_post_page = true
+
+      # Populate @newer_post and @older_post for bottom navigation,
+      # ensuring they are not nil if there is blog content.
+      all_blog_posts = BlogService.all_posts # Sorted newest first
+
+      @newer_post = nil
+      @older_post = nil
+
+      if all_blog_posts.any? # Should always be true if @post is valid
+        other_posts_sorted = all_blog_posts.reject { |p| p.slug == @post.slug }
+
+        if other_posts_sorted.length >= 2
+          @newer_post = other_posts_sorted[0] # Newest of the other posts
+          @older_post = other_posts_sorted[1] # Second newest of the other posts
+        elsif other_posts_sorted.length == 1
+          # Only one other post exists, use it for both slots
+          @newer_post = other_posts_sorted[0]
+          @older_post = other_posts_sorted[0]
+        else
+          # No other posts exist (current post is the only one)
+          # Show the current post in both slots to ensure they are not nil
+          @newer_post = @post
+          @older_post = @post
+        end
+      end
+      # If all_blog_posts is empty (e.g. manifest issue), they remain nil.
+      # The view has `if @newer_post` checks which will handle this gracefully.
 
       render "blog/posts/show"
     end

@@ -8,25 +8,36 @@
       <ul class="flex flex-wrap gap-x-3 gap-y-3 text-lg">
         <li>
           <% all_posts_active = params[:category_name].blank? && params[:tag_name].blank? %>
-          <%= link_to "All Posts", blog_index_path,
+          <%= link_to blog_index_path,
               role: "tab",
               aria_selected: all_posts_active,
-              class: "block no-underline px-4 py-2 rounded-full border border-black transition-all duration-200 ease-in-out
+              class: "block no-underline px-4 py-2 rounded-full border border-black transition-all duration-200 ease-in-out flex items-center justify-center
                       #{ all_posts_active ?
                           'bg-black text-white' :
-                          'bg-white text-black hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_#000]' }" %>
+                          'bg-white text-black hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_#000]' }" do %>
+            All Posts
+            <% if all_posts_active %>
+              <span class="ml-1.5 opacity-85 text-base">(<%= @all_posts_count %>)</span>
+            <% end %>
+          <% end %>
         </li>
-        <% ["Creators", "Tips & tricks", "Product updates", "Community"].each do |static_category_name| %>
+        <% @static_category_names.each do |static_category_name| %>
           <% parameterized_category = static_category_name.parameterize %>
+          <% count = @category_counts[parameterized_category] || 0 %>
           <% is_active_static = params[:category_name] == parameterized_category %>
           <li>
-            <%= link_to static_category_name, blog_index_path(category_name: parameterized_category),
+            <%= link_to blog_index_path(category_name: parameterized_category),
                 role: "tab",
                 aria_selected: is_active_static,
-                class: "block no-underline px-4 py-2 rounded-full border border-black transition-all duration-200 ease-in-out
+                class: "block no-underline px-4 py-2 rounded-full border border-black transition-all duration-200 ease-in-out flex items-center justify-center
                         #{ is_active_static ?
                             'bg-black text-white' :
-                            'bg-white text-black hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_#000]' }" %>
+                            'bg-white text-black hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_#000]' }" do %>
+              <%= static_category_name %>
+              <% if is_active_static %>
+                <span class="ml-1.5 opacity-85 text-base">(<%= count %>)</span>
+              <% end %>
+            <% end %>
           </li>
         <% end %>
       </ul>

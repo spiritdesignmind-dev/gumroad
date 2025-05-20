@@ -1,11 +1,11 @@
 <%= link_to blog_post_path(slug: post.slug),
-    class: "block no-underline text-black bg-white border border-black rounded-lg grid override overflow-hidden transition-all duration-200 ease-in-out hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_#000] #{defined?(custom_classes) ? custom_classes : ''}" do %>
+    class: "block no-underline text-black bg-white border border-black rounded-lg grid grid-rows-[auto_1fr] override overflow-hidden transition-all duration-200 ease-in-out hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[3px_3px_#000] #{defined?(custom_classes) ? custom_classes : ''}" do %>
   <% if post.featured_image %>
     <figure class="overflow-hidden border-b border-black">
-      <%= image_tag post.featured_image, alt: (post.title.presence || "Blog post image"), class: "w-full h-auto object-cover" %>
+      <%= image_tag post.featured_image, alt: (post.title.presence || "Blog post image"), class: "w-full h-auto" %>
     </figure>
   <% end %>
-  <header class="flex flex-col p-6">
+  <header class="flex flex-col p-6 flex-grow">
     <div>
       <h3 class="<%= defined?(title_size_class) ? title_size_class : 'text-2xl' %> leading-tight mb-1">
         <%= post.title.presence || "Untitled Post" %>
