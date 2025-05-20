@@ -20,10 +20,12 @@
       <% combined_tags_and_category << post.category if post.category.present? %>
       <% combined_tags_and_category.concat(post.tags || []) %>
 
-      <% combined_tags_and_category.each_with_index do |tag_or_category_name, index|
-        break if tag_or_category_name.blank? %>
-      <%= render 'blog/shared/tag', tag_name: tag_or_category_name, is_primary: (index == 0) %>
+
+      <% combined_tags_and_category.each_with_index do |tag_or_category_name, index| %>
+        <% next if tag_or_category_name.blank? %>
+        <%= render 'blog/shared/tag', tag_name: tag_or_category_name, is_primary: (index == 0) %>
       <% end %>
+
     </div>
   </header>
 <% end %>
