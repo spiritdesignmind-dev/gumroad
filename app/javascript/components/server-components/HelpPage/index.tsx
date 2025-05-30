@@ -1,25 +1,31 @@
 import * as React from "react";
 import { useState } from "react";
 import { createCast } from "ts-safe-cast";
+
 import { register } from "$app/utils/serverComponentUtil";
-import { categoryGroups } from "./category-groups";
+
 import { Button } from "$app/components/Button";
 
-type CategoryGroups = { [key: string]: { url: string; title: string }[] };
+import { categoryGroups } from "./category-groups";
+
+type CategoryGroups = Record<string, { url: string; title: string }[]>;
 interface SearchState {
   flag: boolean;
   data: CategoryGroups;
   slug: string;
 }
 
-const HelpPage = ({}) => {
+const HelpPage: React.FC = () => {
   const [search, setSearch] = useState<SearchState>({ flag: false, data: {}, slug: "" });
 
   function handleSearchInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const slug = e.target.value.toLowerCase().trim();
-    if (!slug) return setSearch({ data: {}, flag: false, slug });
+    if (!slug) {
+      setSearch({ data: {}, flag: false, slug });
+      return;
+    }
 
-    let filteredGroups: CategoryGroups = {};
+    const filteredGroups: CategoryGroups = {};
     for (const [category, articles] of Object.entries(categoryGroups)) {
       const lowerCategory = category.toLowerCase();
 
@@ -40,16 +46,16 @@ const HelpPage = ({}) => {
   }
 
   // Function to highlight the matched part of the text
-  function highlightText(txt: string, slug: string) {
-    const matchIndex = txt.toLowerCase().indexOf(slug.toLowerCase());
+  function highlightText(txt: string, slugToHighlight: string) {
+    const matchIndex = txt.toLowerCase().indexOf(slugToHighlight.toLowerCase());
 
     if (matchIndex === -1) {
       return txt; // Return the original text if no match is found
     }
 
     const beforeMatch = txt.substring(0, matchIndex);
-    const matchedText = txt.substring(matchIndex, matchIndex + slug.length);
-    const afterMatch = txt.substring(matchIndex + slug.length);
+    const matchedText = txt.substring(matchIndex, matchIndex + slugToHighlight.length);
+    const afterMatch = txt.substring(matchIndex + slugToHighlight.length);
 
     return (
       <>
@@ -61,23 +67,27 @@ const HelpPage = ({}) => {
   }
 
   function getSearchResultTxt(): string {
-    if (search.flag === false) return "All Articles";
+    if (!search.flag) {
+      return "All Articles";
+    }
     const totalArticles = Object.values(search.data).reduce((acc, group) => acc + group.length, 0);
-    if (totalArticles === 1) return "Found 1 article";
-    else return `Found ${totalArticles} articles`;
+    if (totalArticles === 1) {
+      return "Found 1 article";
+    }
+    return `Found ${totalArticles} articles`;
   }
 
   function getNavigateUrl(url: string): string {
-    return "/help" + url;
+    return `/help${url}`;
   }
 
-  const searchData: CategoryGroups = search.flag === true ? search.data : categoryGroups;
+  const searchData: CategoryGroups = search.flag ? search.data : categoryGroups;
 
   return (
     <main>
-      <header>
+      {/* <header>
         <h1>Help Center</h1>
-      </header>
+      </header> */}
       <div className="pt-10">
         <div className="w-full">
           <input
@@ -100,7 +110,7 @@ const HelpPage = ({}) => {
               }}
             >
               {articles.map((article) => (
-                <Button color="filled" style={{ height: "140px", padding: 0 }}>
+                <Button key={article.url} color="filled" style={{ height: "140px", padding: 0 }}>
                   <a
                     href={getNavigateUrl(article.url)}
                     className="m-0 flex h-full w-full items-center justify-center no-underline"
