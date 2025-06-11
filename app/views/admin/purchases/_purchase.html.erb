@@ -22,11 +22,25 @@
     <dl>
       <% if purchase.seller.support_email.present? %>
         <dt>Seller support email</dt>
-        <dd><%= mail_to purchase.seller.support_email %></dd>
+        <dd>
+          <span class="email-with-copy">
+            <%= purchase.seller.support_email %>
+            <button type="button" class="copy-email-btn" data-clipboard-text="<%= purchase.seller.support_email %>" title="Copy to clipboard">
+              <span class="icon icon-outline-duplicate"></span>
+            </button>
+          </span>
+        </dd>
       <% end %>
 
       <dt>Seller email</dt>
-      <dd><%= mail_to purchase.seller.email %></dd>
+      <dd>
+        <span class="email-with-copy">
+          <%= purchase.seller.email %>
+          <button type="button" class="copy-email-btn" data-clipboard-text="<%= purchase.seller.email %>" title="Copy to clipboard">
+            <span class="icon icon-outline-duplicate"></span>
+          </button>
+        </span>
+      </dd>
 
       <% if purchase.merchant_account %>
         <dt>Merchant account</dt>
@@ -366,3 +380,51 @@
     <dd><%= format_datetime_with_relative_tooltip(purchase.deleted_at, placeholder: icon_no) %></dd>
   </dl>
 </div>
+
+<% content_for :script do %>
+  <style>
+    .email-with-copy {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .copy-email-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    
+    .copy-email-btn:hover {
+      opacity: 1;
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    .copy-email-btn .icon {
+      font-size: 0.875rem;
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof ClipboardJS !== 'undefined') {
+        var clipboard = new ClipboardJS('.copy-email-btn');
+        
+        clipboard.on('success', function(e) {
+          var btn = e.trigger;
+          var originalTitle = btn.getAttribute('title');
+          btn.setAttribute('title', 'Copied!');
+          
+          setTimeout(function() {
+            btn.setAttribute('title', originalTitle);
+          }, 2000);
+          
+          e.clearSelection();
+        });
+      }
+    });
+  </script>
+<% end %>
