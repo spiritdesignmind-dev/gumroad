@@ -910,9 +910,12 @@ describe "Balance Pages Scenario", js: true, type: :feature do
 
     def create_payout(payout_date, processor_type, user)
       payment, _ = Payouts.create_payment(payout_date, processor_type, user)
-      payment.update(correlation_id: "12345")
-      payment.txn_id = 123
-      payment.stripe_transfer_id = "tr_1234"
+      payment.update!(
+        correlation_id: "12345",
+        txn_id: 123,
+        stripe_transfer_id: "tr_1234",
+        stripe_connect_account_id: "acct_1234"
+      )
       payment.mark_processing!
       payment.mark_completed!
       payment
