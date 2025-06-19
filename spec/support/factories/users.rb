@@ -61,6 +61,10 @@ FactoryBot.define do
       username { "seller" }
       email { "seller@example.com" }
       payment_address { generate(:fixed_email) }
+
+      after(:create) do |user|
+        create(:user_compliance_info, user:)
+      end
     end
 
     factory :named_user do
