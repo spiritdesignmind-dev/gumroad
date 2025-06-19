@@ -177,13 +177,6 @@ class Payouts
     )
     payment.save!
     payment_errors = payout_processor.prepare_payment_and_set_amount(payment, balances)
-    
-    payment.reload
-    if payment.state == "failed"
-      Rails.logger.error("Payouts: Payment #{payment.id} failed during preparation: #{payment.failure_reason}")
-      return [payment, payment_errors]
-    end
-    
     payment.mark_processing!
     [payment, payment_errors]
   end

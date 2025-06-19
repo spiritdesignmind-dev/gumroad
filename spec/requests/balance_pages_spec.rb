@@ -913,6 +913,7 @@ describe "Balance Pages Scenario", js: true, type: :feature do
       payment.update(correlation_id: "12345")
       payment.txn_id = 123
       payment.stripe_transfer_id = "tr_1234"
+      payment.mark_processing!
       payment.mark_completed!
       payment
     end
