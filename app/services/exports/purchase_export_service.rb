@@ -4,7 +4,7 @@ class Exports::PurchaseExportService
   PURCHASE_FIELDS = [
     "Purchase ID", "Item Name", "Buyer Name", "Purchase Email", "Buyer Email", "Do not contact?",
     "Purchase Date", "Purchase Time (UTC timezone)", "Subtotal ($)", "Taxes ($)", "Tax Type", "Shipping ($)",
-    "Sale Price ($)", "Fees ($)", "Net Total ($)", "Tip ($)", "Tax Included in Price?",
+    "Sale Price ($)", "Fees ($)", "Gumroad Fees ($)", "Stripe Fees ($)", "PayPal Fees ($)", "Net Total ($)", "Tip ($)", "Tax Included in Price?",
     "Street Address", "City", "Zip Code", "State", "Country", "Referrer", "Refunded?",
     "Partial Refund ($)", "Fully Refunded?", "Disputed?", "Dispute Won?", "Access Revoked?", "Variants",
     "Discount Code", "Recurring Charge?", "Free trial purchase?", "Pre-order authorization?", "Product ID", "Order Number",
@@ -18,7 +18,7 @@ class Exports::PurchaseExportService
   ].freeze
   TOTALS_COLUMN_NAME = "Totals"
   TOTALS_FIELDS = [
-    "Subtotal ($)", "Taxes ($)", "Shipping ($)", "Sale Price ($)", "Fees ($)", "Net Total ($)",
+    "Subtotal ($)", "Taxes ($)", "Shipping ($)", "Sale Price ($)", "Fees ($)", "Gumroad Fees ($)", "Stripe Fees ($)", "PayPal Fees ($)", "Net Total ($)",
     "Tip ($)", "Partial Refund ($)", "Variants Price ($)", "Item Price ($)", "Affiliate commission ($)",
     "PayPal Fee Amount", "Stripe Fee Amount"
   ].freeze
@@ -141,6 +141,9 @@ class Exports::PurchaseExportService
         "Shipping ($)" => purchase.shipping_dollars,
         "Sale Price ($)" => purchase.price_dollars,
         "Fees ($)" => purchase.fee_dollars,
+        "Gumroad Fees ($)" => calculate_gumroad_fee_dollars(purchase),
+        "Stripe Fees ($)" => calculate_stripe_fee_dollars(purchase),
+        "PayPal Fees ($)" => calculate_paypal_fee_dollars(purchase),
         "Tip ($)" => (purchase.tip&.value_usd_cents || 0) / 100.0,
         "Net Total ($)" => purchase.net_total,
         "Tax Included in Price?" => determine_exclusive_tax_report_field(purchase),
@@ -221,5 +224,22 @@ class Exports::PurchaseExportService
     def sent_abandoned_cart_email?(purchase)
       return if purchase.order&.cart.blank?
       purchase.order.cart.sent_abandoned_cart_emails.any? { _1.installment.seller_id == purchase.link.user_id }
+    end
+
+    def calculate_gumroad_fee_dollars(purchase)
+      total_fees = purchase.fee_dollars
+      processor_fees = purchase.processor_fee_dollars || 0
+      gumroad_fees = total_fees - processor_fees
+      [gumroad_fees, 0].max
+    end
+
+    def calculate_stripe_fee_dollars(purchase)
+      return 0 unless purchase.charged_using_stripe_connect_account?
+      purchase.processor_fee_dollars || 0
+    end
+
+    def calculate_paypal_fee_dollars(purchase)
+      return 0 unless purchase.paypal_order_id?
+      purchase.processor_fee_dollars || 0
     end
 end
