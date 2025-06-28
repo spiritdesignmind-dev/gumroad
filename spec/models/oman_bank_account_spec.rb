@@ -44,7 +44,14 @@ describe OmanBankAccount do
       expect(build(:oman_bank_account, account_number: "1234567890123456")).to be_valid
     end
 
-    it "rejects records that do not match the required account number regex" do
+    it "allows valid 23-character Omani IBANs" do
+      allow(Rails.env).to receive(:production?).and_return(true)
+      
+      expect(build(:oman_bank_account, account_number: "OM810180000001299123456")).to be_valid
+      expect(build(:oman_bank_account, account_number: "OM200020000001030000001")).to be_valid
+    end
+
+    it "rejects records that do not match the required account number regex or IBAN format" do
       allow(Rails.env).to receive(:production?).and_return(true)
       om_bank_account = build(:oman_bank_account, account_number: "12345")
       expect(om_bank_account).not_to be_valid
@@ -55,6 +62,10 @@ describe OmanBankAccount do
       expect(om_bank_account.errors.full_messages.to_sentence).to eq("The account number is invalid.")
 
       om_bank_account = build(:oman_bank_account, account_number: "ABCDEF")
+      expect(om_bank_account).not_to be_valid
+      expect(om_bank_account.errors.full_messages.to_sentence).to eq("The account number is invalid.")
+
+      om_bank_account = build(:oman_bank_account, account_number: "OM000000000000000000000")
       expect(om_bank_account).not_to be_valid
       expect(om_bank_account.errors.full_messages.to_sentence).to eq("The account number is invalid.")
     end
