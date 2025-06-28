@@ -46,7 +46,7 @@ describe OmanBankAccount do
 
     it "allows valid 23-character Omani IBANs" do
       allow(Rails.env).to receive(:production?).and_return(true)
-      
+
       expect(build(:oman_bank_account, account_number: "OM810180000001299123456")).to be_valid
       expect(build(:oman_bank_account, account_number: "OM200020000001030000001")).to be_valid
     end
