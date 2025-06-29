@@ -102,15 +102,14 @@ describe "PurchaseSubscription", :vcr do
               end
             end
 
-            it "schedules a renewal reminder if the billing period is monthly" do
+            it "does not schedule a renewal reminder if the billing period is monthly" do
               freeze_time do
                 payment_option = @subscription.last_payment_option
                 payment_option.update!(price: @product.prices.find_by(recurrence: "monthly"))
-                reminder_time = 1.month.from_now - BasePrice::Recurrence::RECURRENCE_TO_RENEWAL_REMINDER_EMAIL_DAYS["monthly"]
 
                 @purchase.update_balance_and_mark_successful!
 
-                expect(RecurringChargeReminderWorker).to have_enqueued_sidekiq_job(@subscription.id).at(reminder_time)
+                expect(RecurringChargeReminderWorker.jobs.count).to eq(0)
               end
             end
 

@@ -349,6 +349,7 @@ class Subscription < ApplicationRecord
 
   def schedule_renewal_reminder
     return unless send_renewal_reminders?
+    return if recurrence == BasePrice::Recurrence::MONTHLY
     RecurringChargeReminderWorker.perform_at(send_renewal_reminder_at, id)
   end
 
