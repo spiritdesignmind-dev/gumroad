@@ -209,6 +209,7 @@ class OfferCode < ApplicationRecord
       applicable_products.each do |product|
         validate_price_after_discount(product)
         validate_membership_price_after_discount(product)
+        validate_currency_type_after_discount(product)
         return if errors.present?
       end
     end
@@ -217,6 +218,13 @@ class OfferCode < ApplicationRecord
       return if is_amount_valid?(product)
 
       errors.add(:base, "The price after discount for all of your products must be either #{product.currency["symbol"]}0 or at least #{product.min_price_formatted}.")
+    end
+
+    def validate_currency_type_after_discount(product)
+      return if is_percent?
+      return if product.price_currency_type == currency_type
+
+      errors.add(:base, "The discount code's currency type must match the product's currency type.")
     end
 
     def validate_membership_price_after_discount(product)
