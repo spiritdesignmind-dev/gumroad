@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-unless ENV["LOG_ES"] == "true"
-  EsClient.transport.logger = Logger.new(File::NULL)
-end
+
 
 module Elasticsearch::API::Actions
   alias original_index index
