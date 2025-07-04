@@ -227,19 +227,44 @@ class Exports::PurchaseExportService
     end
 
     def calculate_gumroad_fee_dollars(purchase)
-      total_fees = purchase.fee_dollars
-      processor_fees = purchase.processor_fee_dollars || 0
-      gumroad_fees = total_fees - processor_fees
-      [gumroad_fees, 0].max
+      if purchase.charged_using_gumroad_merchant_account?
+        total_fee_cents = purchase.fee_cents
+        processor_percentage_cents = (purchase.price_cents * Purchase::PROCESSOR_FEE_PER_THOUSAND / 1000.0).round
+        processor_fixed_cents = Purchase::PROCESSOR_FIXED_FEE_CENTS
+        gumroad_portion_cents = total_fee_cents - processor_percentage_cents - processor_fixed_cents
+        convert_cents_to_dollars([gumroad_portion_cents, 0].max)
+      else
+        purchase.fee_dollars
+      end
     end
 
     def calculate_stripe_fee_dollars(purchase)
-      return 0 unless purchase.charged_using_stripe_connect_account?
-      purchase.processor_fee_dollars || 0
+      if purchase.charged_using_stripe_connect_account?
+        purchase.processor_fee_dollars || 0
+      elsif purchase.charged_using_gumroad_merchant_account? && purchase.charge_processor_id == StripeChargeProcessor.charge_processor_id
+        processor_percentage_cents = (purchase.price_cents * Purchase::PROCESSOR_FEE_PER_THOUSAND / 1000.0).round
+        processor_fixed_cents = Purchase::PROCESSOR_FIXED_FEE_CENTS
+        convert_cents_to_dollars(processor_percentage_cents + processor_fixed_cents)
+      else
+        0
+      end
     end
 
     def calculate_paypal_fee_dollars(purchase)
-      return 0 unless purchase.paypal_order_id?
-      purchase.processor_fee_dollars || 0
+      if purchase.charged_using_paypal_connect_account?
+        purchase.processor_fee_dollars || 0
+      elsif purchase.charged_using_gumroad_merchant_account? && purchase.charge_processor_id == BraintreeChargeProcessor.charge_processor_id
+        processor_percentage_cents = (purchase.price_cents * Purchase::PROCESSOR_FEE_PER_THOUSAND / 1000.0).round
+        processor_fixed_cents = Purchase::PROCESSOR_FIXED_FEE_CENTS
+        convert_cents_to_dollars(processor_percentage_cents + processor_fixed_cents)
+      else
+        0
+      end
+    end
+
+    private
+
+    def convert_cents_to_dollars(cents)
+      (cents.to_f / 100).round(2)
     end
 end
