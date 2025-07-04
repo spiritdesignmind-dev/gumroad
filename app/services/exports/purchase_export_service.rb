@@ -141,9 +141,9 @@ class Exports::PurchaseExportService
         "Shipping ($)" => purchase.shipping_dollars,
         "Sale Price ($)" => purchase.price_dollars,
         "Fees ($)" => purchase.fee_dollars,
-        "Gumroad Fees ($)" => calculate_gumroad_fee_dollars(purchase),
-        "Stripe Fees ($)" => calculate_stripe_fee_dollars(purchase),
-        "PayPal Fees ($)" => calculate_paypal_fee_dollars(purchase),
+        "Gumroad Fees ($)" => (gumroad_fees = calculate_gumroad_fee_dollars(purchase)),
+        "Stripe Fees ($)" => (stripe_fees = calculate_stripe_fee_dollars(purchase)),
+        "PayPal Fees ($)" => (paypal_fees = calculate_paypal_fee_dollars(purchase)),
         "Tip ($)" => (purchase.tip&.value_usd_cents || 0) / 100.0,
         "Net Total ($)" => purchase.net_total,
         "Tax Included in Price?" => determine_exclusive_tax_report_field(purchase),
@@ -198,6 +198,8 @@ class Exports::PurchaseExportService
         "UTM Content" => utm_link&.utm_content
       }
 
+      validate_fee_breakdown(purchase, gumroad_fees, stripe_fees, paypal_fees) unless Rails.env.production?
+
       raise "This data is not JSON safe: #{data.inspect}" if !Rails.env.production? && !data.eql?(JSON.load(JSON.dump(data)))
 
       [data, custom_fields_data]
@@ -228,11 +230,29 @@ class Exports::PurchaseExportService
 
     def calculate_gumroad_fee_dollars(purchase)
       if purchase.charged_using_gumroad_merchant_account?
-        total_fee_cents = purchase.fee_cents
-        processor_percentage_cents = (purchase.price_cents * Purchase::PROCESSOR_FEE_PER_THOUSAND / 1000.0).round
-        processor_fixed_cents = Purchase::PROCESSOR_FIXED_FEE_CENTS
-        gumroad_portion_cents = total_fee_cents - processor_percentage_cents - processor_fixed_cents
-        convert_cents_to_dollars([gumroad_portion_cents, 0].max)
+        gumroad_fee_per_thousand = purchase.send(:calculate_gumroad_fee_per_thousand)
+        
+        if purchase.send(:flat_fee_applicable?)
+          gumroad_only_per_thousand = gumroad_fee_per_thousand - Purchase::PROCESSOR_FEE_PER_THOUSAND
+        else
+          gumroad_only_per_thousand = gumroad_fee_per_thousand
+        end
+        
+        variable_gumroad_cents = (purchase.price_cents * gumroad_only_per_thousand / 1000.0).round
+        
+        fixed_gumroad_cents = if purchase.send(:is_recurring_subscription_charge)
+          if purchase.subscription.mor_fee_applicable?
+            purchase.send(:was_discover_fee_charged?) ? 0 : Purchase::GUMROAD_FIXED_FEE_CENTS
+          else
+            0
+          end
+        elsif Feature.active?(:merchant_of_record_fee, purchase.seller)
+          purchase.send(:was_discover_fee_charged?) ? 0 : Purchase::GUMROAD_FIXED_FEE_CENTS
+        else
+          0
+        end
+        
+        convert_cents_to_dollars(variable_gumroad_cents + fixed_gumroad_cents)
       else
         0
       end
@@ -259,6 +279,17 @@ class Exports::PurchaseExportService
         convert_cents_to_dollars(processor_percentage_cents + processor_fixed_cents)
       else
         0
+      end
+    end
+
+    def validate_fee_breakdown(purchase, gumroad_fees, stripe_fees, paypal_fees)
+      total_calculated = gumroad_fees + stripe_fees + paypal_fees
+      actual_total = purchase.fee_dollars
+      
+      difference = (total_calculated - actual_total).abs
+      
+      if difference > 0.01
+        Rails.logger.warn "Fee breakdown mismatch for purchase #{purchase.id}: calculated=#{total_calculated}, actual=#{actual_total}"
       end
     end
 
