@@ -230,15 +230,11 @@ class Exports::PurchaseExportService
 
     def calculate_gumroad_fee_dollars(purchase)
       if purchase.charged_using_gumroad_merchant_account?
-        gumroad_fee_per_thousand = purchase.send(:calculate_gumroad_fee_per_thousand)
+        total_fee_cents = purchase.fee_cents
         
-        if purchase.send(:flat_fee_applicable?)
-          gumroad_only_per_thousand = gumroad_fee_per_thousand - Purchase::PROCESSOR_FEE_PER_THOUSAND
-        else
-          gumroad_only_per_thousand = gumroad_fee_per_thousand
-        end
-        
-        variable_gumroad_cents = (purchase.price_cents * gumroad_only_per_thousand / 1000.0).round
+        processor_percentage_cents = (purchase.price_cents * Purchase::PROCESSOR_FEE_PER_THOUSAND / 1000.0).round
+        processor_fixed_cents = Purchase::PROCESSOR_FIXED_FEE_CENTS
+        total_processor_cents = processor_percentage_cents + processor_fixed_cents
         
         fixed_gumroad_cents = if purchase.send(:is_recurring_subscription_charge)
           if purchase.subscription.mor_fee_applicable?
@@ -252,7 +248,9 @@ class Exports::PurchaseExportService
           0
         end
         
-        convert_cents_to_dollars(variable_gumroad_cents + fixed_gumroad_cents)
+        variable_gumroad_cents = total_fee_cents - total_processor_cents - fixed_gumroad_cents
+        
+        convert_cents_to_dollars([variable_gumroad_cents + fixed_gumroad_cents, 0].max)
       else
         0
       end
@@ -289,7 +287,12 @@ class Exports::PurchaseExportService
       difference = (total_calculated - actual_total).abs
       
       if difference > 0.01
-        Rails.logger.warn "Fee breakdown mismatch for purchase #{purchase.id}: calculated=#{total_calculated}, actual=#{actual_total}"
+        Rails.logger.warn "Fee breakdown mismatch for purchase #{purchase.id}: " \
+                         "calculated=#{total_calculated}, actual=#{actual_total}, " \
+                         "gumroad=#{gumroad_fees}, stripe=#{stripe_fees}, paypal=#{paypal_fees}, " \
+                         "tier_pricing=#{purchase.seller.tier_pricing_enabled?}, " \
+                         "discover_fee=#{purchase.send(:was_discover_fee_charged?)}, " \
+                         "merchant_account=#{purchase.charged_using_gumroad_merchant_account?}"
       end
     end
 
