@@ -234,14 +234,14 @@ class Exports::PurchaseExportService
         gumroad_portion_cents = total_fee_cents - processor_percentage_cents - processor_fixed_cents
         convert_cents_to_dollars([gumroad_portion_cents, 0].max)
       else
-        purchase.fee_dollars
+        0
       end
     end
 
     def calculate_stripe_fee_dollars(purchase)
       if purchase.charged_using_stripe_connect_account?
         purchase.processor_fee_dollars || 0
-      elsif purchase.charged_using_gumroad_merchant_account? && purchase.charge_processor_id == StripeChargeProcessor.charge_processor_id
+      elsif purchase.charged_using_gumroad_merchant_account? && purchase.charge_processor == 'stripe'
         processor_percentage_cents = (purchase.price_cents * Purchase::PROCESSOR_FEE_PER_THOUSAND / 1000.0).round
         processor_fixed_cents = Purchase::PROCESSOR_FIXED_FEE_CENTS
         convert_cents_to_dollars(processor_percentage_cents + processor_fixed_cents)
@@ -253,7 +253,7 @@ class Exports::PurchaseExportService
     def calculate_paypal_fee_dollars(purchase)
       if purchase.charged_using_paypal_connect_account?
         purchase.processor_fee_dollars || 0
-      elsif purchase.charged_using_gumroad_merchant_account? && purchase.charge_processor_id == BraintreeChargeProcessor.charge_processor_id
+      elsif purchase.charged_using_gumroad_merchant_account? && purchase.charge_processor == 'braintree'
         processor_percentage_cents = (purchase.price_cents * Purchase::PROCESSOR_FEE_PER_THOUSAND / 1000.0).round
         processor_fixed_cents = Purchase::PROCESSOR_FIXED_FEE_CENTS
         convert_cents_to_dollars(processor_percentage_cents + processor_fixed_cents)
