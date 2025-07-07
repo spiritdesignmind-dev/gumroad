@@ -430,7 +430,6 @@ class LinksController < ApplicationController
     all_invalid_offer_codes = (invalid_currency_offer_codes + invalid_amount_offer_codes).uniq
 
     if all_invalid_offer_codes.any?
-
       # Determine the main issue type for the message
       has_currency_issues = invalid_currency_offer_codes.any?
       has_amount_issues = invalid_amount_offer_codes.any?
