@@ -527,6 +527,12 @@ describe("Product Edit Scenario", type: :feature, js: true) do
       wait_for_ajax
       expect(page).not_to have_text("Publicly show the number of sales on your product page")
     end
+
+    it "doesn't show the option to change currency code for membership products" do
+      visit "/products/#{@membership_product.unique_permalink}/edit"
+      wait_for_ajax
+      expect(page).not_to have_select("Currency", visible: :all)
+    end
   end
 
   describe "discover notices" do
@@ -767,6 +773,18 @@ describe("Product Edit Scenario", type: :feature, js: true) do
           expect(product.reload.price_currency_type).to eq "gbp"
         end
       end
+    end
+  end
+
+  context "product currency" do
+    it "allows updating currency" do
+      visit edit_link_path(product.unique_permalink)
+
+      select "£", from: "Currency", visible: false
+      expect(page).to have_select("Currency", selected: "£", visible: false)
+
+      click_on "Save changes"
+      expect(product.reload.price_currency_type).to eq "gbp"
     end
   end
 
