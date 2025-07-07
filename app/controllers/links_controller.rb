@@ -430,7 +430,6 @@ class LinksController < ApplicationController
     all_invalid_offer_codes = (invalid_currency_offer_codes + invalid_amount_offer_codes).uniq
 
     if all_invalid_offer_codes.any?
-      plural = all_invalid_offer_codes.length > 1
 
       # Determine the main issue type for the message
       has_currency_issues = invalid_currency_offer_codes.any?
@@ -439,13 +438,13 @@ class LinksController < ApplicationController
       if has_currency_issues && has_amount_issues
         issue_description = "have currency mismatches or discount this product below #{@product.min_price_formatted}"
       elsif has_currency_issues
-        issue_description = "#{plural ? "have" : "has"} currency #{plural ? "mismatches" : "mismatch"} with this product"
+        issue_description = "#{pluralize(all_invalid_offer_codes, "has")} currency #{pluralize(all_invalid_offer_codes,  "mismatch")} with this product"
       else
-        issue_description = "#{plural ? "discount" : "discounts"} this product below #{@product.min_price_formatted}, but not to #{MoneyFormatter.format(0, @product.price_currency_type.to_sym, no_cents_if_whole: true, symbol: true)}"
+        issue_description = "#{pluralize(all_invalid_offer_codes, "discount") } this product below #{@product.min_price_formatted}, but not to #{MoneyFormatter.format(0, @product.price_currency_type.to_sym, no_cents_if_whole: true, symbol: true)}"
       end
 
       return render json: {
-        warning_message: "The following offer #{plural ? "codes" : "code"} #{issue_description}: #{all_invalid_offer_codes.join(", ")}. Please update #{plural ? "them or they" : "it or it"} will not work at checkout."
+        warning_message: "The following offer #{pluralize(all_invalid_offer_codes, "code") } #{issue_description}: #{all_invalid_offer_codes.join(", ")}. Please update #{all_invalid_offer_codes.length > 1 ? "them or they" : "it or it"} will not work at checkout."
       }
     end
 

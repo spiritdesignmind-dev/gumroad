@@ -252,6 +252,88 @@ describe OfferCode do
     end
   end
 
+  describe "currency type validation" do
+    context "percentage offer codes" do
+      let(:usd_product) { create(:product, user: @product.user, price_cents: 1000, price_currency_type: "usd") }
+      let(:eur_product) { create(:product, user: @product.user, price_cents: 800, price_currency_type: "eur") }
+
+      context "when the offer code is a percentage discount" do
+        it "doesn't validate currency type for percentage discounts" do
+          offer_code = build(:percentage_offer_code, products: [usd_product], amount_percentage: 50)
+          expect(offer_code).to be_valid
+        end
+
+        it "allows percentage discounts on products with different currencies" do
+          offer_code = build(:percentage_offer_code, products: [usd_product, eur_product], amount_percentage: 25)
+          expect(offer_code).to be_valid
+        end
+      end
+    end
+
+    context "cents offer codes" do
+      let(:usd_product) { create(:product, user: @product.user, price_cents: 1000, price_currency_type: "usd") }
+      let(:eur_product) { create(:product, user: @product.user, price_cents: 800, price_currency_type: "eur") }
+      let(:gbp_product) { create(:product, user: @product.user, price_cents: 900, price_currency_type: "gbp") }
+
+      context "when the currency types match" do
+        it "is valid for USD products with USD offer code" do
+          offer_code = build(:offer_code, products: [usd_product], amount_cents: 200, currency_type: "usd")
+          expect(offer_code).to be_valid
+        end
+
+        it "is valid for EUR products with EUR offer code" do
+          offer_code = build(:offer_code, products: [eur_product], amount_cents: 150, currency_type: "eur")
+          expect(offer_code).to be_valid
+        end
+
+        it "is valid for multiple products with same currency type" do
+          usd_product2 = create(:product, user: @product.user, price_cents: 1500, price_currency_type: "usd")
+          offer_code = build(:offer_code, products: [usd_product, usd_product2], amount_cents: 300, currency_type: "usd")
+          expect(offer_code).to be_valid
+        end
+      end
+
+      context "when the currency types don't match" do
+        it "adds an error for USD product with EUR offer code" do
+          offer_code = build(:offer_code, products: [usd_product], amount_cents: 200, currency_type: "eur")
+          expect(offer_code).to_not be_valid
+          expect(offer_code.errors.full_messages).to include("The discount code's currency type must match the product's currency type.")
+        end
+
+        it "adds an error for EUR product with GBP offer code" do
+          offer_code = build(:offer_code, products: [eur_product], amount_cents: 150, currency_type: "gbp")
+          expect(offer_code).to_not be_valid
+          expect(offer_code.errors.full_messages).to include("The discount code's currency type must match the product's currency type.")
+        end
+
+        it "adds an error when products have mixed currencies" do
+          offer_code = build(:offer_code, products: [usd_product, eur_product], amount_cents: 200, currency_type: "usd")
+          expect(offer_code).to_not be_valid
+          expect(offer_code.errors.full_messages).to include("The discount code's currency type must match the product's currency type.")
+        end
+      end
+
+      context "universal offer codes" do
+        it "is valid for universal offer codes with currency type specified" do
+          offer_code = build(:universal_offer_code, user: @product.user, amount_cents: 500, currency_type: "usd", universal: true)
+          expect(offer_code).to be_valid
+        end
+
+        it "is valid for universal percentage offer codes without currency type" do
+          offer_code = build(:universal_offer_code, user: @product.user, amount_percentage: 25, universal: true)
+          expect(offer_code).to be_valid
+        end
+
+        it "adds error for universal offer codes with mismatched currency type" do
+          _eur_product = create(:product, user: @product.user, price_cents: 1500, price_currency_type: "eur")
+          offer_code = build(:universal_offer_code, user: @product.user, amount_cents: 500, currency_type: nil, universal: true)
+          expect(offer_code).to_not be_valid
+          expect(offer_code.errors.full_messages).to include("The discount code's currency type must match the product's currency type.")
+        end
+      end
+    end
+  end
+
   describe "#amount_off" do
     describe "percentage offer codes" do
       it "correctly calculates the amount off" do

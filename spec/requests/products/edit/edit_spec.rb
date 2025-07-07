@@ -762,6 +762,7 @@ describe("Product Edit Scenario", type: :feature, js: true) do
           select "£", from: "Currency", visible: false
           click_on "Save changes"
           expect(page).to have_alert(text: "The following offer code has currency mismatch with this product: usd. Please update it or it will not work at checkout.")
+          expect(product.reload.price_currency_type).to eq "gbp"
         end
       end
     end
