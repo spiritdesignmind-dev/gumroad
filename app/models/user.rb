@@ -4,7 +4,6 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable, :confirmable, :omniauthable,
          :recoverable, :rememberable, :trackable, :pwned_password
 
-  include SecureExternalId
   has_paper_trail
   has_one_time_password
   include Flipper::Identifier, FlagShihTzu, CurrencyHelper, Mongoable, JsonData, Deletable, MoneyBalance,
@@ -12,7 +11,7 @@ class User < ApplicationRecord
           StripeConnect, Stats, PaymentStats, FeatureStatus, Risk, Compliance, Validations, Taxation, PingNotification,
           Email, AsyncDeviseNotification, Posts, AffiliatedProducts, Followers, LowBalanceFraudCheck, MailerLevel,
           DirectAffiliates, AsJson, Tier, Recommendations, Team, AustralianBacktaxes, WithCdnUrl,
-          TwoFactorAuthentication, Versionable, Comments, VipCreator, SignedUrlHelper, Purchases
+          TwoFactorAuthentication, Versionable, Comments, VipCreator, SignedUrlHelper, Purchases, SecureExternalId
 
   stripped_fields :name, :facebook_meta_tag, :google_analytics_id, :username, :email, :support_email
 
@@ -121,6 +120,11 @@ class User < ApplicationRecord
   has_many :last_read_community_chat_messages, dependent: :destroy
   has_many :community_notification_settings, dependent: :destroy
   has_many :seller_community_chat_recaps, class_name: "CommunityChatRecap", foreign_key: :seller_id, dependent: :destroy
+
+  has_one_attached :avatar
+  attr_accessor :avatar_changed
+  before_save :set_avatar_changed
+  after_commit :reset_avatar_changed
 
   scope :by_email, ->(email) { where(email:) }
   scope :compliant, -> { where(user_risk_state: "compliant") }
@@ -357,7 +361,6 @@ class User < ApplicationRecord
     end
   end
 
-  has_one_attached :avatar
   has_one_attached :subscribe_preview
   has_many_attached :annual_reports
 
@@ -454,10 +457,6 @@ class User < ApplicationRecord
     merchant_account = merchant_account(charge_processor_id)
     currency = merchant_account.try(:currency) || ChargeProcessor::DEFAULT_CURRENCY_CODE
     currency.upcase
-  end
-
-  def debit_card_payout_supported?
-    max_payment_amount_cents < StripePayoutProcessor::DEBIT_CARD_PAYOUT_MAX
   end
 
   # Public: Get the maximum product price for a user.
@@ -558,10 +557,6 @@ class User < ApplicationRecord
 
   def is_buyer?
     !links.exists? && purchases.successful.exists?
-  end
-
-  def is_creator?
-    !buyer_signup || links.exists?
   end
 
   def is_affiliate?
@@ -1041,28 +1036,6 @@ class User < ApplicationRecord
       end
     end
 
-    def products_sorted_by_reviews_count_desc
-      sorted_product_ids = links.select(:id, :unique_permalink, :flags).sort_by do |product|
-        # Consider reviews count of the products as 0 for sorting if they have display_product_reviews? set to false
-        # so that when sorted by reviews count on the user profile page
-        # they show up *after* all the other products for whom ratings are displayed.
-        reviews_count_for_sorting = product.display_product_reviews? ? -product.reviews_count : 0
-        [reviews_count_for_sorting, product.unique_permalink]
-      end.map(&:id)
-      links.ordered_by_ids(sorted_product_ids)
-    end
-
-    def products_sorted_by_average_rating_desc
-      # Consider average rating of the products as 0 for sorting if they have display_product_reviews? set to false
-      # so that when sorted by average rating on the user profile page
-      # they show up *after* all the other products for whom ratings are displayed.
-      sorted_product_ids = links.select(:id, :unique_permalink, :flags).sort_by do |product|
-        average_rating_for_sorting = product.display_product_reviews? ? -product.average_rating : 0
-        [average_rating_for_sorting, product.unique_permalink]
-      end.map(&:id)
-      links.ordered_by_ids(sorted_product_ids)
-    end
-
     def make_affiliate_of_the_matching_approved_affiliate_requests
       return if pre_signup_affiliate_request_processed? || email.blank?
 
@@ -1147,8 +1120,9 @@ class User < ApplicationRecord
 
     def should_subscribe_preview_be_regenerated?
       previously_new_record? ||
-      %w[name username].intersect?(saved_changes.keys) ||
-      %w[font background_color highlight_color].intersect?(seller_profile.saved_changes.keys)
+        %w[name username].intersect?(saved_changes.keys) ||
+        %w[font background_color highlight_color].intersect?(seller_profile.saved_changes.keys) ||
+        avatar_changed
     end
 
     def cancel_active_subscriptions!
@@ -1166,5 +1140,13 @@ class User < ApplicationRecord
     def has_completed_payouts?
       payments.completed.exists? ||
         made_a_successful_sale_with_a_stripe_connect_or_paypal_connect_account?
+    end
+
+    def set_avatar_changed
+      self.avatar_changed = attachment_changes["avatar"].present?
+    end
+
+    def reset_avatar_changed
+      self.avatar_changed = false
     end
 end
