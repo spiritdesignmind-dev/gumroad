@@ -438,13 +438,13 @@ class LinksController < ApplicationController
       if has_currency_issues && has_amount_issues
         issue_description = "have currency mismatches or discount this product below #{@product.min_price_formatted}"
       elsif has_currency_issues
-        issue_description = "#{pluralize(all_invalid_offer_codes, "has")} currency #{pluralize(all_invalid_offer_codes,  "mismatch")} with this product"
+        issue_description = "#{"has".pluralize(all_invalid_offer_codes.count)} currency #{"mismatch".pluralize(all_invalid_offer_codes.count)} with this product"
       else
-        issue_description = "#{pluralize(all_invalid_offer_codes, "discount") } this product below #{@product.min_price_formatted}, but not to #{MoneyFormatter.format(0, @product.price_currency_type.to_sym, no_cents_if_whole: true, symbol: true)}"
+        issue_description = "#{"discount".pluralize(all_invalid_offer_codes.count)} this product below #{@product.min_price_formatted}, but not to #{MoneyFormatter.format(0, @product.price_currency_type.to_sym, no_cents_if_whole: true, symbol: true)}"
       end
 
       return render json: {
-        warning_message: "The following offer #{pluralize(all_invalid_offer_codes, "code") } #{issue_description}: #{all_invalid_offer_codes.join(", ")}. Please update #{all_invalid_offer_codes.length > 1 ? "them or they" : "it or it"} will not work at checkout."
+        warning_message: "The following offer #{"code".pluralize(all_invalid_offer_codes.count)} #{issue_description}: #{all_invalid_offer_codes.join(", ")}. Please update #{all_invalid_offer_codes.length > 1 ? "them or they" : "it or it"} will not work at checkout."
       }
     end
 

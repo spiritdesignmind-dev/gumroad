@@ -760,6 +760,8 @@ describe("Product Edit Scenario", type: :feature, js: true) do
           visit edit_link_path(product.unique_permalink)
 
           select "£", from: "Currency", visible: false
+          expect(page).to have_select("Currency", selected: "£", visible: false)
+
           click_on "Save changes"
           expect(page).to have_alert(text: "The following offer code has currency mismatch with this product: usd. Please update it or it will not work at checkout.")
           expect(product.reload.price_currency_type).to eq "gbp"
