@@ -423,7 +423,7 @@ class LinksController < ApplicationController
       return render json: { error_message: }, status: :unprocessable_entity
     end
     invalid_currency_offer_codes = @product.product_and_universal_offer_codes.reject do |offer_code|
-      offer_code.amount_cents.nil? || offer_code.currency_type == @product.price_currency_type
+      offer_code.is_currency_valid?(@product)
     end.map(&:code)
     invalid_amount_offer_codes = @product.product_and_universal_offer_codes.reject { _1.is_amount_valid?(@product) }.map(&:code)
 
@@ -435,7 +435,7 @@ class LinksController < ApplicationController
       has_amount_issues = invalid_amount_offer_codes.any?
 
       if has_currency_issues && has_amount_issues
-        issue_description = "have currency mismatches or discount this product below #{@product.min_price_formatted}"
+        issue_description = "have currency mismatches or would discount this product below #{@product.min_price_formatted}"
       elsif has_currency_issues
         issue_description = "#{"has".pluralize(all_invalid_offer_codes.count)} currency #{"mismatch".pluralize(all_invalid_offer_codes.count)} with this product"
       else

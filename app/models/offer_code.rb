@@ -81,6 +81,10 @@ class OfferCode < ApplicationRecord
     is_percent? ? amount_percentage : amount_cents
   end
 
+  def is_currency_valid?(product)
+    is_percent? || product.price_currency_type == currency_type
+  end
+
   # Return amount buyer got off of the purchase with or without currency/'%'
   #
   # with_symbol - include currency/'%' in returned amount
@@ -221,8 +225,7 @@ class OfferCode < ApplicationRecord
     end
 
     def validate_currency_type_after_discount(product)
-      return if is_percent?
-      return if product.price_currency_type == currency_type
+      return if is_currency_valid?(product)
 
       errors.add(:base, "The discount code's currency type must match the product's currency type.")
     end
