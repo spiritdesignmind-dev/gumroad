@@ -784,6 +784,7 @@ describe("Product Edit Scenario", type: :feature, js: true) do
       expect(page).to have_select("Currency", selected: "£", visible: false)
 
       click_on "Save changes"
+      wait_for_ajax
       expect(product.reload.price_currency_type).to eq "gbp"
     end
   end
