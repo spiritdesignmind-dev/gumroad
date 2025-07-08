@@ -82,7 +82,7 @@ class OfferCode < ApplicationRecord
   end
 
   def is_currency_valid?(product)
-    is_percent? || product.price_currency_type == currency_type
+    is_percent? || currency_type.nil? || product.price_currency_type == currency_type
   end
 
   # Return amount buyer got off of the purchase with or without currency/'%'
@@ -227,7 +227,7 @@ class OfferCode < ApplicationRecord
     def validate_currency_type_after_discount(product)
       return if is_currency_valid?(product)
 
-      errors.add(:base, "The discount code's currency type must match the product's currency type.")
+      errors.add(:base, "This discount code uses #{currency_type.upcase} but the product uses #{product.price_currency_type.upcase}. Please change the discount code to use the same currency as the product.")
     end
 
     def validate_membership_price_after_discount(product)
