@@ -435,11 +435,11 @@ class LinksController < ApplicationController
       has_amount_issues = invalid_amount_offer_codes.any?
 
       if has_currency_issues && has_amount_issues
-        issue_description = "have currency mismatches or would discount this product below #{@product.min_price_formatted}"
+        issue_description = "#{"has".pluralize(all_invalid_offer_codes.count)} currency mismatches or would discount this product below #{@product.min_price_formatted}"
       elsif has_currency_issues
         issue_description = "#{"has".pluralize(all_invalid_offer_codes.count)} currency #{"mismatch".pluralize(all_invalid_offer_codes.count)} with this product"
       else
-        issue_description = "#{"discount".pluralize(all_invalid_offer_codes.count)} this product below #{@product.min_price_formatted}, but not to #{MoneyFormatter.format(0, @product.price_currency_type.to_sym, no_cents_if_whole: true, symbol: true)}"
+        issue_description = "#{all_invalid_offer_codes.count > 1 ? "discount" : "discounts"} this product below #{@product.min_price_formatted}, but not to #{MoneyFormatter.format(0, @product.price_currency_type.to_sym, no_cents_if_whole: true, symbol: true)}"
       end
 
       return render json: {
