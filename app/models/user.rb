@@ -4,7 +4,6 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable, :confirmable, :omniauthable,
          :recoverable, :rememberable, :trackable, :pwned_password
 
-  include SecureExternalId
   has_paper_trail
   has_one_time_password
   include Flipper::Identifier, FlagShihTzu, CurrencyHelper, Mongoable, JsonData, Deletable, MoneyBalance,
@@ -12,7 +11,7 @@ class User < ApplicationRecord
           StripeConnect, Stats, PaymentStats, FeatureStatus, Risk, Compliance, Validations, Taxation, PingNotification,
           Email, AsyncDeviseNotification, Posts, AffiliatedProducts, Followers, LowBalanceFraudCheck, MailerLevel,
           DirectAffiliates, AsJson, Tier, Recommendations, Team, AustralianBacktaxes, WithCdnUrl,
-          TwoFactorAuthentication, Versionable, Comments, VipCreator, SignedUrlHelper, Purchases
+          TwoFactorAuthentication, Versionable, Comments, VipCreator, SignedUrlHelper, Purchases, SecureExternalId
 
   stripped_fields :name, :facebook_meta_tag, :google_analytics_id, :username, :email, :support_email
 
@@ -121,6 +120,11 @@ class User < ApplicationRecord
   has_many :last_read_community_chat_messages, dependent: :destroy
   has_many :community_notification_settings, dependent: :destroy
   has_many :seller_community_chat_recaps, class_name: "CommunityChatRecap", foreign_key: :seller_id, dependent: :destroy
+
+  has_one_attached :avatar
+  attr_accessor :avatar_changed
+  before_save :set_avatar_changed
+  after_commit :reset_avatar_changed
 
   scope :by_email, ->(email) { where(email:) }
   scope :compliant, -> { where(user_risk_state: "compliant") }
@@ -357,7 +361,6 @@ class User < ApplicationRecord
     end
   end
 
-  has_one_attached :avatar
   has_one_attached :subscribe_preview
   has_many_attached :annual_reports
 
@@ -786,6 +789,11 @@ class User < ApplicationRecord
     tier_pricing_enabled? ? tier >= TIER_3 : sales_cents_total >= TIER_3
   end
 
+  def read_attribute_for_validation(attr)
+    return read_attribute(attr) if attr == :username
+    super
+  end
+
   def compliance_info_resettable?
     return true if stripe_account.blank?
     return false if balances.where(merchant_account_id: stripe_account.id).exists?
@@ -1112,8 +1120,9 @@ class User < ApplicationRecord
 
     def should_subscribe_preview_be_regenerated?
       previously_new_record? ||
-      %w[name username].intersect?(saved_changes.keys) ||
-      %w[font background_color highlight_color].intersect?(seller_profile.saved_changes.keys)
+        %w[name username].intersect?(saved_changes.keys) ||
+        %w[font background_color highlight_color].intersect?(seller_profile.saved_changes.keys) ||
+        avatar_changed
     end
 
     def cancel_active_subscriptions!
@@ -1131,5 +1140,13 @@ class User < ApplicationRecord
     def has_completed_payouts?
       payments.completed.exists? ||
         made_a_successful_sale_with_a_stripe_connect_or_paypal_connect_account?
+    end
+
+    def set_avatar_changed
+      self.avatar_changed = attachment_changes["avatar"].present?
+    end
+
+    def reset_avatar_changed
+      self.avatar_changed = false
     end
 end
