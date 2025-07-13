@@ -195,7 +195,10 @@ const config = {
       async: false,
     }),
     process.env.WEBPACK_ANALYZE === "1" && new BundleAnalyzerPlugin(),
-    new webpack.DefinePlugin({ SSR: false }),
+    new webpack.DefinePlugin({ 
+      SSR: false,
+      "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || "development")
+    }),
   ].filter(Boolean),
 
   output,
