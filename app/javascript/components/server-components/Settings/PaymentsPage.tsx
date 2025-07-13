@@ -807,6 +807,7 @@ const PaymentsPage = (props: Props) => {
     setIsUpdatePayoutMethodConfirmed(false);
     setPendingPayoutMethod(null);
     setSelectedPayoutMethod(originalPayoutMethod);
+    setErrorFieldNames(new Set());
   };
 
   const confirmUpdatePayoutMethod = () => {
@@ -814,6 +815,7 @@ const PaymentsPage = (props: Props) => {
     setIsUpdatePayoutMethodConfirmed(true);
     if (pendingPayoutMethod) {
       setSelectedPayoutMethod(pendingPayoutMethod);
+      setErrorFieldNames(new Set());
     }
   };
   React.useEffect(() => {
