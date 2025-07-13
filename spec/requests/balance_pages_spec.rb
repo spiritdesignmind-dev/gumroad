@@ -872,7 +872,7 @@ describe "Balance Pages Scenario", js: true, type: :feature do
 
       it "displays 'show older payouts' button when there's pagination" do
         product = create(:product, user: seller)
-        [300, 400, 500, 600, 700, 1756].each do |days|
+        [1756, 700, 600, 500, 400, 300].each do |days|
           travel_to((days + 10).days.ago) do
             purchase = create(:purchase_in_progress, link: product, price_cents: days, seller:, purchase_state: "in_progress")
             purchase.update_balance_and_mark_successful!
