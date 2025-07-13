@@ -20,6 +20,7 @@ import { CountrySelectionModal } from "$app/components/server-components/Country
 import { StripeConnectEmbeddedNotificationBanner } from "$app/components/server-components/PayoutPage/StripeConnectEmbeddedNotificationBanner";
 import { CreditCardForm } from "$app/components/server-components/Settings/CreditCardForm";
 import { UpdateCountryConfirmationModal } from "$app/components/server-components/UpdateCountryConfirmationModal";
+import { UpdatePayoutMethodConfirmationModal } from "$app/components/server-components/UpdatePayoutMethodConfirmationModal";
 import { Layout } from "$app/components/Settings/Layout";
 import AccountDetailsSection from "$app/components/Settings/PaymentsPage/AccountDetailsSection";
 import AusBackTaxesSection from "$app/components/Settings/PaymentsPage/AusBackTaxesSection";
@@ -228,9 +229,27 @@ const PaymentsPage = (props: Props) => {
               ? "bank"
               : "paypal",
   );
+  const [originalPayoutMethod] = React.useState<PayoutMethod>(
+    props.stripe_connect.has_connected_stripe
+      ? "stripe"
+      : props.bank_account_details.show_bank_account && props.bank_account_details.is_a_card
+        ? "card"
+        : props.bank_account_details.account_number_visual !== null
+          ? "bank"
+          : props.paypal_address !== null
+            ? "paypal"
+            : props.bank_account_details.show_bank_account
+              ? "bank"
+              : "paypal",
+  );
   const updatePayoutMethod = (newPayoutMethod: PayoutMethod) => {
-    setSelectedPayoutMethod(newPayoutMethod);
-    setErrorFieldNames(new Set());
+    if (newPayoutMethod !== originalPayoutMethod) {
+      setPendingPayoutMethod(newPayoutMethod);
+      setShowUpdatePayoutMethodConfirmationModal(true);
+    } else {
+      setSelectedPayoutMethod(newPayoutMethod);
+      setErrorFieldNames(new Set());
+    }
   };
 
   const [payoutsPausedByUser, setPayoutsPausedByUser] = React.useState(props.payouts_paused_by_user);
@@ -778,11 +797,38 @@ const PaymentsPage = (props: Props) => {
     setShowUpdateCountryConfirmationModal(false);
     setIsUpdateCountryConfirmed(true);
   };
+
+  const [showUpdatePayoutMethodConfirmationModal, setShowUpdatePayoutMethodConfirmationModal] = React.useState(false);
+  const [pendingPayoutMethod, setPendingPayoutMethod] = React.useState<PayoutMethod | null>(null);
+  const [isUpdatePayoutMethodConfirmed, setIsUpdatePayoutMethodConfirmed] = React.useState(false);
+  
+  const cancelUpdatePayoutMethod = () => {
+    setShowUpdatePayoutMethodConfirmationModal(false);
+    setIsUpdatePayoutMethodConfirmed(false);
+    setPendingPayoutMethod(null);
+    setSelectedPayoutMethod(originalPayoutMethod);
+  };
+  
+  const confirmUpdatePayoutMethod = () => {
+    setShowUpdatePayoutMethodConfirmationModal(false);
+    setIsUpdatePayoutMethodConfirmed(true);
+    if (pendingPayoutMethod) {
+      setSelectedPayoutMethod(pendingPayoutMethod);
+    }
+  };
   React.useEffect(() => {
     if (isUpdateCountryConfirmed) {
       handleSave();
     }
   }, [isUpdateCountryConfirmed]);
+  
+  React.useEffect(() => {
+    if (isUpdatePayoutMethodConfirmed && pendingPayoutMethod) {
+      setErrorFieldNames(new Set());
+      setPendingPayoutMethod(null);
+      setIsUpdatePayoutMethodConfirmed(false);
+    }
+  }, [isUpdatePayoutMethodConfirmed, pendingPayoutMethod]);
   const updatedCountry = complianceInfo.updated_country_code
     ? props.countries[complianceInfo.updated_country_code]
     : null;
@@ -823,6 +869,11 @@ const PaymentsPage = (props: Props) => {
           onClose={cancelUpdateCountry}
         />
       ) : null}
+      <UpdatePayoutMethodConfirmationModal
+        open={showUpdatePayoutMethodConfirmationModal}
+        onConfirm={confirmUpdatePayoutMethod}
+        onClose={cancelUpdatePayoutMethod}
+      />
       <form ref={formRef}>
         <section>
           <header>
