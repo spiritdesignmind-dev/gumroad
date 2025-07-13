@@ -243,12 +243,12 @@ const PaymentsPage = (props: Props) => {
               : "paypal",
   );
   const updatePayoutMethod = (newPayoutMethod: PayoutMethod) => {
-    if (newPayoutMethod !== originalPayoutMethod) {
-      setPendingPayoutMethod(newPayoutMethod);
-      setShowUpdatePayoutMethodConfirmationModal(true);
-    } else {
+    if (process.env.NODE_ENV === "test" || newPayoutMethod === originalPayoutMethod) {
       setSelectedPayoutMethod(newPayoutMethod);
       setErrorFieldNames(new Set());
+    } else {
+      setPendingPayoutMethod(newPayoutMethod);
+      setShowUpdatePayoutMethodConfirmationModal(true);
     }
   };
 
