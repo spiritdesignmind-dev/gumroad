@@ -801,14 +801,14 @@ const PaymentsPage = (props: Props) => {
   const [showUpdatePayoutMethodConfirmationModal, setShowUpdatePayoutMethodConfirmationModal] = React.useState(false);
   const [pendingPayoutMethod, setPendingPayoutMethod] = React.useState<PayoutMethod | null>(null);
   const [isUpdatePayoutMethodConfirmed, setIsUpdatePayoutMethodConfirmed] = React.useState(false);
-  
+
   const cancelUpdatePayoutMethod = () => {
     setShowUpdatePayoutMethodConfirmationModal(false);
     setIsUpdatePayoutMethodConfirmed(false);
     setPendingPayoutMethod(null);
     setSelectedPayoutMethod(originalPayoutMethod);
   };
-  
+
   const confirmUpdatePayoutMethod = () => {
     setShowUpdatePayoutMethodConfirmationModal(false);
     setIsUpdatePayoutMethodConfirmed(true);
@@ -821,7 +821,7 @@ const PaymentsPage = (props: Props) => {
       handleSave();
     }
   }, [isUpdateCountryConfirmed]);
-  
+
   React.useEffect(() => {
     if (isUpdatePayoutMethodConfirmed && pendingPayoutMethod) {
       setErrorFieldNames(new Set());
