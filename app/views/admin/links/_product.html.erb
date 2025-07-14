@@ -132,6 +132,24 @@
         <%= icon_no %>
       <% end %>
     </dd>
+
+    <dt>Seller refund policy enabled</dt>
+    <dd><%= product.user.account_level_refund_policy_enabled? ? icon_yes : icon_no %></dd>
+
+    <% if product.user.account_level_refund_policy_enabled? && product.user.refund_policy.present? %>
+      <dt>Seller refund policy</dt>
+      <dd>
+        <strong><%= product.user.refund_policy.title %></strong>
+        <% if product.user.refund_policy.fine_print.present? %>
+          <br>
+          <%= simple_format(product.user.refund_policy.fine_print) %>
+        <% end %>
+        <% if product.user.refund_policy.max_refund_period_in_days.present? %>
+          <br>
+          <small>Max refund period: <%= product.user.refund_policy.max_refund_period_in_days %> days</small>
+        <% end %>
+      </dd>
+    <% end %>
   </dl>
 
   <hr>
