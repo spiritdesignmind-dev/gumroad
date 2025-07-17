@@ -7,28 +7,7 @@ ruby file: ".ruby-version"
 gem "rails", "7.1.3.4"
 gem "rake", "13.2.1"
 
-group :staging, :production do
-  source "https://gems.contribsys.com/" do
-    gem "sidekiq-pro", "~> 7.2"
-  end
-end
 
-group :development, :test do
-  gem "bundler"
-  gem "dotenv-rails", "~> 2.8"
-  gem "knapsack_pro", "~> 7.0"
-  gem "pry-byebug", "~> 3.10"
-  gem "pry-rails", "~> 0.3", require: "pry-rails/console"
-  gem "rubocop", "~> 1.65.0", require: false
-  gem "rubocop-rspec", "~> 3.0.0", require: false
-  gem "rubocop-performance", "~> 1.21.0", require: false
-  gem "rubocop-rake", "~> 0.6.0", require: false
-  gem "rubocop-rails", "~> 2.26.0", require: false
-  gem "active_record_query_trace", "~> 1.8"
-  gem "shoulda-matchers", "~> 6.0"
-  gem "spring", "~> 4.0"
-  gem "spring-commands-rspec", "~> 1.0"
-end
 
 group :test do
   gem "capybara", "~> 3.38"
@@ -52,11 +31,6 @@ group :test do
   gem "super_diff", "~> 0.12.0", require: false
 end
 
-group :deployer do
-  gem "byebug", "~> 11.1"
-  gem "colorize", "~> 1.0"
-  gem "dotenv", "~> 2.8"
-end
 
 gem "acme-client", "~> 2.0"
 gem "actionpack-action_caching", "~> 1.2"
@@ -199,5 +173,34 @@ gem "psych", "~> 5.2.3"
 
 group :development do
   gem "derailed_benchmarks", "~> 2.1"
-  gem 'bullet'
+end
+
+group :development, :test do
+  gem "bundler"
+  gem "dotenv-rails", "~> 2.8"
+  gem "knapsack_pro", "~> 7.0"
+  gem "pry-byebug", "~> 3.10"
+  gem "pry-rails", "~> 0.3", require: "pry-rails/console"
+  gem "rubocop", "~> 1.65.0", require: false
+  gem "rubocop-rspec", "~> 3.0.0", require: false
+  gem "rubocop-performance", "~> 1.21.0", require: false
+  gem "rubocop-rake", "~> 0.6.0", require: false
+  gem "rubocop-rails", "~> 2.26.0", require: false
+  gem "active_record_query_trace", "~> 1.8"
+  gem "shoulda-matchers", "~> 6.0"
+  gem "spring", "~> 4.0"
+  gem "spring-commands-rspec", "~> 1.0"
+  gem "bullet"
+end
+
+group :staging, :production do
+  source "https://gems.contribsys.com/" do
+    gem "sidekiq-pro", "~> 7.2"
+  end
+end
+
+group :deployer do
+  gem "byebug", "~> 11.1"
+  gem "colorize", "~> 1.0"
+  gem "dotenv", "~> 2.8"
 end
