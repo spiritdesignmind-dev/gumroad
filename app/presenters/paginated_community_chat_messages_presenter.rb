@@ -15,7 +15,7 @@ class PaginatedCommunityChatMessagesPresenter
   end
 
   def props
-    base_query = community.community_chat_messages.alive.includes(:community, user: :avatar_attachment)
+    base_query = community.community_chat_messages.alive.includes(user: :avatar_attachment)
     messages, next_older_timestamp, next_newer_timestamp = fetch_messages(base_query)
 
     {
