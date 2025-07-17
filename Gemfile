@@ -176,21 +176,21 @@ group :development do
 end
 
 group :development, :test do
+  gem "active_record_query_trace", "~> 1.8"
+  gem "bullet"
   gem "bundler"
   gem "dotenv-rails", "~> 2.8"
   gem "knapsack_pro", "~> 7.0"
   gem "pry-byebug", "~> 3.10"
   gem "pry-rails", "~> 0.3", require: "pry-rails/console"
   gem "rubocop", "~> 1.65.0", require: false
-  gem "rubocop-rspec", "~> 3.0.0", require: false
   gem "rubocop-performance", "~> 1.21.0", require: false
-  gem "rubocop-rake", "~> 0.6.0", require: false
   gem "rubocop-rails", "~> 2.26.0", require: false
-  gem "active_record_query_trace", "~> 1.8"
+  gem "rubocop-rake", "~> 0.6.0", require: false
+  gem "rubocop-rspec", "~> 3.0.0", require: false
   gem "shoulda-matchers", "~> 6.0"
   gem "spring", "~> 4.0"
   gem "spring-commands-rspec", "~> 1.0"
-  gem "bullet"
 end
 
 group :staging, :production do
