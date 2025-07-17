@@ -108,7 +108,7 @@ describe GenerateQuarterlySalesReportJob do
                                        "Seller Country",
                                        "Buyer Email", "Buyer Card",
                                        "Price", "Gumroad Fee", "GST",
-                                       "Shipping", "Total", "Customer Tax Number",
+                                       "Shipping", "Total",
                                        "Direct-To-Customer / Buy-Sell", "Zip Tax Rate ID", "Customer ABN Number"])
 
       expect(actual_payload[1]).to eq(["2015-01-01 00:00:00 UTC", @purchase2.external_id,
@@ -116,7 +116,7 @@ describe GenerateQuarterlySalesReportJob do
                                        nil,
                                        @purchase2.email&.gsub(/.{0,4}@/, '####@'), "**** **** **** 4242",
                                        "10000", "1370", "0",
-                                       "0", "10000", nil,
+                                       "0", "10000",
                                        "BS", nil, nil])
     end
 
@@ -138,7 +138,7 @@ describe GenerateQuarterlySalesReportJob do
                                        "Seller Country",
                                        "Buyer Email", "Buyer Card",
                                        "Price", "Gumroad Fee", "GST",
-                                       "Shipping", "Total", "Customer Tax Number",
+                                       "Shipping", "Total",
                                        "Direct-To-Customer / Buy-Sell", "Zip Tax Rate ID", "Customer GST Number"])
 
       expect(actual_payload[1]).to eq(["2015-01-01 00:00:00 UTC", @purchase4.external_id,
@@ -146,7 +146,7 @@ describe GenerateQuarterlySalesReportJob do
                                        nil,
                                        @purchase4.email&.gsub(/.{0,4}@/, '####@'), "**** **** **** 4242",
                                        "10000", "1370", "0",
-                                       "0", "10000", nil,
+                                       "0", "10000",
                                        "BS", nil, nil])
     end
 
