@@ -117,7 +117,7 @@ describe GenerateQuarterlySalesReportJob do
                                        @purchase2.email&.gsub(/.{0,4}@/, '####@'), "**** **** **** 4242",
                                        "10000", "1370", "0",
                                        "0", "10000",
-                                       "BS", nil, nil])
+                                       "BS", nil, @purchase2.purchase_sales_tax_info&.business_vat_id])
     end
 
     it "creates a CSV file for sales into Singapore" do
@@ -147,7 +147,7 @@ describe GenerateQuarterlySalesReportJob do
                                        @purchase4.email&.gsub(/.{0,4}@/, '####@'), "**** **** **** 4242",
                                        "10000", "1370", "0",
                                        "0", "10000",
-                                       "BS", nil, nil])
+                                       "BS", nil, @purchase4.purchase_sales_tax_info&.business_vat_id])
     end
 
     it "creates a CSV file for sales into the United Kingdom and does not send slack notification when send_notification is false",

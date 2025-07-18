@@ -35,7 +35,7 @@ class GenerateQuarterlySalesReportJob
                  purchase.shipping_cents, purchase.total_cents_net_of_refunds]
 
           if %w(AU SG).include?(country_code)
-            row += [purchase.link.is_physical? ? "DTC" : "BS", purchase.zip_tax_rate_id, purchase.gumroad_tax_cents_net_of_refunds == 0 ? purchase.purchase_sales_tax_info&.business_vat_id : nil]
+            row += [purchase.link.is_physical? ? "DTC" : "BS", purchase.zip_tax_rate_id, purchase.purchase_sales_tax_info&.business_vat_id]
           else
             row += [purchase.gumroad_tax_cents_net_of_refunds == 0 ? purchase.purchase_sales_tax_info&.business_vat_id : nil]
           end
