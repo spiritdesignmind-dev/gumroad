@@ -176,6 +176,86 @@ describe GenerateQuarterlySalesReportJob do
 
       expect(SlackMessageWorker).to have_enqueued_sidekiq_job("payments", "VAT Reporting", anything, "green")
     end
+
+    it "populates Customer Tax Number when no tax is charged for non-AU/SG countries" do
+      travel_to(Time.zone.local(2015, 1, 1)) do
+        product = create(:product, price_cents: 100_00, native_type: "digital")
+        purchase = create(:purchase_in_progress, link: product, country: "United Kingdom")
+        purchase.chargeable = create(:chargeable)
+        purchase.process!
+        purchase.update_balance_and_mark_successful!
+        
+        # Create purchase_sales_tax_info with business_vat_id
+        tax_info = create(:purchase_sales_tax_info, business_vat_id: "GB123456789")
+        purchase.update!(purchase_sales_tax_info: tax_info, gumroad_tax_cents_net_of_refunds: 0)
+
+        expect(s3_bucket_double).to receive(:object).ordered.and_return(@s3_object)
+
+        described_class.new.perform("GB", quarter, year)
+
+        temp_file = Tempfile.new("actual-file", encoding: "ascii-8bit")
+        @s3_object.get(response_target: temp_file)
+        temp_file.rewind
+        actual_payload = CSV.read(temp_file)
+
+        expect(actual_payload[0]).to include("Customer Tax Number")
+        expect(actual_payload[1].last).to eq("GB123456789")
+      end
+    end
+
+    it "leaves Customer Tax Number empty when tax is charged for non-AU/SG countries" do
+      travel_to(Time.zone.local(2015, 1, 1)) do
+        product = create(:product, price_cents: 100_00, native_type: "digital")
+        purchase = create(:purchase_in_progress, link: product, country: "United Kingdom")
+        purchase.chargeable = create(:chargeable)
+        purchase.process!
+        purchase.update_balance_and_mark_successful!
+        
+        # Create purchase_sales_tax_info with business_vat_id but tax is charged
+        tax_info = create(:purchase_sales_tax_info, business_vat_id: "GB123456789")
+        purchase.update!(purchase_sales_tax_info: tax_info, gumroad_tax_cents_net_of_refunds: 1000)
+
+        expect(s3_bucket_double).to receive(:object).ordered.and_return(@s3_object)
+
+        described_class.new.perform("GB", quarter, year)
+
+        temp_file = Tempfile.new("actual-file", encoding: "ascii-8bit")
+        @s3_object.get(response_target: temp_file)
+        temp_file.rewind
+        actual_payload = CSV.read(temp_file)
+
+        expect(actual_payload[0]).to include("Customer Tax Number")
+        expect(actual_payload[1].last).to be_nil
+      end
+    end
+
+    it "does not include Customer Tax Number column for AU reports" do
+      expect(s3_bucket_double).to receive(:object).ordered.and_return(@s3_object)
+
+      described_class.new.perform("AU", quarter, year)
+
+      temp_file = Tempfile.new("actual-file", encoding: "ascii-8bit")
+      @s3_object.get(response_target: temp_file)
+      temp_file.rewind
+      actual_payload = CSV.read(temp_file)
+
+      expect(actual_payload[0]).not_to include("Customer Tax Number")
+      expect(actual_payload[0]).to include("Customer ABN Number")
+    end
+
+    it "does not include Customer Tax Number column for SG reports" do
+      expect(s3_bucket_double).to receive(:object).ordered.and_return(@s3_object)
+
+      described_class.new.perform("SG", quarter, year)
+
+      temp_file = Tempfile.new("actual-file", encoding: "ascii-8bit")
+      @s3_object.get(response_target: temp_file)
+      temp_file.rewind
+      actual_payload = CSV.read(temp_file)
+
+      expect(actual_payload[0]).not_to include("Customer Tax Number")
+      expect(actual_payload[0]).to include("Customer GST Number")
+    end
   end
 
   describe "s3_prefix functionality", :vcr do
