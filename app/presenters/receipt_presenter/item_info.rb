@@ -278,19 +278,19 @@ class ReceiptPresenter::ItemInfo
 
     def installment_plan_note
       start_date = subscription.created_at.to_fs(:formatted_date_abbrev_month)
-      
+
       if subscription.charges_completed?
         total_amount = subscription.purchases.successful.sum(&:displayed_price_cents)
         formatted_total = purchase.format_price_in_currency(total_amount)
         payment_dates = subscription.purchases.successful.order(:created_at).map { |p| p.created_at.to_fs(:formatted_date_abbrev_month) }
-        
+
         "This is your final payment for your installment plan. You will not be charged again. " \
         "Payment dates: #{payment_dates.join(', ')}. Total amount paid: #{formatted_total}."
       else
         remaining_charges = subscription.remaining_charges_count
         final_charge_date = (subscription.purchases.successful.last&.created_at || subscription.created_at) + remaining_charges.months
         final_date = final_charge_date.to_fs(:formatted_date_abbrev_month)
-        
+
         "Installment plan initiated on #{start_date}. Your final charge will be on #{final_date}. " \
         "You can manage your payment settings #{link_to(
           "here",

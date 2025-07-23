@@ -319,11 +319,10 @@ describe "Product with installment plan", type: :feature, js: true do
       click_on "Pay"
 
       purchase = product.sales.last
-      subscription = purchase.subscription
-      
+
       receipt_presenter = ReceiptPresenter::ItemInfo.new(purchase)
       props = receipt_presenter.props
-      
+
       expect(props[:manage_subscription_note]).to include("Installment plan initiated on")
       expect(props[:manage_subscription_note]).to include("Your final charge will be on")
       expect(props[:manage_subscription_note]).to include("You can manage your payment settings")
@@ -332,7 +331,7 @@ describe "Product with installment plan", type: :feature, js: true do
 
       payment_info = ReceiptPresenter::PaymentInfo.new(purchase)
       today_payment_attrs = payment_info.today_payment_attributes
-      
+
       today_payment_label = today_payment_attrs.find { |attr| attr[:label]&.include?("Today's payment") }
       expect(today_payment_label[:label]).to eq("Today's payment: 1 of 3")
     end
@@ -345,17 +344,17 @@ describe "Product with installment plan", type: :feature, js: true do
 
       purchase = product.sales.last
       subscription = purchase.subscription
-      
+
       travel_to(1.month.from_now)
       RecurringChargeWorker.new.perform(subscription.id)
-      
+
       travel_to(1.month.from_now)
       RecurringChargeWorker.new.perform(subscription.id)
-      
+
       final_purchase = subscription.purchases.successful.last
       receipt_presenter = ReceiptPresenter::ItemInfo.new(final_purchase)
       props = receipt_presenter.props
-      
+
       expect(props[:manage_subscription_note]).to include("This is your final payment for your installment plan")
       expect(props[:manage_subscription_note]).to include("You will not be charged again")
       expect(props[:manage_subscription_note]).to include("Payment dates:")
@@ -363,7 +362,7 @@ describe "Product with installment plan", type: :feature, js: true do
 
       payment_info = ReceiptPresenter::PaymentInfo.new(final_purchase)
       today_payment_attrs = payment_info.today_payment_attributes
-      
+
       today_payment_label = today_payment_attrs.find { |attr| attr[:label]&.include?("Today's payment") }
       expect(today_payment_label[:label]).to eq("Today's payment: 3 of 3")
     end
