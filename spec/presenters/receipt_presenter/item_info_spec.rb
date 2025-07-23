@@ -614,6 +614,47 @@ describe ReceiptPresenter::ItemInfo do
           end
         end
 
+        context "when the subscription is an installment plan" do
+          let(:installment_plan) { create(:product_installment_plan, number_of_installments: 3) }
+          let(:product) { create(:product, installment_plan: installment_plan) }
+          let(:subscription) { create(:subscription, link: product, is_installment_plan: true, charge_occurrence_count: 3) }
+          let(:purchase) { create(:purchase, link: product, subscription: subscription) }
+
+          before do
+            allow(subscription).to receive(:is_installment_plan?).and_return(true)
+            allow(subscription).to receive(:charges_completed?).and_return(false)
+            allow(subscription).to receive(:remaining_charges_count).and_return(2)
+            allow(subscription).to receive(:created_at).and_return(Time.zone.parse("2024-01-15"))
+          end
+
+          it "returns installment plan note with start and end dates" do
+            url = Rails.application.routes.url_helpers.manage_subscription_url(
+              subscription.external_id,
+              host: UrlService.domain_with_protocol,
+            )
+            expected_note = "Installment plan initiated on Jan 15, 2024. Your final charge will be on Mar 15, 2024. " \
+                           "You can manage your payment settings <a target=\"_blank\" href=\"#{url}\">here</a>."
+            expect(props[:manage_subscription_note]).to eq(expected_note)
+          end
+
+          context "when it's the final payment" do
+            before do
+              allow(subscription).to receive(:charges_completed?).and_return(true)
+              successful_purchases = double("successful_purchases")
+              allow(subscription).to receive_message_chain(:purchases, :successful).and_return(successful_purchases)
+              allow(successful_purchases).to receive(:sum).and_return(3000)
+              allow(successful_purchases).to receive_message_chain(:order, :map).and_return(["Jan 15, 2024", "Feb 15, 2024", "Mar 15, 2024"])
+              allow(purchase).to receive(:format_price_in_currency).with(3000).and_return("$30.00")
+            end
+
+            it "returns final payment note with payment history" do
+              expected_note = "This is your final payment for your installment plan. You will not be charged again. " \
+                             "Payment dates: Jan 15, 2024, Feb 15, 2024, Mar 15, 2024. Total amount paid: $30.00."
+              expect(props[:manage_subscription_note]).to eq(expected_note)
+            end
+          end
+        end
+
         context "when the subscription is a gift" do
           before do
             allow(purchase.subscription).to receive(:gift?).and_return(true)
@@ -622,7 +663,7 @@ describe ReceiptPresenter::ItemInfo do
 
           context "when the purchase is a gift sender purchase" do
             it "returns gift subscription note" do
-              note = "Note that giftee@gumroad.com’s membership will not automatically renew."
+              note = "Note that giftee@gumroad.com's membership will not automatically renew."
               expect(props[:manage_subscription_note]).to eq(note)
             end
           end

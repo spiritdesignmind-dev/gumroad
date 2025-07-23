@@ -257,18 +257,49 @@ class ReceiptPresenter::ItemInfo
         return if purchase.is_gift_receiver_purchase && subscription.credit_card_id.blank?
         return gift_subscription_renewal_note if subscription.gift? && subscription.credit_card_id.blank?
 
-        "You will be charged once #{recurrence_long_indicator(subscription.recurrence)}. If you would like to manage your membership you can visit #{link_to(
-            "subscription settings",
-            Rails.application.routes.url_helpers.manage_subscription_url(
-              subscription.external_id,
-              { host: UrlService.domain_with_protocol },
-            ),
-            target: "_blank"
-          )}.".html_safe
+        if subscription.is_installment_plan?
+          installment_plan_note
+        else
+          "You will be charged once #{recurrence_long_indicator(subscription.recurrence)}. If you would like to manage your membership you can visit #{link_to(
+              "subscription settings",
+              Rails.application.routes.url_helpers.manage_subscription_url(
+                subscription.external_id,
+                { host: UrlService.domain_with_protocol },
+              ),
+              target: "_blank"
+            )}.".html_safe
+        end
       end
     end
 
     def gift_subscription_renewal_note
-      "Note that #{purchase.giftee_name_or_email}’s membership will not automatically renew."
+      "Note that #{purchase.giftee_name_or_email}'s membership will not automatically renew."
+    end
+
+    def installment_plan_note
+      start_date = subscription.created_at.to_fs(:formatted_date_abbrev_month)
+      
+      if subscription.charges_completed?
+        total_amount = subscription.purchases.successful.sum(&:displayed_price_cents)
+        formatted_total = purchase.format_price_in_currency(total_amount)
+        payment_dates = subscription.purchases.successful.order(:created_at).map { |p| p.created_at.to_fs(:formatted_date_abbrev_month) }
+        
+        "This is your final payment for your installment plan. You will not be charged again. " \
+        "Payment dates: #{payment_dates.join(', ')}. Total amount paid: #{formatted_total}."
+      else
+        remaining_charges = subscription.remaining_charges_count
+        final_charge_date = (subscription.purchases.successful.last&.created_at || subscription.created_at) + remaining_charges.months
+        final_date = final_charge_date.to_fs(:formatted_date_abbrev_month)
+        
+        "Installment plan initiated on #{start_date}. Your final charge will be on #{final_date}. " \
+        "You can manage your payment settings #{link_to(
+          "here",
+          Rails.application.routes.url_helpers.manage_subscription_url(
+            subscription.external_id,
+            { host: UrlService.domain_with_protocol }
+          ),
+          target: "_blank"
+        )}.".html_safe
+      end
     end
 end

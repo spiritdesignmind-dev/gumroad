@@ -129,6 +129,27 @@ describe ReceiptPresenter::PaymentInfo do
             )
           end
 
+          context "when subscription is an installment plan" do
+            before do
+              allow(purchase.subscription).to receive(:is_installment_plan?).and_return(true)
+              allow(purchase.subscription).to receive(:charge_occurrence_count).and_return(3)
+              allow(purchase.subscription).to receive_message_chain(:purchases, :successful, :count).and_return(2)
+            end
+
+            it "returns pricing attributes with installment numbers in today's payment label" do
+              expect(today_payment_attributes).to eq(
+                [
+                  { label: "Today's payment: 2 of 3", value: nil },
+                  { label: "Membership product", value: "$17.44" },
+                  { label: "Shipping", value: "$4.99" },
+                  { label: "Sales tax (included)", value: "$2.54" },
+                  { label: "Amount paid", value: "$24.97" },
+                  { label: nil, value: link_to("Generate invoice", invoice_url) },
+                ]
+              )
+            end
+          end
+
           context "when the purchase is in EUR" do
             before do
               purchase.link.update!(price_currency_type: Currency::EUR)
@@ -278,6 +299,24 @@ describe ReceiptPresenter::PaymentInfo do
                   { label: "Membership product", value: "$19.98 on Feb 1, 2023" },
                 ]
               )
+            end
+
+            context "when subscription is an installment plan" do
+              before do
+                allow(purchase.subscription).to receive(:is_installment_plan?).and_return(true)
+                allow(purchase.subscription).to receive(:charge_occurrence_count).and_return(3)
+                allow(purchase.subscription).to receive_message_chain(:purchases, :successful, :count).and_return(1)
+              end
+
+              it "returns upcoming payment attributes with installment numbers" do
+                purchase.subscription.original_purchase.reload
+                expect(upcoming_payment_attributes).to eq(
+                  [
+                    { label: "Upcoming payment: 2 of 3", value: nil },
+                    { label: "Membership product", value: "$19.98 on Feb 1, 2023" },
+                  ]
+                )
+              end
             end
           end
 

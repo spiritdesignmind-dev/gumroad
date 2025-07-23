@@ -114,4 +114,31 @@ describe "Installment Plans", type: :feature, js: true do
         .and change { subscription.reload.credit_card }.from(credit_card).to(be_present)
     end
   end
+
+  describe "receipt copy verification" do
+    include_context "setup installment plan subscription"
+
+    it "displays correct installment plan copy in receipt emails" do
+      receipt_presenter = ReceiptPresenter::ItemInfo.new(purchase)
+      props = receipt_presenter.props
+      
+      expect(props[:manage_subscription_note]).to include("Installment plan initiated on")
+      expect(props[:manage_subscription_note]).to include("Your final charge will be on")
+      expect(props[:manage_subscription_note]).to include("You can manage your payment settings")
+      expect(props[:manage_subscription_note]).not_to include("You will be charged once a month")
+      expect(props[:manage_subscription_note]).not_to include("subscription settings")
+    end
+
+    it "displays correct payment labels with installment numbers" do
+      payment_info = ReceiptPresenter::PaymentInfo.new(purchase)
+      today_payment_attrs = payment_info.today_payment_attributes
+      upcoming_payment_attrs = payment_info.upcoming_payment_attributes
+      
+      today_payment_label = today_payment_attrs.find { |attr| attr[:label]&.include?("Today's payment") }
+      upcoming_payment_label = upcoming_payment_attrs.find { |attr| attr[:label]&.include?("Upcoming payment") }
+      
+      expect(today_payment_label[:label]).to eq("Today's payment: 1 of 3")
+      expect(upcoming_payment_label[:label]).to eq("Upcoming payment: 2 of 3")
+    end
+  end
 end

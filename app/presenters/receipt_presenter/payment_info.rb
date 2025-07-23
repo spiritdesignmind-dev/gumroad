@@ -153,8 +153,16 @@ class ReceiptPresenter::PaymentInfo
     def today_payment_heading_attribute
       return unless any_upcoming_payments?
 
+      label = if chargeable.subscription&.is_installment_plan?
+        current_installment = chargeable.subscription.purchases.successful.count
+        total_installments = chargeable.subscription.charge_occurrence_count
+        "Today's payment: #{current_installment} of #{total_installments}"
+      else
+        "Today's payment"
+      end
+
       {
-        label: "Today's payment",
+        label: label,
         value: nil
       }
     end
@@ -217,8 +225,17 @@ class ReceiptPresenter::PaymentInfo
     end
 
     def upcoming_payment_heading_attribute
+      label = if chargeable.subscription&.is_installment_plan?
+        current_installment = chargeable.subscription.purchases.successful.count
+        total_installments = chargeable.subscription.charge_occurrence_count
+        next_installment = current_installment + 1
+        "Upcoming payment: #{next_installment} of #{total_installments}"
+      else
+        "Upcoming #{"payment".pluralize(upcoming_price_attributes.size)}"
+      end
+
       {
-        label: "Upcoming #{"payment".pluralize(upcoming_price_attributes.size)}",
+        label: label,
         value: nil
       }
     end
