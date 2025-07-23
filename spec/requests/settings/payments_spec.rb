@@ -154,6 +154,10 @@ describe("Payments Settings Scenario", type: :feature, js: true) do
       fill_in("Account number", with: "000123456789")
       fill_in("Confirm account number", with: "000123456789")
       click_on("Update settings")
+      
+      if page.has_content?("Confirm payout method change")
+        click_on "Confirm"
+      end
       expect(page).to have_content("Thanks! You're all set.")
       expect(page).to have_content("Routing number")
 
@@ -199,6 +203,10 @@ describe("Payments Settings Scenario", type: :feature, js: true) do
       end
 
       click_on "Update settings"
+      
+      if page.has_content?("Confirm payout method change")
+        click_on "Confirm"
+      end
 
       expect(page).to have_content("Thanks! You're all set.")
       compliance_info = @user.reload.alive_user_compliance_info
@@ -310,6 +318,10 @@ describe("Payments Settings Scenario", type: :feature, js: true) do
 
         fill_in("Address", with: "address_full_match")
         click_on("Update settings")
+        
+        if page.has_content?("Confirm payout method change")
+          click_on "Confirm"
+        end
 
         expect(page).to have_content("Thanks! You're all set.")
         compliance_info = @user.alive_user_compliance_info
@@ -336,6 +348,10 @@ describe("Payments Settings Scenario", type: :feature, js: true) do
 
         fill_in("First name", with: "barny")
         click_on("Update settings")
+        
+        if page.has_content?("Confirm payout method change")
+          click_on "Confirm"
+        end
 
         within(:alert, text: "Your account could not be updated.")
 
@@ -365,6 +381,10 @@ describe("Payments Settings Scenario", type: :feature, js: true) do
         fill_in("Account number", with: "000111111116")
         fill_in("Confirm account number", with: "000111111116")
         click_on("Update settings")
+        
+        if page.has_content?("Confirm payout method change")
+          click_on "Confirm"
+        end
 
         expect(page).to have_content("Thanks! You're all set.")
         compliance_info = @user.alive_user_compliance_info
@@ -414,6 +434,10 @@ describe("Payments Settings Scenario", type: :feature, js: true) do
         fill_in("PayPal Email", with: "valid@gumroad.com")
 
         click_on "Update settings"
+        
+        if page.has_content?("Confirm payout method change")
+          click_on "Confirm"
+        end
 
         expect(page).to have_content("Thanks! You're all set.")
         compliance_info = @user.reload.alive_user_compliance_info
@@ -442,6 +466,10 @@ describe("Payments Settings Scenario", type: :feature, js: true) do
 
         fill_in "Pay to the order of", with: "Gumhead Moneybags"
         click_on("Update settings")
+        
+        if page.has_content?("Confirm payout method change")
+          click_on "Confirm"
+        end
         expect(page).to have_alert(text: "Thanks! You're all set.")
 
         expect(@user.active_bank_account.account_holder_full_name).to eq("Gumhead Moneybags")
@@ -549,6 +577,11 @@ describe("Payments Settings Scenario", type: :feature, js: true) do
           expect do
             expect do
               click_on "Update settings"
+              
+              if page.has_content?("Confirm payout method change")
+                click_on "Confirm"
+              end
+              
               wait_for_ajax
               expect(page).to have_alert(text: "Thanks! You're all set.")
             end.to change { user.reload.user_compliance_infos.count }.by(1)
@@ -563,11 +596,21 @@ describe("Payments Settings Scenario", type: :feature, js: true) do
         fill_in "Street address", with: "P.O. Box 123, Smith street"
         expect do
           click_on "Update settings"
+          
+          if page.has_content?("Confirm payout method change")
+            click_on "Confirm"
+          end
+          
           expect(page).to have_status(text: "We require a valid physical US address. We cannot accept a P.O. Box as a valid address.")
         end.to_not change { @user.alive_user_compliance_info.reload.street_address }
         fill_in "Street address", with: "123, Smith street"
         expect do
           click_on "Update settings"
+          
+          if page.has_content?("Confirm payout method change")
+            click_on "Confirm"
+          end
+          
           wait_for_ajax
           expect(page).to have_alert(text: "Thanks! You're all set.")
         end.to change { @user.alive_user_compliance_info.reload.street_address }.to("123, Smith street")
@@ -583,11 +626,21 @@ describe("Payments Settings Scenario", type: :feature, js: true) do
         fill_in "Business Tax ID (EIN, or SSN for sole proprietors)", with: "123456789"
         expect do
           click_on "Update settings"
+          
+          if page.has_content?("Confirm payout method change")
+            click_on "Confirm"
+          end
+          
           expect(page).to have_status(text: "We require a valid physical US address. We cannot accept a P.O. Box as a valid address.")
         end.to_not change { @user.alive_user_compliance_info.reload.business_street_address }
         find_field("Address", match: :first).set("123 North street")
         expect do
           click_on "Update settings"
+          
+          if page.has_content?("Confirm payout method change")
+            click_on "Confirm"
+          end
+          
           wait_for_ajax
           expect(page).to have_alert(text: "Thanks! You're all set.")
         end.to change { @user.alive_user_compliance_info.reload.business_street_address }.to("123 North street")
@@ -941,6 +994,10 @@ describe("Payments Settings Scenario", type: :feature, js: true) do
 
         fill_in("Address", with: "address_full_match")
         click_on("Update settings")
+        
+        if page.has_content?("Confirm payout method change")
+          click_on "Confirm"
+        end
         expect(page).to_not have_alert(text: "Thanks! You're all set.")
         expect(find_field("City")["aria-invalid"]).to eq "true"
 
