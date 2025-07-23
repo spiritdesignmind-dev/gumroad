@@ -415,8 +415,12 @@ const CustomersPage = ({
               />
               <input type="hidden" name="start_time" value={lightFormat(from, "yyyy-MM-dd")} />
               <input type="hidden" name="end_time" value={lightFormat(to, "yyyy-MM-dd")} />
-              <input type="hidden" name="product_ids" value={includedProductIds.join(",")} />
-              <input type="hidden" name="variant_ids" value={includedVariantIds.join(",")} />
+              {includedProductIds.map((id, index) => (
+                <input key={`product-${index}`} type="hidden" name="product_ids[]" value={id} />
+              ))}
+              {includedVariantIds.map((id, index) => (
+                <input key={`variant-${index}`} type="hidden" name="variant_ids[]" value={id} />
+              ))}
 
               <div>
                 <h3>Download sales as CSV</h3>
