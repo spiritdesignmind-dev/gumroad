@@ -397,27 +397,40 @@ const CustomersPage = ({
               </WithTooltip>
             }
           >
-            <div className="paragraphs">
-              <h3>Download sales as CSV</h3>
+            <form
+              action={Routes.export_purchases_path({ format: "csv" })}
+              acceptCharset="UTF-8"
+              method="post"
+              style={{ display: "grid", gap: "var(--spacer-3)" }}
+            >
+              <input type="hidden" name="utf8" value="✓" />
+              <input
+                type="hidden"
+                name="authenticity_token"
+                value={
+                  typeof document !== "undefined"
+                    ? document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || ""
+                    : ""
+                }
+              />
+              <input type="hidden" name="start_time" value={lightFormat(from, "yyyy-MM-dd")} />
+              <input type="hidden" name="end_time" value={lightFormat(to, "yyyy-MM-dd")} />
+              <input type="hidden" name="product_ids" value={includedProductIds.join(",")} />
+              <input type="hidden" name="variant_ids" value={includedVariantIds.join(",")} />
+
               <div>
-                {exportNames
-                  ? `This will download sales of '${exportNames}' as a CSV, with each purchase on its own row.`
-                  : "This will download a CSV with each purchase on its own row."}
+                <h3>Download sales as CSV</h3>
+                <div>
+                  {exportNames
+                    ? `This will download sales of '${exportNames}' as a CSV, with each purchase on its own row.`
+                    : "This will download a CSV with each purchase on its own row."}
+                </div>
               </div>
               <DateRangePicker from={from} to={to} setFrom={setFrom} setTo={setTo} />
-              <NavigationButton
-                color="primary"
-                href={Routes.export_purchases_path({
-                  format: "csv",
-                  start_time: lightFormat(from, "yyyy-MM-dd"),
-                  end_time: lightFormat(to, "yyyy-MM-dd"),
-                  product_ids: includedProductIds,
-                  variant_ids: includedVariantIds,
-                })}
-              >
+              <Button type="submit" color="primary">
                 Download
-              </NavigationButton>
-            </div>
+              </Button>
+            </form>
           </Popover>
         </div>
       </header>
