@@ -177,7 +177,7 @@ module Product::Searchable
                   term rated_as_adult: false
                 end
               end
-              
+
               compliant_user_ids = User.compliant.pluck(:id)
               if compliant_user_ids.any?
                 must do
