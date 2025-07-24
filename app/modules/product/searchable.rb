@@ -177,6 +177,19 @@ module Product::Searchable
                   term rated_as_adult: false
                 end
               end
+              
+              must do
+                range :sales_count do
+                  gt 0
+                end
+              end
+              
+              compliant_user_ids = User.compliant.pluck(:id)
+              if compliant_user_ids.any?
+                must do
+                  terms user_id: compliant_user_ids
+                end
+              end
             end
 
             if !params[:is_alive_on_profile].nil?
@@ -481,6 +494,7 @@ module Product::Searchable
       when "total_fee_cents" then total_fee_cents(created_after: DEFAULT_SALES_VOLUME_RECENTNESS.ago)
       when "past_year_fee_cents" then total_fee_cents(created_after: 1.year.ago)
       when "staff_picked_at" then staff_picked_at
+      when "sales_count" then successful_sales_count
       else
         raise "Error building search properties. #{attribute_key} is not a valid property"
       end
