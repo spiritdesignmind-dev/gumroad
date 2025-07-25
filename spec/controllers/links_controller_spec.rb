@@ -4299,13 +4299,13 @@ describe LinksController, :vcr do
       describe "Loose and exact matching" do
         before do
           @products = {
-            name: create(:product, name: "North American river otter"),
-            desc: create(:product, description: "The North American river otter, also known as the northern river otter or the common otter, is a semiaquatic mammal."),
-            creator: create(:product, user: create(:user, name: "Brig. Gen. W. North American River Otter III")),
-            inexact: create(:product, description: "An American otter is found in the north river."),
-            partial: create(:product, name: "Just an ordinary otter"),
-            cross_field: create(:product, name: "River otter", description: "Animals of this description are common and live in the North and the South of the American and European continents."),
-            tagged: create(:product, name: "River otter")
+            name: create(:product, name: "North American river otter", user: create(:recommendable_user)),
+            desc: create(:product, description: "The North American river otter, also known as the northern river otter or the common otter, is a semiaquatic mammal.", user: create(:recommendable_user)),
+            creator: create(:product, user: create(:recommendable_user, name: "Brig. Gen. W. North American River Otter III")),
+            inexact: create(:product, description: "An American otter is found in the north river.", user: create(:recommendable_user)),
+            partial: create(:product, name: "Just an ordinary otter", user: create(:recommendable_user)),
+            cross_field: create(:product, name: "River otter", description: "Animals of this description are common and live in the North and the South of the American and European continents.", user: create(:recommendable_user)),
+            tagged: create(:product, name: "River otter", user: create(:recommendable_user))
           }
           @products[:tagged].tag!("North American")
           @products[:tagged].tag!("common")
