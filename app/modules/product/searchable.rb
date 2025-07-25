@@ -178,7 +178,7 @@ module Product::Searchable
                   term rated_as_adult: false
                 end
               end
-              
+
               must do
                 term creator_risk_state: "compliant"
               end
