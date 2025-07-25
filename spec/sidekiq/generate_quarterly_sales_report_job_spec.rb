@@ -177,7 +177,8 @@ describe GenerateQuarterlySalesReportJob do
       expect(SlackMessageWorker).to have_enqueued_sidekiq_job("payments", "VAT Reporting", anything, "green")
     end
 
-    it "populates Customer Tax Number when no tax is charged for non-AU/SG countries" do
+    it "populates Customer Tax Number when no tax is charged for non-AU/SG countries",
+       vcr: { cassette_name: "GenerateQuarterlySalesReportJob/happy_case/creates_a_CSV_file_for_sales_into_the_United_Kingdom" } do
       # Modify existing UK purchase to have business_vat_id and no tax
       tax_info = create(:purchase_sales_tax_info, business_vat_id: "GB123456789")
       @purchase1.update!(purchase_sales_tax_info: tax_info, gumroad_tax_cents_net_of_refunds: 0)
@@ -197,7 +198,8 @@ describe GenerateQuarterlySalesReportJob do
       expect(purchase1_row.last).to eq("GB123456789")
     end
 
-    it "leaves Customer Tax Number empty when tax is charged for non-AU/SG countries" do
+    it "leaves Customer Tax Number empty when tax is charged for non-AU/SG countries",
+       vcr: { cassette_name: "GenerateQuarterlySalesReportJob/happy_case/creates_a_CSV_file_for_sales_into_the_United_Kingdom" } do
       # Modify existing UK purchase to have business_vat_id but with tax charged
       tax_info = create(:purchase_sales_tax_info, business_vat_id: "GB123456789")
       @purchase3.update!(purchase_sales_tax_info: tax_info, gumroad_tax_cents_net_of_refunds: 1000)
@@ -217,7 +219,8 @@ describe GenerateQuarterlySalesReportJob do
       expect(purchase3_row.last).to be_nil
     end
 
-    it "does not include Customer Tax Number column for AU reports" do
+    it "does not include Customer Tax Number column for AU reports",
+       vcr: { cassette_name: "GenerateQuarterlySalesReportJob/happy_case/creates_a_CSV_file_for_sales_into_Australia" } do
       expect(s3_bucket_double).to receive(:object).ordered.and_return(@s3_object)
 
       described_class.new.perform("AU", quarter, year)
@@ -231,7 +234,8 @@ describe GenerateQuarterlySalesReportJob do
       expect(actual_payload[0]).to include("Customer ABN Number")
     end
 
-    it "does not include Customer Tax Number column for SG reports" do
+    it "does not include Customer Tax Number column for SG reports",
+       vcr: { cassette_name: "GenerateQuarterlySalesReportJob/happy_case/creates_a_CSV_file_for_sales_into_Singapore" } do
       expect(s3_bucket_double).to receive(:object).ordered.and_return(@s3_object)
 
       described_class.new.perform("SG", quarter, year)
