@@ -46,7 +46,6 @@ module Product::Searchable
     total_fee_cents
     past_year_fee_cents
     staff_picked_at
-    creator_risk_state
   ] + ATTRIBUTE_TO_SEARCH_FIELDS_MAP.values.flatten)
 
   MAX_PARTIAL_SEARCH_RESULTS = 5
@@ -179,8 +178,8 @@ module Product::Searchable
                 end
               end
 
-              must do
-                term creator_risk_state: "compliant"
+              must_not do
+                terms user_id: User.where.not(user_risk_state: "compliant").pluck(:id)
               end
             end
 
@@ -486,7 +485,6 @@ module Product::Searchable
       when "total_fee_cents" then total_fee_cents(created_after: DEFAULT_SALES_VOLUME_RECENTNESS.ago)
       when "past_year_fee_cents" then total_fee_cents(created_after: 1.year.ago)
       when "staff_picked_at" then staff_picked_at
-      when "creator_risk_state" then user.user_risk_state
       else
         raise "Error building search properties. #{attribute_key} is not a valid property"
       end
