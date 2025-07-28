@@ -60,9 +60,7 @@ type Props = {
   };
   activity_items: ActivityItem[];
   stripe_verification_message?: string | null;
-  tax_forms: {
-    [year: number]: string;
-  };
+  tax_forms: Record<number, string>;
   show_1099_download_notice: boolean;
 };
 type TableProps = { sales: ProductRow[] };

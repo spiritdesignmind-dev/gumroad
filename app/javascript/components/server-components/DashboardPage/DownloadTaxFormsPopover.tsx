@@ -2,23 +2,18 @@ import * as React from "react";
 
 import { Button } from "$app/components/Button";
 import { Icon } from "$app/components/Icons";
-import { LoadingSpinner } from "$app/components/LoadingSpinner";
 import { Popover } from "$app/components/Popover";
 import { showAlert } from "$app/components/server-components/Alert";
 
 type Props = {
-  taxForms: {
-    [year: number]: string;
-  };
+  taxForms: Record<number, string>;
 };
 
 export const DownloadTaxFormsPopover = ({ taxForms }: Props) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [isDownloading, setIsDownloading] = React.useState(false);
   const [selectedYears, setSelectedYears] = React.useState<Set<number>>(new Set());
 
   const handleDownload = () => {
-    setIsDownloading(true);
     try {
       if (selectedYears.size === 0) {
         showAlert("Please select at least one tax year to download.", "error");
@@ -31,7 +26,6 @@ export const DownloadTaxFormsPopover = ({ taxForms }: Props) => {
     } catch {
       showAlert("Sorry, something went wrong. Please try again.", "error");
     }
-    setIsDownloading(false);
   };
 
   const toggleSelectAll = () => {
@@ -92,11 +86,11 @@ export const DownloadTaxFormsPopover = ({ taxForms }: Props) => {
               </section>
 
               <footer className="flex gap-4">
-                <Button className="flex-1" disabled={isDownloading} onClick={toggleSelectAll}>
+                <Button className="flex-1" onClick={toggleSelectAll}>
                   {selectedYears.size === Object.keys(taxForms).length ? "Deselect all" : "Select all"}
                 </Button>
-                <Button className="flex-1" color="primary" disabled={isDownloading} onClick={handleDownload}>
-                  {isDownloading ? <LoadingSpinner /> : "Download"}
+                <Button className="flex-1" color="primary" disabled={selectedYears.size === 0} onClick={handleDownload}>
+                  Download
                 </Button>
               </footer>
             </>

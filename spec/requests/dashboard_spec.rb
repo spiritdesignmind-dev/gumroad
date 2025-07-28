@@ -139,6 +139,7 @@ describe "Dashboard", js: true, type: :feature do
 
   describe "tax form download notice" do
     before do
+      freeze_time
       seller.update!(created_at: 1.year.ago)
     end
 
@@ -167,6 +168,7 @@ describe "Dashboard", js: true, type: :feature do
     download_url = "https://s3.amazonaws.com/gumroad-specs/attachments/23b2d41ac63a40b5afa1a99bf38a0982/original/nyt.pdf"
 
     before do
+      freeze_time
       seller.update!(created_at: 1.year.ago)
       allow(seller).to receive(:eligible_for_1099?).and_return(true)
       allow(seller).to receive(:tax_form_1099_download_url).and_return(download_url)
@@ -189,7 +191,7 @@ describe "Dashboard", js: true, type: :feature do
       expect(page).to have_unchecked_field(Time.current.prev_year.year.to_s)
     end
 
-    it "allows selecting all yearsand deselecting all years" do
+    it "allows selecting all years and deselecting all years" do
       visit dashboard_path
 
       click_button("Tax forms")
