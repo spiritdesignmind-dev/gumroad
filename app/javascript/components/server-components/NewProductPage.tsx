@@ -115,112 +115,116 @@ const NewProductPage = ({
       </header>
       <main>
         <div>
-        <form id={`new-product-form-${formUID}`} className="row" onSubmit={(e) => void submit(e)}>
-          <section>
-            <header>
-              <p>
-                Turn your idea into a live product in minutes. No fuss, just a few quick selections and you're ready to
-                start selling. Whether it's digital downloads, online courses, or memberships — see what sticks.
-                <br />
-                <br />
-                <a data-helper-prompt="What kind of products can I sell on Gumroad?">Need help adding a product?</a>
-              </p>
-            </header>
+          <form id={`new-product-form-${formUID}`} className="row" onSubmit={(e) => void submit(e)}>
+            <section>
+              <header>
+                <p>
+                  Turn your idea into a live product in minutes. No fuss, just a few quick selections and you're ready
+                  to start selling. Whether it's digital downloads, online courses, or memberships — see what sticks.
+                  <br />
+                  <br />
+                  <a data-helper-prompt="What kind of products can I sell on Gumroad?">Need help adding a product?</a>
+                </p>
+              </header>
 
-            <fieldset className={cx({ danger: errors.has("name") })}>
-              <legend>
-                <label htmlFor={`name-${formUID}`}>Name</label>
-              </legend>
-
-              <input
-                ref={nameInputRef}
-                id={`name-${formUID}`}
-                type="text"
-                placeholder="Name of product"
-                onChange={(e) => {
-                  setName(e.target.value);
-                  errors.delete("name");
-                }}
-                aria-invalid={errors.has("name")}
-              />
-            </fieldset>
-
-            <fieldset>
-              <legend>Products</legend>
-              <ProductTypeSelector selectedType={productType} types={native_product_types} onChange={setProductType} />
-            </fieldset>
-            {service_product_types.length > 0 ? (
-              <fieldset>
-                <legend>Services</legend>
-                <ProductTypeSelector
-                  selectedType={productType}
-                  types={service_product_types}
-                  onChange={setProductType}
-                  disabled={!eligible_for_service_products}
-                />
-              </fieldset>
-            ) : null}
-
-            <fieldset className={cx({ danger: errors.has("price") })}>
-              <legend>
-                <label htmlFor={`price-${formUID}`}>{productType === "coffee" ? "Suggested amount" : "Price"}</label>
-              </legend>
-
-              <div className="input">
-                <label className="pill select">
-                  <span>{selectedCurrency.longSymbol}</span>
-                  <TypeSafeOptionSelect
-                    onChange={(newCurrencyCode) => {
-                      setCurrencyCode(newCurrencyCode);
-                    }}
-                    value={currencyCode}
-                    aria-label="Currency"
-                    options={currencyCodeList.map((code) => {
-                      const { displayFormat } = findCurrencyByCode(code);
-                      return {
-                        id: code,
-                        label: displayFormat,
-                      };
-                    })}
-                  />
-                </label>
+              <fieldset className={cx({ danger: errors.has("name") })}>
+                <legend>
+                  <label htmlFor={`name-${formUID}`}>Name</label>
+                </legend>
 
                 <input
-                  ref={priceInputRef}
-                  id={`price-${formUID}`}
+                  ref={nameInputRef}
+                  id={`name-${formUID}`}
                   type="text"
-                  maxLength={10}
-                  placeholder="Price your product"
-                  value={price}
+                  placeholder="Name of product"
                   onChange={(e) => {
-                    setPrice(e.target.value);
-                    errors.delete("price");
+                    setName(e.target.value);
+                    errors.delete("name");
                   }}
-                  autoComplete="off"
-                  aria-invalid={errors.has("price")}
+                  aria-invalid={errors.has("name")}
                 />
+              </fieldset>
 
-                {isRecurringBilling ? (
-                  <label className="pill select" style={{ border: "unset" }}>
-                    <span>{recurrenceLabels[subscriptionDuration || defaultRecurrence]}</span>
+              <fieldset>
+                <legend>Products</legend>
+                <ProductTypeSelector
+                  selectedType={productType}
+                  types={native_product_types}
+                  onChange={setProductType}
+                />
+              </fieldset>
+              {service_product_types.length > 0 ? (
+                <fieldset>
+                  <legend>Services</legend>
+                  <ProductTypeSelector
+                    selectedType={productType}
+                    types={service_product_types}
+                    onChange={setProductType}
+                    disabled={!eligible_for_service_products}
+                  />
+                </fieldset>
+              ) : null}
+
+              <fieldset className={cx({ danger: errors.has("price") })}>
+                <legend>
+                  <label htmlFor={`price-${formUID}`}>{productType === "coffee" ? "Suggested amount" : "Price"}</label>
+                </legend>
+
+                <div className="input">
+                  <label className="pill select">
+                    <span>{selectedCurrency.longSymbol}</span>
                     <TypeSafeOptionSelect
-                      onChange={(newSubscriptionDuration) => {
-                        setSubscriptionDuration(newSubscriptionDuration);
+                      onChange={(newCurrencyCode) => {
+                        setCurrencyCode(newCurrencyCode);
                       }}
-                      value={subscriptionDuration || defaultRecurrence}
-                      aria-label="Default subscription duration"
-                      options={recurrenceIds.map((recurrence) => ({
-                        id: recurrence,
-                        label: recurrenceLabels[recurrence],
-                      }))}
+                      value={currencyCode}
+                      aria-label="Currency"
+                      options={currencyCodeList.map((code) => {
+                        const { displayFormat } = findCurrencyByCode(code);
+                        return {
+                          id: code,
+                          label: displayFormat,
+                        };
+                      })}
                     />
                   </label>
-                ) : null}
-              </div>
-            </fieldset>
-          </section>
-        </form>
-      </div>
+
+                  <input
+                    ref={priceInputRef}
+                    id={`price-${formUID}`}
+                    type="text"
+                    maxLength={10}
+                    placeholder="Price your product"
+                    value={price}
+                    onChange={(e) => {
+                      setPrice(e.target.value);
+                      errors.delete("price");
+                    }}
+                    autoComplete="off"
+                    aria-invalid={errors.has("price")}
+                  />
+
+                  {isRecurringBilling ? (
+                    <label className="pill select" style={{ border: "unset" }}>
+                      <span>{recurrenceLabels[subscriptionDuration || defaultRecurrence]}</span>
+                      <TypeSafeOptionSelect
+                        onChange={(newSubscriptionDuration) => {
+                          setSubscriptionDuration(newSubscriptionDuration);
+                        }}
+                        value={subscriptionDuration || defaultRecurrence}
+                        aria-label="Default subscription duration"
+                        options={recurrenceIds.map((recurrence) => ({
+                          id: recurrence,
+                          label: recurrenceLabels[recurrence],
+                        }))}
+                      />
+                    </label>
+                  ) : null}
+                </div>
+              </fieldset>
+            </section>
+          </form>
+        </div>
       </main>
     </>
   );
