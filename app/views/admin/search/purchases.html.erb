@@ -1,5 +1,53 @@
 <%= load_pack("admin_review") %>
 
+<div class="paragraphs" style="margin-bottom: var(--spacer-4);">
+  <form action="<%= admin_search_purchases_path %>" method="get" style="display: grid; gap: var(--spacer-3); grid-template-columns: 1fr 1fr 1fr auto auto;">
+    <input type="hidden" name="query" value="<%= params[:query] %>" />
+    
+    <div class="input">
+      <input
+        name="product_name"
+        placeholder="Product name"
+        type="text"
+        value="<%= params[:product_name] %>"
+      />
+    </div>
+    
+    <div class="input">
+      <input
+        name="date_from"
+        placeholder="From date (YYYY-MM-DD)"
+        type="date"
+        value="<%= params[:date_from] %>"
+      />
+    </div>
+    
+    <div class="input">
+      <input
+        name="date_to"
+        placeholder="To date (YYYY-MM-DD)"
+        type="date"
+        value="<%= params[:date_to] %>"
+      />
+    </div>
+    
+    <select name="status">
+      <option value="">All statuses</option>
+      <option value="successful" <%= 'selected' if params[:status] == 'successful' %>>Successful</option>
+      <option value="failed" <%= 'selected' if params[:status] == 'failed' %>>Failed</option>
+      <option value="not_charged" <%= 'selected' if params[:status] == 'not_charged' %>>Not charged</option>
+      <option value="preorder_authorization_successful" <%= 'selected' if params[:status] == 'preorder_authorization_successful' %>>Preorder authorized</option>
+      <option value="gift_receiver_purchase_successful" <%= 'selected' if params[:status] == 'gift_receiver_purchase_successful' %>>Gift received</option>
+    </select>
+    
+    <button type="submit" class="button">Search</button>
+    
+    <% if params[:product_name].present? || params[:date_from].present? || params[:date_to].present? || params[:status].present? %>
+      <a href="<%= admin_search_purchases_path(query: params[:query]) %>" class="button">Clear filters</a>
+    <% end %>
+  </form>
+</div>
+
 <% if @purchases&.exists? %>
   <%= render("purchases", purchases: @purchases) %>
 <% else %>

@@ -19,7 +19,15 @@ class Admin::SearchController < Admin::BaseController
   def purchases
     @title = "Purchase results"
 
-    @purchases = AdminSearchService.new.search_purchases(query: @raw_query)
+    search_params = {
+      query: @raw_query,
+      product_name: params[:product_name],
+      date_from: params[:date_from],
+      date_to: params[:date_to],
+      status: params[:status]
+    }.compact
+
+    @purchases = AdminSearchService.new.search_purchases(**search_params)
     @purchases = @purchases.page_with_kaminari(params[:page]).per(RECORDS_PER_PAGE) if @purchases.present?
 
     redirect_to admin_purchase_path(@purchases.first) if @purchases.one? && params[:page].blank?

@@ -3,7 +3,7 @@
 class AdminSearchService
   class InvalidDateError < StandardError; end
 
-  def search_purchases(query: nil, creator_email: nil, license_key: nil, transaction_date: nil, last_4: nil, card_type: nil, price: nil, expiry_date: nil, limit: nil)
+  def search_purchases(query: nil, creator_email: nil, license_key: nil, transaction_date: nil, last_4: nil, card_type: nil, price: nil, expiry_date: nil, product_name: nil, date_from: nil, date_to: nil, status: nil, limit: nil)
     purchases = Purchase.order(created_at: :desc)
 
     if query.present?
@@ -52,6 +52,23 @@ class AdminSearchService
         purchases = purchases.where(card_expiry_year: "20#{expiry_year}") if expiry_year.present?
         purchases = purchases.where(card_expiry_month: expiry_month) if expiry_month.present?
       end
+    end
+
+    if product_name.present?
+      purchases = purchases.joins(:link).where("links.name ILIKE ?", "%#{product_name}%")
+    end
+
+    if date_from.present? || date_to.present?
+      if date_from.present?
+        purchases = purchases.where("purchases.created_at >= ?", Date.parse(date_from).beginning_of_day)
+      end
+      if date_to.present?
+        purchases = purchases.where("purchases.created_at <= ?", Date.parse(date_to).end_of_day)
+      end
+    end
+
+    if status.present?
+      purchases = purchases.where(purchase_state: status)
     end
 
     purchases.limit(limit)
