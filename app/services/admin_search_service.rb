@@ -60,10 +60,10 @@ class AdminSearchService
 
     if date_from.present? || date_to.present?
       if date_from.present?
-        purchases = purchases.where("purchases.created_at >= ?", Date.parse(date_from).beginning_of_day)
+        purchases = purchases.where("purchases.created_at >= ?", parse_date!(date_from).beginning_of_day)
       end
       if date_to.present?
-        purchases = purchases.where("purchases.created_at <= ?", Date.parse(date_to).end_of_day)
+        purchases = purchases.where("purchases.created_at <= ?", parse_date!(date_to).end_of_day)
       end
     end
 
