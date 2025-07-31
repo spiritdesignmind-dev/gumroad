@@ -172,12 +172,12 @@ describe GenerateSalesReportJob do
     it "populates Customer Tax Number when no tax is charged for non-AU/SG countries",
        vcr: { cassette_name: "GenerateSalesReportJob/happy_case/creates_a_CSV_file_for_sales_into_the_United_Kingdom" } do
       # Modify existing UK purchase to have business_vat_id and no tax
-      tax_info = create(:purchase_sales_tax_info, business_vat_id: "GB123456789")
+      tax_info = PurchaseSalesTaxInfo.new(business_vat_id: "GB123456789")
       @purchase1.update!(purchase_sales_tax_info: tax_info, gumroad_tax_cents_net_of_refunds: 0)
 
       expect(s3_bucket_double).to receive(:object).ordered.and_return(@s3_object)
 
-      described_class.new.perform("GB", quarter, year)
+      described_class.new.perform("GB", start_date, end_date)
 
       temp_file = Tempfile.new("actual-file", encoding: "ascii-8bit")
       @s3_object.get(response_target: temp_file)
@@ -193,12 +193,12 @@ describe GenerateSalesReportJob do
     it "leaves Customer Tax Number empty when tax is charged for non-AU/SG countries",
        vcr: { cassette_name: "GenerateSalesReportJob/happy_case/creates_a_CSV_file_for_sales_into_the_United_Kingdom" } do
       # Modify existing UK purchase to have business_vat_id but with tax charged
-      tax_info = create(:purchase_sales_tax_info, business_vat_id: "GB123456789")
+      tax_info = PurchaseSalesTaxInfo.new(business_vat_id: "GB123456789")
       @purchase3.update!(purchase_sales_tax_info: tax_info, gumroad_tax_cents_net_of_refunds: 1000)
 
       expect(s3_bucket_double).to receive(:object).ordered.and_return(@s3_object)
 
-      described_class.new.perform("GB", quarter, year)
+      described_class.new.perform("GB", start_date, end_date)
 
       temp_file = Tempfile.new("actual-file", encoding: "ascii-8bit")
       @s3_object.get(response_target: temp_file)
@@ -215,7 +215,7 @@ describe GenerateSalesReportJob do
        vcr: { cassette_name: "GenerateSalesReportJob/happy_case/creates_a_CSV_file_for_sales_into_Australia" } do
       expect(s3_bucket_double).to receive(:object).ordered.and_return(@s3_object)
 
-      described_class.new.perform("AU", quarter, year)
+      described_class.new.perform("AU", start_date, end_date)
 
       temp_file = Tempfile.new("actual-file", encoding: "ascii-8bit")
       @s3_object.get(response_target: temp_file)
@@ -230,7 +230,7 @@ describe GenerateSalesReportJob do
        vcr: { cassette_name: "GenerateSalesReportJob/happy_case/creates_a_CSV_file_for_sales_into_Singapore" } do
       expect(s3_bucket_double).to receive(:object).ordered.and_return(@s3_object)
 
-      described_class.new.perform("SG", quarter, year)
+      described_class.new.perform("SG", start_date, end_date)
 
       temp_file = Tempfile.new("actual-file", encoding: "ascii-8bit")
       @s3_object.get(response_target: temp_file)
