@@ -23,6 +23,7 @@ class RedisKey
     def api_v2_sales_deprecated_pagination_query_timeout = "api_v2_sales_deprecated_pagination_query_timeout"
     def free_purchases_watch_hours = "free_purchases_watch_hours"
     def max_allowed_free_purchases_of_same_product = "max_allowed_free_purchases_of_same_product"
+    def ai_request_throttle(user_id) = "ai_request_throttle:#{user_id}"
     def fraudulent_free_purchases_block_hours = "fraudulent_free_purchases_block_hours"
     def sales_related_products_internal_limit = "sales_related_products_internal_limit"
     def recommended_products_associated_product_ids_limit = "recommended_products_associated_product_ids_limit"
@@ -34,7 +35,7 @@ class RedisKey
     def tip_options = "tip_options"
     def default_tip_option = "default_tip_option"
     def create_canada_monthly_sales_report_job_max_execution_time_seconds = "create_canada_monthly_sales_report_job:max_execution_time_seconds"
-    def generate_quarterly_sales_report_job_max_execution_time_seconds = "generate_quarterly_sales_report_job:max_execution_time_seconds"
+    def generate_sales_report_job_max_execution_time_seconds = "generate_sales_report_job:max_execution_time_seconds"
     def generate_canada_sales_report_job_max_execution_time_seconds = "generate_canada_sales_report_job:max_execution_time_seconds"
     def create_vat_report_job_max_execution_time_seconds = "create_vat_report_job:max_execution_time_seconds"
     def transcoded_videos_recentness_limit_in_months = "transcoded_videos_recentness_limit_in_months"
@@ -43,5 +44,6 @@ class RedisKey
     def failed_seller_purchases_watch_minutes = "failed_seller_purchases_watch_minutes"
     def max_seller_failed_purchases_price_cents = "max_seller_failed_purchases_price_cents"
     def seller_age_threshold_days = "seller_age_threshold_days"
+    def sales_report_jobs = "sales_report_jobs"
   end
 end
