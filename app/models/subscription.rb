@@ -196,7 +196,7 @@ class Subscription < ApplicationRecord
 
   def current_subscription_price_cents
     if is_installment_plan
-      original_purchase.minimum_paid_price_cents
+      original_purchase.displayed_price_cents
     else
       discount_applies_to_next_charge? ?
         original_purchase.displayed_price_cents :

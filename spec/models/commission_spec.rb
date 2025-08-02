@@ -338,4 +338,78 @@ describe Commission, :vcr do
       expect(commission.completion_display_price_cents).to eq(5000)
     end
   end
+
+  describe "pricing preservation edge cases" do
+    let!(:seller) { create(:user, :eligible_for_service_products) }
+    let!(:product) { create(:product, user: seller, native_type: Link::NATIVE_TYPE_COMMISSION, price_cents: 69900) } # $699
+    let!(:deposit_purchase) do
+      create(:purchase,
+        link: product,
+        displayed_price_cents: 34950, # 50% deposit
+        price_cents: 34950,
+        is_commission_deposit_purchase: true,
+        purchase_state: "successful"
+      )
+    end
+    let!(:commission) { create(:commission, status: Commission::STATUS_IN_PROGRESS, deposit_purchase: deposit_purchase) }
+
+    context "when product price increases significantly" do
+      it "completion display price uses original price, not inflated current price" do
+        product.update!(price_cents: 199900) # Increase to $1999
+
+        # Test the pricing calculation method directly (no Stripe needed)
+        completion_display_price = commission.completion_display_price_cents
+
+        expect(completion_display_price).to eq(34950) # 50% of original $699, not new $1999
+      end
+
+      it "mock completion purchase would use perceived_price_cents correctly" do
+        product.update!(price_cents: 199900) # Increase to $1999
+
+        # Test that our minimum_paid_price_cents fix works for commission completions
+        mock_completion = build(:purchase,
+          link: product,
+          perceived_price_cents: 34950, # Set by commission logic
+          is_commission_completion_purchase: true
+        )
+
+        # Our fix ensures minimum_paid_price_cents uses perceived_price_cents
+        expect(mock_completion.minimum_paid_price_cents).to eq(34950)
+      end
+    end
+
+    context "when product price decreases significantly" do
+      it "completion display price uses original price, not reduced current price" do
+        product.update!(price_cents: 19900) # Decrease to $199
+
+        # Test the pricing calculation method directly (no Stripe needed)
+        completion_display_price = commission.completion_display_price_cents
+
+        expect(completion_display_price).to eq(34950) # Still 50% of original $699, not new $199
+      end
+    end
+
+    context "when completion purchase has perceived_price_cents validation" do
+      it "validates that perceived_price_cents is present for commission completions" do
+        # Test our validation without creating actual purchases
+        invalid_purchase = build(:purchase,
+          link: product,
+          is_commission_completion_purchase: true,
+          perceived_price_cents: nil # Missing required field
+        )
+
+        expect(invalid_purchase.valid?).to be(false)
+        expect(invalid_purchase.errors[:perceived_price_cents]).to include("can't be blank")
+
+        # Test that valid purchase passes
+        valid_purchase = build(:purchase,
+          link: product,
+          is_commission_completion_purchase: true,
+          perceived_price_cents: 34950
+        )
+
+        expect(valid_purchase.valid?).to be(true)
+      end
+    end
+  end
 end

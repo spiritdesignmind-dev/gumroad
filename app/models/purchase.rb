@@ -327,6 +327,7 @@ class Purchase < ApplicationRecord
   validates :call, presence: true, if: -> { link.native_type == Link::NATIVE_TYPE_CALL }
   validates_inclusion_of :recommender_model_name, in: RecommendedProductsService::MODELS, allow_nil: true
   validates :purchaser, presence: true, if: -> { is_gift_receiver_purchase && gift&.is_recipient_hidden? }
+  validates :perceived_price_cents, presence: true, if: -> { is_commission_completion_purchase || is_installment_payment }
 
   # before_create instead of validate since we want to persist the purchases that fail these.
   before_create :product_is_sellable
@@ -1248,7 +1249,8 @@ class Purchase < ApplicationRecord
   # Returns the minimum amount in the product's currency.
   def minimum_paid_price_cents
     return 0 if is_gift_receiver_purchase
-    return perceived_price_cents if perceived_price_cents.present? && is_applying_plan_change
+    return perceived_price_cents if perceived_price_cents.present? &&
+      (is_applying_plan_change || is_commission_completion_purchase || is_installment_payment)
 
     if is_recurring_subscription_charge
       minimum_price = subscription.current_subscription_price_cents

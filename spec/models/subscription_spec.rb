@@ -2978,6 +2978,69 @@ describe Subscription, :vcr do
         end
       end
     end
+
+    context "pricing preserved when product price changes" do
+      let!(:product) { create(:product, name: "Awesome product", user: seller, price_cents: 69900) } # $699
+      let!(:installment_plan) { create(:product_installment_plan, link: product, number_of_installments: 3) }
+      let!(:first_purchase) { create(:installment_plan_purchase, link: product, displayed_price_cents: 69900, price_cents: 23300, perceived_price_cents: 69900, is_original_subscription_purchase: true) }
+      let!(:subscription) do
+        sub = create(:subscription, link: product, is_installment_plan: true)
+        first_purchase.update!(subscription: sub)
+        sub.update!(original_purchase: first_purchase)
+        sub
+      end
+
+      context "when product price increases after first installment" do
+        before do
+          product.update!(price_cents: 99900) # Increase to $999
+        end
+
+        it "uses original displayed price for subsequent installments" do
+          expect(subscription.current_subscription_price_cents).to eq(69900) # Original $699, not new $999
+        end
+
+        it "would create subsequent purchases with preserved pricing" do
+          # Test that our subscription pricing method returns the original price
+          # (The actual purchase creation is tested in our comprehensive test file)
+          expect(subscription.current_subscription_price_cents).to eq(69900) # Original total price preserved
+        end
+      end
+
+      context "when product price decreases after first installment" do
+        before do
+          product.update!(price_cents: 39900) # Decrease to $399
+        end
+
+        it "uses original displayed price, not the reduced price" do
+          expect(subscription.current_subscription_price_cents).to eq(69900) # Still original $699
+        end
+
+        it "would create subsequent purchases with preserved original pricing" do
+          # Test that our subscription pricing method returns the original price, not the reduced price
+          # (The actual purchase creation is tested in our comprehensive test file)
+          expect(subscription.current_subscription_price_cents).to eq(69900) # Original total price, not $399
+        end
+      end
+
+      context "with offer codes applied to original purchase" do
+        let!(:offer_code) { create(:offer_code, products: [product], amount_cents: 10000) } # $100 off
+        let!(:discounted_first_purchase) { create(:installment_plan_purchase, link: product, displayed_price_cents: 59900, price_cents: 19967, perceived_price_cents: 59900, is_original_subscription_purchase: true, offer_code:) }
+        let!(:discounted_subscription) do
+          sub = create(:subscription, link: product, is_installment_plan: true)
+          discounted_first_purchase.update!(subscription: sub)
+          sub.update!(original_purchase: discounted_first_purchase)
+          sub
+        end
+
+        before do
+          product.update!(price_cents: 99900) # Increase to $999
+        end
+
+        it "preserves the discounted original price for subsequent installments" do
+          expect(discounted_subscription.current_subscription_price_cents).to eq(59900) # Original $599 (with discount), not $999
+        end
+      end
+    end
   end
 
   describe "#current_plan_displayed_price_cents" do
