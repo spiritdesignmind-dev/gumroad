@@ -10,6 +10,7 @@ class DirectAffiliate < Affiliate
   attr_accessor :prevent_sending_invitation_email, :prevent_sending_invitation_email_to_seller
 
   belongs_to :seller, class_name: "User"
+  has_one :affiliate_invitation, foreign_key: :affiliate_id, dependent: :destroy
   has_and_belongs_to_many :products, class_name: "Link", join_table: "affiliates_links", foreign_key: "affiliate_id", after_add: :update_audience_member_with_added_product, after_remove: :update_audience_member_with_removed_product
 
   validates :affiliate_basis_points, presence: true
@@ -20,6 +21,9 @@ class DirectAffiliate < Affiliate
   after_commit :send_invitation_email, on: :create
 
   validates_uniqueness_of :affiliate_user_id, scope: :seller_id, conditions: -> { alive }, if: :alive?
+
+  scope :invitation_accepted, -> { left_joins(:affiliate_invitation).where(affiliate_invitations: { id: nil }) }
+  scope :invitation_pending, -> { joins(:affiliate_invitation) }
 
   def self.cookie_lifetime
     AFFILIATE_COOKIE_LIFETIME_DAYS.days
@@ -48,6 +52,10 @@ class DirectAffiliate < Affiliate
       products: affiliated_products,
       apply_to_all_products: affiliated_products.all? { _1[:fee_percent] == affiliate_percentage } && affiliated_products.length == seller.links.alive.count,
       product_referral_url: product_affiliates.one? ? referral_url_for_product(products.first) : referral_url)
+  end
+
+  def invitation_accepted?
+    affiliate_invitation.blank?
   end
 
   def product_sales_info

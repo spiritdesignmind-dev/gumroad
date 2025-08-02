@@ -25,7 +25,7 @@ class AffiliateMailer < ApplicationMailer
     @affiliate_referral_url = affiliate_referral_url
     @final_destination_url = @products.one? ? product[:destination_url] : @direct_affiliate.final_destination_url
 
-    @subject = "#{@seller_name} has added you as an affiliate."
+    @subject = "#{@seller_name} has invited you to be an affiliate."
     params = {
       to: @direct_affiliate.affiliate_user.form_email,
       subject: @subject
@@ -174,6 +174,42 @@ class AffiliateMailer < ApplicationMailer
     @subject = "#{invitee_name} has declined your invitation to collaborate on Gumroad"
 
     mail to: inviter.form_email,
+         subject: @subject
+  end
+
+  def affiliate_invitation_accepted(affiliate_id)
+    affiliate = DirectAffiliate.find(affiliate_id)
+    inviter = affiliate.seller
+    @invitee = affiliate.affiliate_user
+    invitee_name = @invitee.name_or_username
+
+    @subject = "#{invitee_name} has accepted your affiliate invitation on Gumroad"
+
+    mail to: inviter.form_email,
+         subject: @subject
+  end
+
+  def affiliate_invitation_declined(affiliate_id)
+    affiliate = DirectAffiliate.find(affiliate_id)
+    inviter = affiliate.seller
+    @invitee = affiliate.affiliate_user
+    invitee_name = @invitee.name_or_username
+
+    @subject = "#{invitee_name} has declined your affiliate invitation on Gumroad"
+
+    mail to: inviter.form_email,
+         subject: @subject
+  end
+
+  def affiliate_self_removal(affiliate_id)
+    affiliate = DirectAffiliate.find(affiliate_id)
+    seller = affiliate.seller
+    @affiliate_user = affiliate.affiliate_user
+    affiliate_name = @affiliate_user.name_or_username
+
+    @subject = "#{affiliate_name} has removed themselves as your affiliate"
+
+    mail to: seller.form_email,
          subject: @subject
   end
 

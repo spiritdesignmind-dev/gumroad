@@ -14,6 +14,7 @@ class Affiliate < ApplicationRecord
   QUERY_PARAMS = [QUERY_PARAM, SHORT_QUERY_PARAM]
 
   belongs_to :affiliate_user, class_name: "User"
+  has_one :affiliate_invitation, foreign_key: :affiliate_id, dependent: :destroy
   has_many :affiliate_credits
   has_many :purchases
   has_many :product_affiliates, autosave: true
@@ -43,6 +44,9 @@ class Affiliate < ApplicationRecord
   scope :pending_collaborators, -> { merge(Collaborator.invitation_pending) }
   scope :confirmed_collaborators, -> { merge(Collaborator.invitation_accepted) }
   scope :pending_or_confirmed_collaborators, -> { where(type: Collaborator.name) }
+
+  scope :invitation_accepted, -> { left_joins(:affiliate_invitation).where(affiliate_invitations: { id: nil }) }
+  scope :invitation_pending, -> { joins(:affiliate_invitation) }
 
   scope :for_product, ->(product) do
     affiliates_relation = Affiliate.joins("LEFT OUTER JOIN affiliates_links ON affiliates_links.affiliate_id = affiliates.id").where("affiliates_links.link_id = ?", product.id).direct_affiliates

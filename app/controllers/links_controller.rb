@@ -610,7 +610,9 @@ class LinksController < ApplicationController
     end
 
     def paged_params
-      params.permit(:page, sort: [:key, :direction])
+      # Defensive fix: ensure params is ActionController::Parameters
+      safe_params = params.is_a?(ActionController::Parameters) ? params : ActionController::Parameters.new(params || {})
+      safe_params.permit(:page, sort: [:key, :direction])
     end
 
     def paginated_memberships(page:, query: nil)

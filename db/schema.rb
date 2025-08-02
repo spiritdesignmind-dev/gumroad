@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_04_25_212934) do
+ActiveRecord::Schema[7.1].define(version: 2025_04_26_000000) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "name", limit: 191, null: false
     t.string "record_type", limit: 191, null: false
@@ -72,6 +72,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_04_25_212934) do
     t.index ["oauth_application_id"], name: "index_affiliate_credits_on_oauth_application_id"
     t.index ["purchase_id"], name: "index_affiliate_credits_on_purchase_id"
     t.index ["seller_id"], name: "index_affiliate_credits_on_seller_id"
+  end
+
+  create_table "affiliate_invitations", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.integer "affiliate_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["affiliate_id"], name: "index_affiliate_invitations_on_affiliate_id", unique: true
   end
 
   create_table "affiliate_partial_refunds", id: :integer, charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
@@ -2717,4 +2724,5 @@ ActiveRecord::Schema[7.1].define(version: 2025_04_25_212934) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "affiliate_invitations", "affiliates"
 end

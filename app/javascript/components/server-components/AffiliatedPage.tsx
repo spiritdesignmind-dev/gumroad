@@ -34,6 +34,16 @@ export type AffiliatedProduct = {
   humanized_revenue: string;
   sales_count: number;
   affiliate_type: "direct_affiliate" | "global_affiliate";
+  affiliate_id: string;
+};
+
+export type PendingInvitation = {
+  invitation_id: string;
+  affiliate_id: string;
+  product_name: string;
+  seller_name: string;
+  fee_percentage: number;
+  url: string;
 };
 
 type Stats = {
@@ -46,6 +56,7 @@ type Stats = {
 type Props = {
   pagination: PaginationProps;
   affiliated_products: AffiliatedProduct[];
+  pending_invitations: PendingInvitation[];
   stats: Stats;
   global_affiliates_data: {
     global_affiliate_id: number;
@@ -91,6 +102,7 @@ type AffiliatedProductsTableProps = {
   pagination: PaginationProps;
   loadAffiliatedProducts: (page: number, sort: Sort<SortKey> | null) => void;
   isLoading: boolean;
+  onRemoveAffiliation?: (affiliateId: string) => void;
 };
 
 export type SortKey = "product_name" | "sales_count" | "commission" | "revenue";
@@ -100,6 +112,7 @@ const AffiliatedProductsTable = ({
   pagination,
   loadAffiliatedProducts,
   isLoading,
+  onRemoveAffiliation,
 }: AffiliatedProductsTableProps) => {
   const [sort, setSort] = React.useState<Sort<SortKey> | null>(null);
   const thProps = useSortingTableDriver<SortKey>(sort, setSort);
@@ -157,13 +170,20 @@ const AffiliatedProductsTable = ({
               </td>
 
               <td>
-                <div className="actions">
+                <div className="actions" style={{ display: "flex", gap: "var(--spacer-2)" }}>
                   <CopyToClipboard tooltipPosition="bottom" copyTooltip="Copy link" text={affiliatedProduct.url}>
                     <Button>
                       <Icon name="link" />
                       Copy link
                     </Button>
                   </CopyToClipboard>
+                  {onRemoveAffiliation && affiliatedProduct.affiliate_type === "direct_affiliate" && (
+                    <WithTooltip position="bottom" tip="Remove affiliation">
+                      <Button onClick={() => onRemoveAffiliation(affiliatedProduct.affiliate_id)} color="danger" small>
+                        <Icon name="trash2" />
+                      </Button>
+                    </WithTooltip>
+                  )}
                 </div>
               </td>
             </tr>
@@ -220,12 +240,105 @@ const Search = ({ onSearch, value }: SearchProps) => {
 
 type AffiliatedPageState = {
   affiliatedProducts: AffiliatedProduct[];
+  pendingInvitations: PendingInvitation[];
   pagination: PaginationProps;
   query: string;
 };
 
+type PendingInvitationsTableProps = {
+  pendingInvitations: PendingInvitation[];
+  onInvitationResponse: () => Promise<void>;
+};
+
+const PendingInvitationsTable = ({ pendingInvitations, onInvitationResponse }: PendingInvitationsTableProps) => {
+  const [loadingInvitations, setLoadingInvitations] = React.useState<Set<string>>(new Set());
+
+  const handleInvitationResponse = async (invitationId: string, accepted: boolean) => {
+    setLoadingInvitations((prev) => new Set(prev).add(invitationId));
+
+    try {
+      const endpoint = accepted ? "invitation_acceptances" : "invitation_declines";
+      const affiliateId = pendingInvitations.find((inv) => inv.invitation_id === invitationId)?.affiliate_id;
+
+      const response = await fetch(`/internal/affiliates/${affiliateId}/${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content || "",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${accepted ? "accept" : "decline"} invitation`);
+      }
+
+      showAlert(`Invitation ${accepted ? "accepted" : "declined"} successfully`, "success");
+      await onInvitationResponse();
+    } catch (error) {
+      showAlert(`Failed to ${accepted ? "accept" : "decline"} invitation`, "error");
+    } finally {
+      setLoadingInvitations((prev) => {
+        const next = new Set(prev);
+        next.delete(invitationId);
+        return next;
+      });
+    }
+  };
+
+  return (
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Seller</th>
+          <th>Commission</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {pendingInvitations.map((invitation) => {
+          const isLoading = loadingInvitations.has(invitation.invitation_id);
+          return (
+            <tr key={invitation.invitation_id}>
+              <td>
+                <a href={invitation.url} title={invitation.url} target="_blank" rel="noreferrer">
+                  {invitation.product_name}
+                </a>
+              </td>
+              <td>{invitation.seller_name}</td>
+              <td>{(invitation.fee_percentage / 100).toLocaleString([], { style: "percent" })}</td>
+              <td>
+                <div className="actions" style={{ display: "flex", gap: "var(--spacer-2)" }}>
+                  <Button
+                    disabled={isLoading}
+                    onClick={() => handleInvitationResponse(invitation.invitation_id, true)}
+                    color="accent"
+                    small
+                  >
+                    <Icon name="outline-check" />
+                    Accept
+                  </Button>
+                  <Button
+                    disabled={isLoading}
+                    onClick={() => handleInvitationResponse(invitation.invitation_id, false)}
+                    small
+                  >
+                    <Icon name="x" />
+                    Decline
+                  </Button>
+                </div>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+};
+
 const AffiliatedPage = ({
   affiliated_products: initialAffiliatedProducts,
+  pending_invitations: initialPendingInvitations,
   stats,
   global_affiliates_data: globalAffiliatesData,
   archived_tab_visible: archivedTabVisible,
@@ -244,8 +357,10 @@ const AffiliatedPage = ({
   const [state, setState] = React.useState<AffiliatedPageState>({
     pagination: initialPaginationState,
     affiliatedProducts: initialAffiliatedProducts,
+    pendingInvitations: initialPendingInvitations,
     query: "",
   });
+  const [currentStats, setCurrentStats] = React.useState(stats);
   const { affiliatedProducts, pagination } = state;
   const [isLoading, setIsLoading] = React.useState(false);
   const activeRequest = React.useRef<{ cancel: () => void } | null>(null);
@@ -269,10 +384,57 @@ const AffiliatedPage = ({
   };
   const debouncedLoadAffiliatedProducts = useDebouncedCallback(asyncVoid(loadAffiliatedProducts), 500);
 
+  const refetchAllData = async () => {
+    try {
+      const response = await fetch("/products/affiliated", {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to refresh data");
+      }
+
+      const data = (await response.json()) as Props;
+      setState({
+        pagination: data.pagination,
+        affiliatedProducts: data.affiliated_products,
+        pendingInvitations: data.pending_invitations,
+        query: "",
+      });
+      setCurrentStats(data.stats);
+    } catch (error) {
+      showAlert("Failed to refresh data", "error");
+    }
+  };
+
   const handleSearch = (query: string) => {
     if (query === state.query) return;
     setState((prevState) => ({ ...prevState, query }));
     debouncedLoadAffiliatedProducts(state.pagination.page, query);
+  };
+
+  const handleRemoveAffiliation = async (affiliateId: string) => {
+    try {
+      const response = await fetch(`/products/affiliated/${affiliateId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content || "",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to remove affiliation");
+      }
+
+      showAlert("Affiliation removed successfully", "success");
+      await refetchAllData();
+    } catch (error) {
+      showAlert("Failed to remove affiliation", "error");
+    }
   };
 
   const toggleOpen = (newState: boolean) => {
@@ -314,7 +476,7 @@ const AffiliatedPage = ({
         />
       ) : (
         <section>
-          {initialAffiliatedProducts.length === 0 ? (
+          {initialAffiliatedProducts.length === 0 && initialPendingInvitations.length === 0 ? (
             <div className="placeholder">
               <figure>
                 <img src={placeholder} />
@@ -333,24 +495,43 @@ const AffiliatedPage = ({
             </div>
           ) : (
             <div style={{ display: "grid", gap: "var(--spacer-7)" }}>
-              <StatsSection {...stats} />
-              {state.affiliatedProducts.length === 0 ? (
+              <StatsSection {...currentStats} />
+
+              {state.pendingInvitations.length > 0 && (
+                <section>
+                  <h2>Pending affiliate invitations</h2>
+                  <p>
+                    You have been invited to become an affiliate for these products. Choose to accept or decline each
+                    invitation.
+                  </p>
+                  <PendingInvitationsTable
+                    pendingInvitations={state.pendingInvitations}
+                    onInvitationResponse={refetchAllData}
+                  />
+                </section>
+              )}
+
+              {state.affiliatedProducts.length === 0 && state.pendingInvitations.length === 0 ? (
                 <div className="placeholder">
                   <figure>
                     <img src={placeholder} />
                   </figure>
                   <h2>No affiliated products found.</h2>
                 </div>
-              ) : (
-                <AffiliatedProductsTable
-                  affiliatedProducts={affiliatedProducts}
-                  pagination={pagination}
-                  loadAffiliatedProducts={(page: number, sort: Sort<SortKey> | null) => {
-                    void loadAffiliatedProducts(page, state.query, sort);
-                  }}
-                  isLoading={isLoading}
-                />
-              )}
+              ) : state.affiliatedProducts.length > 0 ? (
+                <section>
+                  <h2>Active affiliations</h2>
+                  <AffiliatedProductsTable
+                    affiliatedProducts={affiliatedProducts}
+                    pagination={pagination}
+                    loadAffiliatedProducts={(page: number, sort: Sort<SortKey> | null) => {
+                      void loadAffiliatedProducts(page, state.query, sort);
+                    }}
+                    isLoading={isLoading}
+                    onRemoveAffiliation={handleRemoveAffiliation}
+                  />
+                </section>
+              ) : null}
             </div>
           )}
         </section>
