@@ -12,7 +12,7 @@ class Settings::MainController < Sellers::BaseController
 
   def update
     begin
-      current_seller.with_lock { current_seller.update(user_params.except(:seller_refund_policy)) }
+      current_seller.with_lock { current_seller.update(user_params.except(:seller_refund_policy, :reply_to_emails)) }
     rescue StandardError => e
       Bugsnag.notify(e)
       return render json: { success: false, error_message: "Something broke. We're looking into what happened. Sorry about this!" }
@@ -31,6 +31,7 @@ class Settings::MainController < Sellers::BaseController
 
     if current_seller.save
       current_seller.update_purchasing_power_parity_excluded_products!(params[:user][:purchasing_power_parity_excluded_product_ids])
+      upsert_reply_to_emails(params[:user][:reply_to_emails])  if params[:user][:reply_to_emails].present?
 
       render json: { success: true }
     else
@@ -67,10 +68,29 @@ class Settings::MainController < Sellers::BaseController
         :purchasing_power_parity_limit,
         :purchasing_power_parity_payment_verification_disabled,
         :show_nsfw_products,
+        { reply_to_emails: [:email, { product_ids: [] }] },
         { seller_refund_policy: [:max_refund_period_in_days, :fine_print] }
       ]
 
       params.require(:user).permit(permitted_params)
+    end
+
+    def upsert_reply_to_emails(reply_to_emails_data)
+      reply_to_emails_data.each do |email_data|
+        reply_to_email = current_seller.reply_to_emails.find_or_initialize_by(email: email_data[:email])
+
+        if reply_to_email.persisted?
+          reply_to_email.products.clear
+        end
+
+        reply_to_email.save!
+
+        if email_data[:product_ids].present?
+          product_ids = email_data[:product_ids].reject(&:blank?)
+          products = current_seller.products.where(id: product_ids)
+          reply_to_email.products = products
+        end
+      end
     end
 
     def seller_refund_policy_params

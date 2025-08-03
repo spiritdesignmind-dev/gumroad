@@ -2,7 +2,7 @@
 
 class ReplyToEmail < ApplicationRecord
   belongs_to :user
-  has_many :links, dependent: :nullify
+  has_many :products, class_name: "Link", dependent: :nullify
 
 
   validates :email, presence: true, format: URI::MailTo::EMAIL_REGEXP

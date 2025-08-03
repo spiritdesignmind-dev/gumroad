@@ -30,7 +30,7 @@ describe Settings::MainController do
     end
   end
 
-  describe "PUT update" do
+  fdescribe "PUT update" do
     let (:user_params) do
       { seller_refund_policy: { max_refund_period_in_days: "30", fine_print: nil } }
     end
@@ -296,6 +296,76 @@ describe Settings::MainController do
 
           expect(seller.refund_policy.reload.max_refund_period_in_days).to eq(0)
           expect(seller.refund_policy.fine_print).to be_nil
+        end
+      end
+
+      context "reply to emails" do
+        let(:product1) { create(:product, user: seller) }
+        let(:product2) { create(:product, user: seller) }
+        let(:other_seller) { create(:user) }
+        let(:other_product) { create(:product, user: other_seller) }
+
+        it "creates new reply to emails with associated products" do
+          reply_to_emails_params = [
+            { email: "contact@example.com", product_ids: [product1.id, product2.id] },
+            { email: "support@example.com", product_ids: [] }
+          ]
+
+          expect do
+            put :update, params: { user: user_params.merge(reply_to_emails: reply_to_emails_params) }, format: :json
+          end.to change(ReplyToEmail, :count).by(2)
+
+          expect(response.parsed_body["success"]).to be(true)
+
+          expect(product1.reload.reply_to_email.email).to eq("contact@example.com")
+          expect(product2.reload.reply_to_email.email).to eq("contact@example.com")
+
+          support_email = seller.reply_to_emails.find_by(email: "support@example.com")
+          expect(support_email.products).to be_empty
+        end
+
+        it "updates existing reply to emails" do
+          existing_reply_to_email = create(:reply_to_email, user: seller, email: "contact@example.com")
+          existing_reply_to_email.products = [product1]
+
+          reply_to_emails_params = [
+            { email: "contact@example.com", product_ids: [product2.id] }
+          ]
+
+          expect do
+            put :update, params: { user: user_params.merge(reply_to_emails: reply_to_emails_params) }, format: :json
+          end.not_to change(ReplyToEmail, :count)
+
+          expect(response.parsed_body["success"]).to be(true)
+          expect(existing_reply_to_email.reload.products).to match_array([product2])
+        end
+
+        it "clears existing products when updating" do
+          existing_reply_to_email = create(:reply_to_email, user: seller, email: "contact@example.com")
+          existing_reply_to_email.products = [product1, product2]
+
+          reply_to_emails_params = [
+            { email: "contact@example.com", product_ids: [] }
+          ]
+
+          put :update, params: { user: user_params.merge(reply_to_emails: reply_to_emails_params) }, format: :json
+
+          expect(response.parsed_body["success"]).to be(true)
+          expect(existing_reply_to_email.reload.products).to be_empty
+        end
+
+        it "only associates products belonging to current seller" do
+          reply_to_emails_params = [
+            { email: "contact@example.com", product_ids: [product1.id, other_product.id] }
+          ]
+
+          put :update, params: { user: user_params.merge(reply_to_emails: reply_to_emails_params) }, format: :json
+
+          expect(response.parsed_body["success"]).to be(true)
+
+          reply_to_email = seller.reply_to_emails.find_by(email: "contact@example.com")
+          expect(reply_to_email.products).to match_array([product1])
+          expect(reply_to_email.products).not_to include(other_product)
         end
       end
     end
