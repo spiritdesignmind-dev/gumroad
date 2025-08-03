@@ -38,6 +38,7 @@ describe Products::AffiliatedController do
 
   it_behaves_like "authorize called for controller", Products::AffiliatedPolicy do
     let(:record) { :affiliated }
+    let(:request_params) { { id: direct_affiliate.external_id } }
   end
 
   describe "GET index", :vcr do
@@ -152,5 +153,44 @@ describe Products::AffiliatedController do
       product_name: ["Creator 1 Product 1", "Creator 1 Product 2", "The Works of Edgar Gumstein"],
       sales_count: [0, 1, 2]
     }
+  end
+
+  describe "DELETE destroy" do
+    let(:affiliate_to_remove) { create(:direct_affiliate, affiliate_user: affiliate_user, seller: creator) }
+
+    it "successfully removes affiliate when current user is the affiliate user" do
+      expect do
+        delete :destroy, params: { id: affiliate_to_remove.external_id }, format: :json
+      end.to have_enqueued_mail(AffiliateMailer, :affiliate_self_removal).with(affiliate_to_remove.id)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["success"]).to eq(true)
+      expect(affiliate_to_remove.reload.deleted?).to eq(true)
+    end
+
+    it "returns unauthorized when current user is not the affiliate user" do
+      different_affiliate = create(:direct_affiliate, affiliate_user: create(:user), seller: creator)
+
+      delete :destroy, params: { id: different_affiliate.external_id }, format: :json
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.parsed_body["success"]).to eq(false)
+      expect(response.parsed_body["message"]).to eq("Unauthorized")
+      expect(different_affiliate.reload.deleted?).to eq(false)
+    end
+
+    it "returns not found for non-existent affiliate" do
+      expect do
+        delete :destroy, params: { id: "non-existent-id" }, format: :json
+      end.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    it "returns not found for soft-deleted affiliate" do
+      affiliate_to_remove.mark_deleted!
+
+      expect do
+        delete :destroy, params: { id: affiliate_to_remove.external_id }, format: :json
+      end.to raise_error(ActiveRecord::RecordNotFound)
+    end
   end
 end
