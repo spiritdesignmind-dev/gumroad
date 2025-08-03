@@ -42,7 +42,7 @@ class AffiliatedProductsPresenter
           humanized_revenue: MoneyFormatter.format(revenue, :usd, no_cents_if_whole: true, symbol: true),
           sales_count: product.sales_count,
           affiliate_type: product.affiliate_type.underscore,
-          affiliate_id: Affiliate.find(product.affiliate_id).external_id
+          affiliate_id: product.affiliate_external_id
         }
       end
       { pagination: PagyPresenter.new(pagination).props, affiliated_products: records }
@@ -101,6 +101,7 @@ class AffiliatedProductsPresenter
       links.unique_permalink AS unique_permalink,
       links.name AS name,
       affiliates.type AS affiliate_type,
+      affiliates.external_id AS affiliate_external_id,
       COALESCE(affiliates_links.affiliate_basis_points, affiliates.affiliate_basis_points) AS basis_points,
       SUM(affiliate_credits.amount_cents) AS revenue,
       COUNT(DISTINCT affiliate_credits.id) AS sales_count
@@ -111,6 +112,7 @@ class AffiliatedProductsPresenter
       links.unique_permalink,
       links.name,
       affiliates.type,
+      affiliates.external_id,
       affiliates_links.affiliate_basis_points || affiliates.affiliate_basis_points
     }
       affiliate_credits_join = %{
