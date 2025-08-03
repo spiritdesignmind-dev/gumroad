@@ -11,10 +11,10 @@ class ReplyToEmail < ApplicationRecord
     {
       id:,
       email:,
-      applied_products: links.map do |link|
+      applied_products: products.map do |product|
         {
-          id: link.id,
-          name: link.name,
+          id: product.external_id,
+          name: product.name,
         }
       end
     }

@@ -8,7 +8,7 @@ describe ReplyToEmail do
 
   describe "associations" do
     it { is_expected.to belong_to(:user) }
-    it { is_expected.to have_many(:links) }
+    it { is_expected.to have_many(:products) }
   end
 
   describe "validations" do
@@ -65,11 +65,11 @@ describe ReplyToEmail do
 
       expect(result[:applied_products]).to contain_exactly(
         {
-          id: product1.id,
+          id: product1.external_id,
           name: product1.name
         },
         {
-          id: product2.id,
+          id: product2.external_id,
           name: product2.name
         }
       )

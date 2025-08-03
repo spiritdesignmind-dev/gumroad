@@ -94,6 +94,7 @@ describe SettingsPresenter do
           disable_comments_email: false,
           disable_reviews_email: false,
           show_nsfw_products: false,
+          reply_to_emails: [],
           seller_refund_policy: {
             enabled: true,
             allowed_refund_periods_in_days: [
@@ -124,6 +125,27 @@ describe SettingsPresenter do
           }
         }
       )
+    end
+
+    context "when reply to emails exist" do
+      before do
+        create(:reply_to_email, user: seller, email: "support@example.com", product_ids: [product.id])
+      end
+
+      it "includes reply_to_emails in main_props" do
+        expect(presenter.main_props[:user][:reply_to_emails]).to include(
+          {
+            id: seller.reply_to_emails.first.id,
+            email: "support@example.com",
+            applied_products: [
+              {
+                id: product.external_id,
+                name: product.name
+              }
+            ]
+          }
+        )
+      end
     end
 
     context "when user has unconfirmed email" do
