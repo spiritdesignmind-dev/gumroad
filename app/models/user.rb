@@ -45,6 +45,7 @@ class User < ApplicationRecord
            as: :owner
   has_many :resource_subscriptions
   has_many :devices
+  has_many :reply_to_emails, dependent: :destroy
 
   belongs_to :credit_card, optional: true
 

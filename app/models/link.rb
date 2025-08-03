@@ -157,7 +157,7 @@ class Link < ApplicationRecord
   has_many :alive_public_files, -> { alive }, class_name: "PublicFile", as: :resource
   has_many :communities, as: :resource, dependent: :destroy
   has_one :active_community, -> { alive }, class_name: "Community", as: :resource
-
+  belongs_to :reply_to_email, optional: true
   before_validation :associate_price, on: :create
   before_validation :set_unique_permalink
   before_validation :release_custom_permalink_if_possible, if: :custom_permalink_changed?
