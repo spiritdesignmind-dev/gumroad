@@ -2724,5 +2724,5 @@ ActiveRecord::Schema[7.1].define(version: 2025_04_26_000000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "affiliate_invitations", "affiliates"
+  add_foreign_key "affiliate_invitations", "affiliates", on_delete: :cascade
 end
