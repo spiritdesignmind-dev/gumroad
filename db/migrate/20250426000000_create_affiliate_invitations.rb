@@ -8,6 +8,6 @@ class CreateAffiliateInvitations < ActiveRecord::Migration[7.1]
       t.timestamps
     end
 
-    add_foreign_key :affiliate_invitations, :affiliates
+    add_foreign_key :affiliate_invitations, :affiliates, on_delete: :cascade
   end
 end
