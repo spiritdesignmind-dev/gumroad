@@ -3,6 +3,6 @@
 FactoryBot.define do
   factory :reply_to_email do
     user { create(:user) }
-    email { "contact@example.com" }
+    email { Faker::Internet.email }
   end
 end

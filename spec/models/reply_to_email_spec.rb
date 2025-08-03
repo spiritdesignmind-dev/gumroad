@@ -44,6 +44,27 @@ describe ReplyToEmail do
         end
       end
     end
+
+    context "email uniqueness validation" do
+      it "allows same email for different users" do
+        user1 = create(:user)
+        user2 = create(:user)
+
+        create(:reply_to_email, user: user1, email: "contact@example.com")
+        reply_to_email2 = build(:reply_to_email, user: user2, email: "contact@example.com")
+
+        expect(reply_to_email2).to be_valid
+      end
+
+      it "prevents duplicate emails for the same user" do
+        user = create(:user)
+        create(:reply_to_email, user: user, email: "contact@example.com")
+        duplicate_reply_to_email = build(:reply_to_email, user: user, email: "contact@example.com")
+
+        expect(duplicate_reply_to_email).not_to be_valid
+        expect(duplicate_reply_to_email.errors[:email]).to be_present
+      end
+    end
   end
 
   describe "#as_json" do

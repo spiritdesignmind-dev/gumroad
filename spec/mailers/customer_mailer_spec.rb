@@ -26,6 +26,24 @@ describe CustomerMailer do
       expect(mail[:reply_to].value).to eq("bob@gumroad.com")
     end
 
+    context "when reply to email exists" do
+      subject(:mail) do
+        user = create(:user, email: "bob@gumroad.com", name: "bob walsh")
+        link = create(:product, user:)
+        reply_to_email = create(:reply_to_email, user:, email: "support@example.com")
+        link.update!(reply_to_email:)
+
+        @purchase = create(:purchase, link:, seller: link.user, email: "to@example.org")
+        @purchase.create_url_redirect!
+
+        CustomerMailer.receipt(@purchase.id)
+      end
+
+      it "uses correct reply to email" do
+        expect(mail[:reply_to].value).to eq("support@example.com")
+      end
+    end
+
     it "renders the headers with UrlRedirect" do
       user = create(:user, email: "bob@gumroad.com", name: "bob walsh, LLC")
       link = create(:product, user:)

@@ -37,10 +37,14 @@ class CustomerMailer < ApplicationMailer
 
     is_receipt_for_gift_receiver = receipt_for_gift_receiver?(@chargeable)
     @footer_template = "layouts/mailers/receipt_footer" unless is_receipt_for_gift_receiver
+    purchase = @chargeable.is_a?(Purchase) ? @chargeable : @chargeable.purchases.last
+    product = purchase.link
+    reply_to = product&.reply_to_email&.email || @chargeable.seller.support_or_form_email
+
     mail(
       to: @chargeable.orderable.email,
       from: from_email_address_with_name(@chargeable.seller.name, "noreply@#{CUSTOMERS_MAIL_DOMAIN}"),
-      reply_to: @chargeable.seller.support_or_form_email,
+      reply_to: reply_to,
       subject: @receipt_presenter.mail_subject,
       template_name: is_receipt_for_gift_receiver ? "gift_receiver_receipt" : "receipt",
       delivery_method_options: MailerInfo.random_delivery_method_options(domain: :customers, seller: @chargeable.seller)
