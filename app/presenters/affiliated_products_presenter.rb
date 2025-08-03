@@ -153,7 +153,11 @@ class AffiliatedProductsPresenter
         .invitation_pending
         .alive
         .where(affiliate_user: user)
-        .includes(:seller, :affiliate_invitation, :products)
+        .includes(
+          :seller,
+          :affiliate_invitation,
+          product_affiliates: :product
+        )
 
       @_pending_invitations
     end
