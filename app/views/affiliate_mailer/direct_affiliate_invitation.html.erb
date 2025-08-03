@@ -1,33 +1,33 @@
 <%= header_section(@subject) %>
 <div>
   <p>
-    You are now able to share <%= @product_name %> with your audience. For every sale you make, you will get <%= @affiliate_percentage_text %> of the total sale as your commission.
+    <%= @seller_name %> would like you to become an affiliate for <%= @product_name %>. If you accept, you'll earn <%= @affiliate_percentage_text %> commission on every sale you refer.
   </p>
-  <h3>How do you share products with your audience?</h3>
+
+  <div style="text-align: center; margin: 30px 0;">
+    <%= link_to "View invitation", "#{PROTOCOL}://#{DOMAIN}/products/affiliated",
+        class: "button accent",
+        style: "display: inline-block; padding: 12px 24px; background-color: #ff90e8; color: white; text-decoration: none; border-radius: 4px;",
+        clicktracking: "off" %>
+  </div>
+
+  <p style="text-align: center; color: #666; font-size: 14px;">
+    You'll need to log in to your Gumroad account to respond to this invitation.
+  </p>
+
+  <h3>What happens if you accept?</h3>
   <p>
-    You can direct them to this link:
-    <%= link_to @affiliate_referral_url, @affiliate_referral_url, clicktracking: "off" %>
-    <% if @direct_affiliate.products.count > 1 || @direct_affiliate.destination_url.present? %>
-      — after they click, we'll redirect them to
-      <%= link_to @final_destination_url, @final_destination_url, clicktracking: "off" %>.
-      <br>
-      <br>
-      <% if @products.count == 1 %>
-        Or, if you'd like to share the product, you can use this link:
-      <% else %>
-        Or, if you'd like to share individual products, you can use these links:
-      <% end %>
-      <ul>
-      <% @products.each do |product| %>
-        <li>
-          <strong><%= product[:name] %></strong>
-          <span> - Your commission: <%= product[:fee_percent] %>%</span>
-          <br>
-          <%= link_to product[:referral_url], product[:referral_url], clicktracking: "off" %>
-        </li>
-      <% end %>
-      </ul>
-    <% end %>
+    Once you accept this invitation, you'll get access to your unique affiliate links and be able to start earning commissions by sharing <%= @product_name %> with your audience.
   </p>
-  <%= render("notify_affiliate_footer") %>
+
+  <h3>How does the affiliate program work?</h3>
+  <p>
+    When someone clicks your affiliate link, we'll place a cookie on their device. If they make a purchase within 30 days, you'll receive <%= @affiliate_percentage_text %> commission on that sale.
+  </p>
+
+  <h3>Questions about the affiliate program?</h3>
+  <p>
+    You can learn more about how our affiliate program works here:
+    <%= link_to HomePageLinkService.affiliates, HomePageLinkService.affiliates, clicktracking: "off" %>
+  </p>
 </div>
