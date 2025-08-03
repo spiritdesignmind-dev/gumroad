@@ -30,7 +30,7 @@ describe Settings::MainController do
     end
   end
 
-  fdescribe "PUT update" do
+  describe "PUT update" do
     let (:user_params) do
       { seller_refund_policy: { max_refund_period_in_days: "30", fine_print: nil } }
     end
