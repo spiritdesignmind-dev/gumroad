@@ -253,12 +253,11 @@ type PendingInvitationsTableProps = {
 const PendingInvitationsTable = ({ pendingInvitations, onInvitationResponse }: PendingInvitationsTableProps) => {
   const [loadingInvitations, setLoadingInvitations] = React.useState<Set<string>>(new Set());
 
-  const handleInvitationResponse = async (invitationId: string, accepted: boolean) => {
+  const handleInvitationResponse = async (invitationId: string, affiliateId: string, accepted: boolean) => {
     setLoadingInvitations((prev) => new Set(prev).add(invitationId));
 
     try {
       const endpoint = accepted ? "invitation_acceptances" : "invitation_declines";
-      const affiliateId = pendingInvitations.find((inv) => inv.invitation_id === invitationId)?.affiliate_id;
 
       const response = await fetch(`/internal/affiliates/${affiliateId}/${endpoint}`, {
         method: "POST",
@@ -311,7 +310,7 @@ const PendingInvitationsTable = ({ pendingInvitations, onInvitationResponse }: P
                 <div className="actions" style={{ display: "flex", gap: "var(--spacer-2)" }}>
                   <Button
                     disabled={isLoading}
-                    onClick={() => handleInvitationResponse(invitation.invitation_id, true)}
+                    onClick={() => handleInvitationResponse(invitation.invitation_id, invitation.affiliate_id, true)}
                     color="accent"
                     small
                   >
@@ -320,7 +319,7 @@ const PendingInvitationsTable = ({ pendingInvitations, onInvitationResponse }: P
                   </Button>
                   <Button
                     disabled={isLoading}
-                    onClick={() => handleInvitationResponse(invitation.invitation_id, false)}
+                    onClick={() => handleInvitationResponse(invitation.invitation_id, invitation.affiliate_id, false)}
                     small
                   >
                     <Icon name="x" />
