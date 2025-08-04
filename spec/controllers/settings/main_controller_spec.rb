@@ -329,7 +329,7 @@ describe Settings::MainController do
           existing_reply_to_email.products = [product1]
 
           reply_to_emails_params = [
-            { email: "contact@example.com", product_ids: [product2.id] }
+            { id: existing_reply_to_email.id, email: "contact@example.com", product_ids: [product2.id] }
           ]
 
           expect do
@@ -345,7 +345,7 @@ describe Settings::MainController do
           existing_reply_to_email.products = [product1, product2]
 
           reply_to_emails_params = [
-            { email: "contact@example.com", product_ids: [] }
+            { id: existing_reply_to_email.id, email: "contact@example.com", product_ids: [] }
           ]
 
           put :update, params: { user: user_params.merge(reply_to_emails: reply_to_emails_params) }, format: :json
@@ -366,6 +366,17 @@ describe Settings::MainController do
           reply_to_email = seller.reply_to_emails.find_by(email: "contact@example.com")
           expect(reply_to_email.products).to match_array([product1])
           expect(reply_to_email.products).not_to include(other_product)
+        end
+
+        it "deletes all existing reply to emails if param is empty" do
+          existing_reply_to_email = create(:reply_to_email, user: seller, email: "contact@example.com")
+          existing_reply_to_email.products = [product1, product2]
+
+          reply_to_emails_params = []
+          put :update, params: { user: user_params.merge(reply_to_emails: reply_to_emails_params) }, format: :json
+
+          expect(response.parsed_body["success"]).to be(true)
+          expect(ReplyToEmail.count).to eq(0)
         end
       end
     end

@@ -31,7 +31,7 @@ class Settings::MainController < Sellers::BaseController
 
     if current_seller.save
       current_seller.update_purchasing_power_parity_excluded_products!(params[:user][:purchasing_power_parity_excluded_product_ids])
-      upsert_reply_to_emails(params[:user][:reply_to_emails])  if params[:user][:reply_to_emails].present?
+      upsert_reply_to_emails(params[:user][:reply_to_emails])
 
       render json: { success: true }
     else
@@ -68,7 +68,7 @@ class Settings::MainController < Sellers::BaseController
         :purchasing_power_parity_limit,
         :purchasing_power_parity_payment_verification_disabled,
         :show_nsfw_products,
-        { reply_to_emails: [:email, { product_ids: [] }] },
+        { reply_to_emails: [:id, :email, { product_ids: [] }] },
         { seller_refund_policy: [:max_refund_period_in_days, :fine_print] }
       ]
 
@@ -76,8 +76,11 @@ class Settings::MainController < Sellers::BaseController
     end
 
     def upsert_reply_to_emails(reply_to_emails_data)
-      reply_to_emails_data.each do |email_data|
-        reply_to_email = current_seller.reply_to_emails.find_or_initialize_by(email: email_data[:email])
+      existing_reply_to_emails = current_seller.reply_to_emails
+
+      keep_reply_to_emails = reply_to_emails_data&.map do |email_data|
+        reply_to_email = current_seller.reply_to_emails.find_or_initialize_by(id: email_data[:id])
+        reply_to_email.update!(email: email_data[:email]) if email_data[:email] != reply_to_email.email
 
         if reply_to_email.persisted?
           reply_to_email.products.clear
@@ -86,11 +89,14 @@ class Settings::MainController < Sellers::BaseController
         reply_to_email.save!
 
         if email_data[:product_ids].present?
-          product_ids = email_data[:product_ids].reject(&:blank?)
-          products = current_seller.products.where(id: product_ids)
+          products = current_seller.products.where(id: email_data[:product_ids])
           reply_to_email.products = products
         end
-      end
+
+        reply_to_email
+      end || []
+
+      (existing_reply_to_emails - keep_reply_to_emails).each(&:destroy)
     end
 
     def seller_refund_policy_params
