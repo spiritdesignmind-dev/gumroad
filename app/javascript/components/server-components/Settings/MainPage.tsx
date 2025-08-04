@@ -436,7 +436,7 @@ const MainPage = (props: Props) => {
             />
             <small>This email is listed on the receipt of every sale.</small>
           </fieldset>
-          {userSettings.reply_to_emails.length > 0 ? (
+          {userSettings.reply_to_emails.length ? (
             <>
               <div className="rows" role="list">
                 {userSettings.reply_to_emails.map((reply_to_email) => (

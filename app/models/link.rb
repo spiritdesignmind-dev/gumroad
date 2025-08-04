@@ -1303,6 +1303,10 @@ class Link < ApplicationRecord
       SHORT_DOMAIN.to_s
     end
 
+    def support_email
+      reply_to_email&.email || user.support_or_form_email
+    end
+
   private
     def as_json_for_api(options)
       keep = %w[

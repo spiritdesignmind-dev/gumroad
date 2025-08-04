@@ -493,6 +493,25 @@ class User < ApplicationRecord
     end
   end
 
+  def update_reply_to_emails!(reply_to_emails_data)
+    existing_reply_to_emails = reply_to_emails
+    keep_reply_to_emails = reply_to_emails_data&.map do |email_data|
+      reply_to_email = reply_to_emails.find_or_initialize_by(id: email_data[:id])
+      reply_to_email.update!(email: email_data[:email]) if email_data[:email] != reply_to_email.email
+
+      reply_to_email.products.clear if reply_to_email.persisted?
+
+
+      if email_data[:product_ids].present?
+        reply_to_email.products = products.by_external_ids(email_data[:product_ids])
+      end
+
+      reply_to_email
+    end || []
+
+    (existing_reply_to_emails - keep_reply_to_emails).each(&:destroy)
+  end
+
   def save_external_id
     return if external_id.present?
 

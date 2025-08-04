@@ -33,7 +33,7 @@ class Settings::MainController < Sellers::BaseController
 
     begin
       current_seller.update_purchasing_power_parity_excluded_products!(params[:user][:purchasing_power_parity_excluded_product_ids])
-      upsert_reply_to_emails(params[:user][:reply_to_emails])
+      current_seller.update_reply_to_emails!(params[:user][:reply_to_emails])
       render json: { success: true }
     rescue StandardError => e
       Bugsnag.notify(e)
@@ -75,28 +75,6 @@ class Settings::MainController < Sellers::BaseController
       ]
 
       params.require(:user).permit(permitted_params)
-    end
-
-    def upsert_reply_to_emails(reply_to_emails_data)
-      existing_reply_to_emails = current_seller.reply_to_emails
-
-      keep_reply_to_emails = reply_to_emails_data&.map do |email_data|
-        reply_to_email = current_seller.reply_to_emails.find_or_initialize_by(id: email_data[:id])
-        reply_to_email.update!(email: email_data[:email]) if email_data[:email] != reply_to_email.email
-
-        if reply_to_email.persisted?
-          reply_to_email.products.clear
-        end
-
-        if email_data[:product_ids].present?
-          products = current_seller.products.by_external_ids(email_data[:product_ids])
-          reply_to_email.products = products
-        end
-
-        reply_to_email
-      end || []
-
-      (existing_reply_to_emails - keep_reply_to_emails).each(&:destroy)
     end
 
     def seller_refund_policy_params
