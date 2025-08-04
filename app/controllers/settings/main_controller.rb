@@ -29,13 +29,15 @@ class Settings::MainController < Sellers::BaseController
       )
     end
 
-    if current_seller.save
+    return render json: { success: false, error_message: current_seller.errors.full_messages.to_sentence } unless current_seller.save
+
+    begin
       current_seller.update_purchasing_power_parity_excluded_products!(params[:user][:purchasing_power_parity_excluded_product_ids])
       upsert_reply_to_emails(params[:user][:reply_to_emails])
-
       render json: { success: true }
-    else
-      render json: { success: false, error_message: current_seller.errors.full_messages.to_sentence }
+    rescue StandardError => e
+      Bugsnag.notify(e)
+      render json: { success: false, error_message: e.message }
     end
   end
 
