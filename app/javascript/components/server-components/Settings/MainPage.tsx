@@ -64,6 +64,11 @@ type Props = {
   };
 };
 
+type UserSettings = Props["user"] & {
+  email: string;
+  support_email: string;
+};
+
 const AddReplyToEmailButton = ({ addNewReplyToEmail }: { addNewReplyToEmail: () => void }) => (
   <Button color="primary" onClick={() => addNewReplyToEmail()}>
     <Icon name="plus" />
@@ -72,29 +77,30 @@ const AddReplyToEmailButton = ({ addNewReplyToEmail }: { addNewReplyToEmail: () 
 );
 
 const ReplyToEmailRow = ({
+  idx,
   replyToEmail,
   userSettings,
   updateUserSettings,
 }: {
+  idx: number;
   replyToEmail: ReplyToEmail;
-  userSettings: Props["user"];
-  updateUserSettings: (user: Props["user"]) => void;
+  userSettings: UserSettings;
+  updateUserSettings: (user: UserSettings) => void;
 }) => {
   const uid = React.useId();
   const [expanded, setExpanded] = React.useState(!replyToEmail.email); // Expand newly added rows
   const updateReplyToEmail = (update: Partial<ReplyToEmail>) => {
-    const replyToEmailIndex = userSettings.reply_to_emails.findIndex(({ email }) => email === replyToEmail.email);
     updateUserSettings({
       ...userSettings,
       reply_to_emails: [
-        ...userSettings.reply_to_emails.slice(0, replyToEmailIndex),
+        ...userSettings.reply_to_emails.slice(0, idx),
         { ...replyToEmail, ...update },
-        ...userSettings.reply_to_emails.slice(replyToEmailIndex + 1),
+        ...userSettings.reply_to_emails.slice(idx + 1),
       ],
     });
   };
   const tagList = React.useMemo(() => {
-    const otherEmails = userSettings.reply_to_emails.filter(({ email }) => email !== replyToEmail.email);
+    const otherEmails = userSettings.reply_to_emails.filter((_value, index) => index !== idx);
 
     const unavailableProductIds = otherEmails.map(({ product_ids }) => product_ids).flat();
 
@@ -164,10 +170,11 @@ const MainPage = (props: Props) => {
   const [formErrors, setFormErrors] = React.useState<Record<"email", boolean>>({
     email: false,
   });
-  const [userSettings, setUserSettings] = React.useState<Props["user"]>({
+  const [userSettings, setUserSettings] = React.useState({
     ...props.user,
     email: props.user.email ?? "",
     support_email: props.user.support_email ?? "",
+    tax_id: null,
     purchasing_power_parity_excluded_product_ids: props.user.purchasing_power_parity_excluded_product_ids,
   });
   const updateUserSettings = (settings: Partial<typeof userSettings>) =>
@@ -266,7 +273,7 @@ const MainPage = (props: Props) => {
               type="email"
               id={`${uid}-email`}
               ref={emailInputRef}
-              value={userSettings.email ?? ""}
+              value={userSettings.email}
               disabled={props.is_form_disabled}
               aria-invalid={formErrors.email}
               onChange={(e) => updateUserSettings({ email: e.target.value })}
@@ -419,7 +426,7 @@ const MainPage = (props: Props) => {
             <input
               type="email"
               id={`${uid}-support-email`}
-              value={userSettings.support_email ?? ""}
+              value={userSettings.support_email}
               placeholder={props.user.email ?? ""}
               disabled={props.is_form_disabled}
               onChange={(e) => updateUserSettings({ support_email: e.target.value })}
@@ -429,9 +436,10 @@ const MainPage = (props: Props) => {
           {userSettings.reply_to_emails.length ? (
             <>
               <div className="rows" role="list">
-                {userSettings.reply_to_emails.map((reply_to_email) => (
+                {userSettings.reply_to_emails.map((reply_to_email, idx) => (
                   <ReplyToEmailRow
-                    key={reply_to_email.email}
+                    key={idx}
+                    idx={idx}
                     replyToEmail={reply_to_email}
                     userSettings={userSettings}
                     updateUserSettings={updateUserSettings}

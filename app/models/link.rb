@@ -157,6 +157,7 @@ class Link < ApplicationRecord
   has_many :alive_public_files, -> { alive }, class_name: "PublicFile", as: :resource
   has_many :communities, as: :resource, dependent: :destroy
   has_one :active_community, -> { alive }, class_name: "Community", as: :resource
+
   before_validation :associate_price, on: :create
   before_validation :set_unique_permalink
   before_validation :release_custom_permalink_if_possible, if: :custom_permalink_changed?
@@ -216,6 +217,7 @@ class Link < ApplicationRecord
   attr_json_data_accessor :excluded_sales_tax_regions, default: -> { [] }
   attr_json_data_accessor :sections, default: -> { [] }
   attr_json_data_accessor :main_section_index, default: -> { 0 }
+
   scope :alive,                           -> { where(purchase_disabled_at: nil, banned_at: nil, deleted_at: nil) }
   scope :visible,                         -> { where(deleted_at: nil) }
   scope :visible_and_not_archived,        -> { visible.not_archived }

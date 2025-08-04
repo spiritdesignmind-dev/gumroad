@@ -94,8 +94,6 @@ class SettingsPresenter
     }
   end
 
-
-
   def application_props(application)
     {
       settings_pages: pages,

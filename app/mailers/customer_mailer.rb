@@ -86,7 +86,6 @@ class CustomerMailer < ApplicationMailer
   def refund(email, link_id, purchase_id)
     @product = Link.find(link_id)
     @purchase = purchase_id ? Purchase.find(purchase_id) : nil
-
     mail(
       to: email,
       from: from_email_address_with_name(@product.user.name, "noreply@#{CUSTOMERS_MAIL_DOMAIN}"),
