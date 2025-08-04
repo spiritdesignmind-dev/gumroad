@@ -70,7 +70,7 @@ type Props = {
 const AddReplyToEmailButton = ({ addNewReplyToEmail }: { addNewReplyToEmail: () => void }) => (
   <Button color="primary" onClick={() => addNewReplyToEmail()}>
     <Icon name="plus" />
-    Add reply-to email
+    Add a product specific email
   </Button>
 );
 
@@ -100,9 +100,12 @@ const ReplyToEmailRow = ({
   return (
     <div role="listitem">
       <div className="content">
-        <Icon name="code-square" className="type-icon" />
-        <div>
+        <Icon name="envelope-fill" className="type-icon" />
+        <div className="ml-1">
           <h4>{replyToEmail.email || "No email set"}</h4>
+          <span>
+            {replyToEmail.product_ids.length} {replyToEmail.product_ids.length === 1 ? "product" : "products"}
+          </span>
         </div>
       </div>
       <div className="actions">
@@ -131,6 +134,7 @@ const ReplyToEmailRow = ({
               value={replyToEmail.email}
               onChange={(evt) => updateReplyToEmail({ email: evt.target.value })}
             />
+            <small>This reply-to email will appear on receipts for selected products.</small>
           </fieldset>
           <fieldset>
             <legend>
@@ -422,27 +426,27 @@ const MainPage = (props: Props) => {
               onChange={(e) => updateUserSettings({ support_email: e.target.value })}
             />
             <small>This email is listed on the receipt of every sale.</small>
-
-            {userSettings.reply_to_emails.length > 0 ? (
-              <>
-                <div className="rows" role="list">
-                  {userSettings.reply_to_emails.map((reply_to_email) => (
-                    <ReplyToEmailRow
-                      key={reply_to_email.id}
-                      replyToEmail={reply_to_email}
-                      userSettings={userSettings}
-                      updateUserSettings={updateUserSettings}
-                    />
-                  ))}
-                </div>
-                <AddReplyToEmailButton addNewReplyToEmail={addNewReplyToEmail} />
-              </>
-            ) : (
-              <div className="placeholder">
-                <AddReplyToEmailButton addNewReplyToEmail={addNewReplyToEmail} />
-              </div>
-            )}
           </fieldset>
+          {userSettings.reply_to_emails.length > 0 ? (
+            <>
+              <div className="rows" role="list">
+                {userSettings.reply_to_emails.map((reply_to_email) => (
+                  <ReplyToEmailRow
+                    key={reply_to_email.id}
+                    replyToEmail={reply_to_email}
+                    userSettings={userSettings}
+                    updateUserSettings={updateUserSettings}
+                  />
+                ))}
+              </div>
+              <AddReplyToEmailButton addNewReplyToEmail={addNewReplyToEmail} />
+            </>
+          ) : (
+            <div className="placeholder">
+              <AddReplyToEmailButton addNewReplyToEmail={addNewReplyToEmail} />
+              <div>Use a different reply-to email for specific products.</div>
+            </div>
+          )}
         </section>
         {props.user.seller_refund_policy.enabled ? (
           <section>
