@@ -269,4 +269,84 @@ describe("Main Settings Scenario", type: :feature, js: true) do
       end
     end
   end
+
+  context "Reply to email" do
+    let!(:product_1) { create(:product, user:, name: "Product 1") }
+    let!(:product_2) { create(:product, user:, name: "Product 2") }
+
+    it "adds new reply to email" do
+      visit settings_main_path
+      click_on "Add a product specific email"
+      within find_reply_to_email_row(name: "No email set") do
+        fill_in "Email", with: "support@example.com"
+        select_combo_box_option "Product 1", from: "Products"
+      end
+      click_on "Update settings"
+      expect(page).to have_alert(text: "Your account has been updated!")
+
+      reply_to_email = ReplyToEmail.last
+      expect(reply_to_email.email).to eq("support@example.com")
+      expect(reply_to_email.products).to eq([product_1])
+    end
+
+    it "deletes reply to email" do
+      reply_to_email = create(:reply_to_email, user:, email: "support@example.com")
+
+      visit settings_main_path
+      within find_reply_to_email_row(name: reply_to_email.email) do
+        click_on "Delete email"
+      end
+      click_on "Update settings"
+      expect(page).to have_alert(text: "Your account has been updated!")
+
+      expect(ReplyToEmail.count).to eq(0)
+    end
+
+    it "updates existing reply to email" do
+      reply_to_email = create(:reply_to_email, user:, email: "support@example.com")
+
+      visit settings_main_path
+      within find_reply_to_email_row(name: reply_to_email.email) do
+        click_on "Edit email"
+        fill_in "Email", with: "new_support@example.com"
+        select_combo_box_option "Product 2", from: "Products"
+      end
+      click_on "Update settings"
+      expect(page).to have_alert(text: "Your account has been updated!")
+
+      reply_to_email.reload
+      expect(reply_to_email.email).to eq("new_support@example.com")
+      expect(reply_to_email.products).to eq([product_2])
+    end
+
+    it "does not allow same product to be selected for multiple emails" do
+      reply_to_email1 = create(:reply_to_email, user:, email: "support@example.com", product_ids: [product_1.id])
+      _reply_to_email2 = create(:reply_to_email, user:, email: "other@example.com", product_ids: [product_2.id])
+
+      visit settings_main_path
+      within find_reply_to_email_row(name: reply_to_email1.email) do
+        click_on "Edit email"
+        expect(page).not_to have_combo_box("Products", options: ["Product 2"])
+      end
+    end
+
+    it "does not allow multiple emails to have the same email address" do
+      create(:reply_to_email, user:, email: "support@example.com")
+
+      visit settings_main_path
+      click_on "Add a product specific email"
+      within find_reply_to_email_row(name: "No email set") do
+        fill_in "Email", with: "support@example.com"
+        select_combo_box_option "Product 1", from: "Products"
+      end
+      click_on "Update settings"
+
+      expect(page).to have_alert(text: "Email has already been taken")
+      expect(ReplyToEmail.count).to eq(1)
+    end
+  end
+
+  def find_reply_to_email_row(name:)
+    find("[role=listitem] h4", text: name).ancestor("[role=listitem]")
+  end
 end

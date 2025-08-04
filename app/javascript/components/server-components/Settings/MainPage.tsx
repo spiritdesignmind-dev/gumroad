@@ -96,6 +96,15 @@ const ReplyToEmailRow = ({
       ],
     });
   };
+  const tagList = React.useMemo(() => {
+    const otherEmails = userSettings.reply_to_emails.filter(({ id }) => id !== replyToEmail.id);
+
+    const unavailableProductIds = otherEmails.map(({ product_ids }) => product_ids).flat();
+
+    return userSettings.products
+      .filter(({ id }) => !unavailableProductIds.includes(id))
+      .map(({ id, name }) => ({ id, label: name }));
+  }, [userSettings.products, userSettings.reply_to_emails]);
 
   return (
     <div role="listitem">
@@ -109,7 +118,7 @@ const ReplyToEmailRow = ({
         </div>
       </div>
       <div className="actions">
-        <Button onClick={() => setExpanded((prevExpanded) => !prevExpanded)} aria-label="Edit snippet">
+        <Button onClick={() => setExpanded((prevExpanded) => !prevExpanded)} aria-label="Edit email">
           {expanded ? <Icon name="outline-cheveron-up" /> : <Icon name="outline-cheveron-down" />}
         </Button>
         <Button
@@ -143,7 +152,7 @@ const ReplyToEmailRow = ({
             <TagInput
               inputId={`${uid}-products`}
               tagIds={replyToEmail.product_ids}
-              tagList={userSettings.products.map(({ id, name }) => ({ id, label: name }))}
+              tagList={tagList}
               onChangeTagIds={(productIds) => updateReplyToEmail({ product_ids: productIds })}
             />
           </fieldset>
