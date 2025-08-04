@@ -307,7 +307,7 @@ describe Settings::MainController do
 
         it "creates new reply to emails with associated products" do
           reply_to_emails_params = [
-            { email: "contact@example.com", product_ids: [product1.id, product2.id] },
+            { email: "contact@example.com", product_ids: [product1.external_id, product2.external_id] },
             { email: "support@example.com", product_ids: [] }
           ]
 
@@ -329,7 +329,7 @@ describe Settings::MainController do
           existing_reply_to_email.products = [product1]
 
           reply_to_emails_params = [
-            { id: existing_reply_to_email.id, email: "contact@example.com", product_ids: [product2.id] }
+            { id: existing_reply_to_email.id, email: "contact@example.com", product_ids: [product2.external_id] }
           ]
 
           expect do
@@ -356,7 +356,7 @@ describe Settings::MainController do
 
         it "only associates products belonging to current seller" do
           reply_to_emails_params = [
-            { email: "contact@example.com", product_ids: [product1.id, other_product.id] }
+            { email: "contact@example.com", product_ids: [product1.external_id, other_product.external_id] }
           ]
 
           put :update, params: { user: user_params.merge(reply_to_emails: reply_to_emails_params) }, format: :json
