@@ -157,12 +157,12 @@ class Link < ApplicationRecord
   has_many :alive_public_files, -> { alive }, class_name: "PublicFile", as: :resource
   has_many :communities, as: :resource, dependent: :destroy
   has_one :active_community, -> { alive }, class_name: "Community", as: :resource
-  belongs_to :reply_to_email, optional: true
   before_validation :associate_price, on: :create
   before_validation :set_unique_permalink
   before_validation :release_custom_permalink_if_possible, if: :custom_permalink_changed?
   validates :user, presence: true
   validates :name, presence: true, length: { maximum: 255 }
+  validates :reply_to_email, format: URI::MailTo::EMAIL_REGEXP, allow_nil: true
   validates :default_price_cents, presence: true
   validates :unique_permalink, presence: true, uniqueness: { case_sensitive: false }, format: { with: /\A[a-zA-Z_]+\z/ }
   validates :custom_permalink, format: { with: /\A[a-zA-Z0-9_-]+\z/ }, uniqueness: { scope: :user_id, case_sensitive: false }, allow_nil: true, allow_blank: true
@@ -216,7 +216,6 @@ class Link < ApplicationRecord
   attr_json_data_accessor :excluded_sales_tax_regions, default: -> { [] }
   attr_json_data_accessor :sections, default: -> { [] }
   attr_json_data_accessor :main_section_index, default: -> { 0 }
-
   scope :alive,                           -> { where(purchase_disabled_at: nil, banned_at: nil, deleted_at: nil) }
   scope :visible,                         -> { where(deleted_at: nil) }
   scope :visible_and_not_archived,        -> { visible.not_archived }
@@ -1304,7 +1303,7 @@ class Link < ApplicationRecord
     end
 
     def support_email
-      reply_to_email&.email || user.support_or_form_email
+      reply_to_email || user.support_or_form_email
     end
 
   private

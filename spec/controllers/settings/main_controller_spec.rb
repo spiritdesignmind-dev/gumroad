@@ -311,47 +311,26 @@ describe Settings::MainController do
             { email: "support@example.com", product_ids: [] }
           ]
 
-          expect do
-            put :update, params: { user: user_params.merge(reply_to_emails: reply_to_emails_params) }, format: :json
-          end.to change(ReplyToEmail, :count).by(2)
+          put :update, params: { user: user_params.merge(reply_to_emails: reply_to_emails_params) }, format: :json
 
           expect(response.parsed_body["success"]).to be(true)
 
-          expect(product1.reload.reply_to_email.email).to eq("contact@example.com")
-          expect(product2.reload.reply_to_email.email).to eq("contact@example.com")
-
-          support_email = seller.reply_to_emails.find_by(email: "support@example.com")
-          expect(support_email.products).to be_empty
+          expect(product1.reload.reply_to_email).to eq("contact@example.com")
+          expect(product2.reload.reply_to_email).to eq("contact@example.com")
         end
 
         it "updates existing reply to emails" do
-          existing_reply_to_email = create(:reply_to_email, user: seller, email: "contact@example.com")
-          existing_reply_to_email.products = [product1]
+          product1.update!(reply_to_email: "contact@example.com")
 
           reply_to_emails_params = [
-            { id: existing_reply_to_email.id, email: "contact@example.com", product_ids: [product2.external_id] }
-          ]
-
-          expect do
-            put :update, params: { user: user_params.merge(reply_to_emails: reply_to_emails_params) }, format: :json
-          end.not_to change(ReplyToEmail, :count)
-
-          expect(response.parsed_body["success"]).to be(true)
-          expect(existing_reply_to_email.reload.products).to match_array([product2])
-        end
-
-        it "clears existing products when updating" do
-          existing_reply_to_email = create(:reply_to_email, user: seller, email: "contact@example.com")
-          existing_reply_to_email.products = [product1, product2]
-
-          reply_to_emails_params = [
-            { id: existing_reply_to_email.id, email: "contact@example.com", product_ids: [] }
+            { email: "contact@example.com", product_ids: [product2.external_id] }
           ]
 
           put :update, params: { user: user_params.merge(reply_to_emails: reply_to_emails_params) }, format: :json
 
           expect(response.parsed_body["success"]).to be(true)
-          expect(existing_reply_to_email.reload.products).to be_empty
+          expect(product1.reload.reply_to_email).to be_nil
+          expect(product2.reload.reply_to_email).to eq("contact@example.com")
         end
 
         it "only associates products belonging to current seller" do
@@ -363,20 +342,20 @@ describe Settings::MainController do
 
           expect(response.parsed_body["success"]).to be(true)
 
-          reply_to_email = seller.reply_to_emails.find_by(email: "contact@example.com")
-          expect(reply_to_email.products).to match_array([product1])
-          expect(reply_to_email.products).not_to include(other_product)
+          expect(product1.reload.reply_to_email).to eq("contact@example.com")
+          expect(other_product.reload.reply_to_email).to be_nil
         end
 
-        it "deletes all existing reply to emails if param is empty" do
-          existing_reply_to_email = create(:reply_to_email, user: seller, email: "contact@example.com")
-          existing_reply_to_email.products = [product1, product2]
+        it "clears all existing reply to emails if param is empty" do
+          product1.update!(reply_to_email: "contact@example.com")
+          product2.update!(reply_to_email: "support@example.com")
 
           reply_to_emails_params = []
           put :update, params: { user: user_params.merge(reply_to_emails: reply_to_emails_params) }, format: :json
 
           expect(response.parsed_body["success"]).to be(true)
-          expect(seller.reply_to_emails.count).to eq(0)
+          expect(product1.reload.reply_to_email).to be_nil
+          expect(product2.reload.reply_to_email).to be_nil
         end
       end
     end

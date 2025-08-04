@@ -70,7 +70,7 @@ class Settings::MainController < Sellers::BaseController
         :purchasing_power_parity_limit,
         :purchasing_power_parity_payment_verification_disabled,
         :show_nsfw_products,
-        { reply_to_emails: [:id, :email, { product_ids: [] }] },
+        { reply_to_emails: [:email, { product_ids: [] }] },
         { seller_refund_policy: [:max_refund_period_in_days, :fine_print] }
       ]
 

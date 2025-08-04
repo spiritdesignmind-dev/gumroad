@@ -45,7 +45,6 @@ class User < ApplicationRecord
            as: :owner
   has_many :resource_subscriptions
   has_many :devices
-  has_many :reply_to_emails, dependent: :destroy
 
   belongs_to :credit_card, optional: true
 
@@ -494,22 +493,14 @@ class User < ApplicationRecord
   end
 
   def update_reply_to_emails!(reply_to_emails_data)
-    existing_reply_to_emails = reply_to_emails
-    keep_reply_to_emails = reply_to_emails_data&.map do |email_data|
-      reply_to_email = reply_to_emails.find_or_initialize_by(id: email_data[:id])
-      reply_to_email.update!(email: email_data[:email]) if email_data[:email] != reply_to_email.email
+    products.where.not(reply_to_email: nil).update_all(reply_to_email: nil)
 
-      reply_to_email.products.clear if reply_to_email.persisted?
+    reply_to_emails_data&.each do |email_data|
+      email = email_data[:email]
+      raise ArgumentError, "Invalid email format: #{email}" if email.present? && !email.match?(EMAIL_REGEX)
 
-
-      if email_data[:product_ids].present?
-        reply_to_email.products = products.by_external_ids(email_data[:product_ids])
-      end
-
-      reply_to_email
-    end || []
-
-    (existing_reply_to_emails - keep_reply_to_emails).each(&:destroy)
+      products.by_external_ids(email_data[:product_ids]).update_all(reply_to_email: email)
+    end
   end
 
   def save_external_id

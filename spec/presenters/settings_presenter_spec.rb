@@ -129,13 +129,13 @@ describe SettingsPresenter do
 
     context "when reply to emails exist" do
       before do
-        create(:reply_to_email, user: seller, email: "support@example.com", product_ids: [product.id])
+        product.reply_to_email = "support@example.com"
+        product.save!
       end
 
       it "includes reply_to_emails in main_props" do
         expect(presenter.main_props[:user][:reply_to_emails]).to include(
           {
-            id: seller.reply_to_emails.first.id,
             email: "support@example.com",
             product_ids: [
               product.external_id,

@@ -17,10 +17,7 @@ import { Layout } from "$app/components/Settings/Layout";
 import { TagInput } from "$app/components/TagInput";
 import { Toggle } from "$app/components/Toggle";
 
-const NEW_REPLY_TO_EMAIL_ID_PREFIX = "__REPLY_TO_EMAIL";
-
 type ReplyToEmail = {
-  id: number | string; // new emails will have a string ID starting with NEW_REPLY_TO_EMAIL_ID_PREFIX
   email: string;
   product_ids: string[];
 };
@@ -84,9 +81,9 @@ const ReplyToEmailRow = ({
   updateUserSettings: (user: Props["user"]) => void;
 }) => {
   const uid = React.useId();
-  const [expanded, setExpanded] = React.useState(!!replyToEmail.id.toString().startsWith(NEW_REPLY_TO_EMAIL_ID_PREFIX));
+  const [expanded, setExpanded] = React.useState(!replyToEmail.email); // Expand newly added rows
   const updateReplyToEmail = (update: Partial<ReplyToEmail>) => {
-    const replyToEmailIndex = userSettings.reply_to_emails.findIndex(({ id }) => id === replyToEmail.id);
+    const replyToEmailIndex = userSettings.reply_to_emails.findIndex(({ email }) => email === replyToEmail.email);
     updateUserSettings({
       ...userSettings,
       reply_to_emails: [
@@ -97,7 +94,7 @@ const ReplyToEmailRow = ({
     });
   };
   const tagList = React.useMemo(() => {
-    const otherEmails = userSettings.reply_to_emails.filter(({ id }) => id !== replyToEmail.id);
+    const otherEmails = userSettings.reply_to_emails.filter(({ email }) => email !== replyToEmail.email);
 
     const unavailableProductIds = otherEmails.map(({ product_ids }) => product_ids).flat();
 
@@ -125,7 +122,7 @@ const ReplyToEmailRow = ({
           onClick={() =>
             updateUserSettings({
               ...userSettings,
-              reply_to_emails: userSettings.reply_to_emails.filter(({ id }) => id !== replyToEmail.id),
+              reply_to_emails: userSettings.reply_to_emails.filter(({ email }) => email !== replyToEmail.email),
             })
           }
           aria-label="Delete email"
@@ -178,10 +175,7 @@ const MainPage = (props: Props) => {
 
   const addNewReplyToEmail = React.useCallback(() => {
     updateUserSettings({
-      reply_to_emails: [
-        ...userSettings.reply_to_emails,
-        { id: `${NEW_REPLY_TO_EMAIL_ID_PREFIX}${Math.random()}`, email: "", product_ids: [] },
-      ],
+      reply_to_emails: [...userSettings.reply_to_emails, { email: "", product_ids: [] }],
     });
   }, [userSettings]);
 
@@ -232,10 +226,6 @@ const MainPage = (props: Props) => {
           user: {
             ...userSettings,
             reply_to_emails: userSettings.reply_to_emails.map((replyToEmail) => ({
-              id:
-                replyToEmail.id && !replyToEmail.id.toString().startsWith(NEW_REPLY_TO_EMAIL_ID_PREFIX)
-                  ? replyToEmail.id
-                  : null,
               email: replyToEmail.email,
               product_ids: replyToEmail.product_ids,
             })),
@@ -441,7 +431,7 @@ const MainPage = (props: Props) => {
               <div className="rows" role="list">
                 {userSettings.reply_to_emails.map((reply_to_email) => (
                   <ReplyToEmailRow
-                    key={reply_to_email.id}
+                    key={reply_to_email.email}
                     replyToEmail={reply_to_email}
                     userSettings={userSettings}
                     updateUserSettings={updateUserSettings}

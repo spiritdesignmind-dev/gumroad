@@ -29,9 +29,7 @@ describe CustomerMailer do
     context "when reply to email exists" do
       subject(:mail) do
         user = create(:user, email: "bob@gumroad.com", name: "bob walsh")
-        link = create(:product, user:)
-        reply_to_email = create(:reply_to_email, user:, email: "support@example.com")
-        link.update!(reply_to_email:)
+        link = create(:product, user:, reply_to_email: "support@example.com")
 
         @purchase = create(:purchase, link:, seller: link.user, email: "to@example.org")
         @purchase.create_url_redirect!

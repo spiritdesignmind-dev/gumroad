@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_30_232310) do
+ActiveRecord::Schema[7.1].define(version: 2025_08_04_221353) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "name", limit: 191, null: false
     t.string "record_type", limit: 191, null: false
@@ -1110,11 +1110,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_30_232310) do
     t.bigint "taxonomy_id"
     t.string "native_type", default: "digital", null: false
     t.integer "discover_fee_per_thousand", default: 100, null: false
-    t.bigint "reply_to_email_id"
+    t.string "reply_to_email"
     t.index ["banned_at"], name: "index_links_on_banned_at"
     t.index ["custom_permalink"], name: "index_links_on_custom_permalink", length: 191
     t.index ["deleted_at"], name: "index_links_on_deleted_at"
-    t.index ["reply_to_email_id"], name: "index_links_on_reply_to_email_id"
+    t.index ["reply_to_email"], name: "index_links_on_reply_to_email"
     t.index ["showcaseable"], name: "index_links_on_showcaseable"
     t.index ["taxonomy_id"], name: "index_links_on_taxonomy_id"
     t.index ["unique_permalink"], name: "index_links_on_unique_permalink", length: 191
@@ -1836,15 +1836,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_30_232310) do
     t.index ["processor_refund_id"], name: "index_refunds_on_processor_refund_id"
     t.index ["purchase_id"], name: "index_refunds_on_purchase_id"
     t.index ["seller_id", "created_at"], name: "index_refunds_on_seller_id_and_created_at"
-  end
-
-  create_table "reply_to_emails", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
-    t.string "email", null: false
-    t.bigint "user_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["user_id", "email"], name: "index_reply_to_emails_on_user_id_and_email", unique: true
-    t.index ["user_id"], name: "index_reply_to_emails_on_user_id"
   end
 
   create_table "resource_subscriptions", id: :integer, charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
@@ -2728,6 +2719,4 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_30_232310) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "links", "reply_to_emails", on_delete: :nullify
-  add_foreign_key "reply_to_emails", "users"
 end
