@@ -376,7 +376,7 @@ describe Settings::MainController do
           put :update, params: { user: user_params.merge(reply_to_emails: reply_to_emails_params) }, format: :json
 
           expect(response.parsed_body["success"]).to be(true)
-          expect(ReplyToEmail.count).to eq(0)
+          expect(seller.reply_to_emails.count).to eq(0)
         end
       end
     end

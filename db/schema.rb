@@ -1843,6 +1843,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_30_232310) do
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["user_id", "email"], name: "index_reply_to_emails_on_user_id_and_email", unique: true
     t.index ["user_id"], name: "index_reply_to_emails_on_user_id"
   end
 
@@ -2727,6 +2728,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_30_232310) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "links", "reply_to_emails"
+  add_foreign_key "links", "reply_to_emails", on_delete: :nullify
   add_foreign_key "reply_to_emails", "users"
 end
