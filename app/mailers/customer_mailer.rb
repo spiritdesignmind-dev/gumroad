@@ -73,10 +73,12 @@ class CustomerMailer < ApplicationMailer
     else
       @product = Link.find(link_id)
     end
+    reply_to = @product.reply_to_email&.email || @product.user.support_or_form_email
+
     mail(
       to: email,
       from: from_email_address_with_name(@product.user.name, "noreply@#{CUSTOMERS_MAIL_DOMAIN}"),
-      reply_to: @product.user.support_or_form_email,
+      reply_to: reply_to,
       subject: "You pre-ordered #{@product.name}!",
       delivery_method_options: MailerInfo.random_delivery_method_options(domain: :customers, seller: @product.user)
     )
@@ -85,10 +87,12 @@ class CustomerMailer < ApplicationMailer
   def refund(email, link_id, purchase_id)
     @product = Link.find(link_id)
     @purchase = purchase_id ? Purchase.find(purchase_id) : nil
+    reply_to = @product.reply_to_email&.email || @product.user.support_or_form_email
+
     mail(
       to: email,
       from: from_email_address_with_name(@product.user.name, "noreply@#{CUSTOMERS_MAIL_DOMAIN}"),
-      reply_to: @product.user.support_or_form_email,
+      reply_to: reply_to,
       subject: "You have been refunded.",
       delivery_method_options: MailerInfo.random_delivery_method_options(domain: :customers, seller: @product.user)
     )
@@ -223,12 +227,13 @@ class CustomerMailer < ApplicationMailer
     @product = review.link
     seller = @product.user
     @seller_presenter = UserPresenter.new(user: seller).author_byline_props
+    reply_to = @product.reply_to_email&.email || @product.user.support_or_form_email
 
     mail(
       to: review.purchase.email,
       subject: "#{@seller_presenter[:name]} responded to your review",
       from: from_email_address_with_name(seller.name, "noreply@#{CUSTOMERS_MAIL_DOMAIN}"),
-      reply_to: seller.support_or_form_email,
+      reply_to: reply_to,
       delivery_method_options: MailerInfo.random_delivery_method_options(domain: :customers)
     )
   end
