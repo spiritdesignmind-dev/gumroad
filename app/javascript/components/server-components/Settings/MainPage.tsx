@@ -20,9 +20,9 @@ import { Toggle } from "$app/components/Toggle";
 const NEW_REPLY_TO_EMAIL_ID_PREFIX = "__REPLY_TO_EMAIL";
 
 type ReplyToEmail = {
-  id: string;
+  id: number | string; // new emails will have a string ID starting with NEW_REPLY_TO_EMAIL_ID_PREFIX
   email: string;
-  applied_product_ids: string[];
+  product_ids: string[];
 };
 
 type Props = {
@@ -84,7 +84,7 @@ const ReplyToEmailRow = ({
   updateUserSettings: (user: Props["user"]) => void;
 }) => {
   const uid = React.useId();
-  const [expanded, setExpanded] = React.useState(!!replyToEmail.id.startsWith(NEW_REPLY_TO_EMAIL_ID_PREFIX));
+  const [expanded, setExpanded] = React.useState(!!replyToEmail.id.toString().startsWith(NEW_REPLY_TO_EMAIL_ID_PREFIX));
   const updateReplyToEmail = (update: Partial<ReplyToEmail>) => {
     const replyToEmailIndex = userSettings.reply_to_emails.findIndex(({ id }) => id === replyToEmail.id);
     updateUserSettings({
@@ -127,20 +127,20 @@ const ReplyToEmailRow = ({
             <label htmlFor={`${uid}email`}>Email</label>
             <input
               id={`${uid}email`}
-              type="text"
+              type="email"
               value={replyToEmail.email}
               onChange={(evt) => updateReplyToEmail({ email: evt.target.value })}
             />
           </fieldset>
           <fieldset>
             <legend>
-              <label htmlFor={`${uid}-ppp-exclude-products`}>Products to exclude</label>
+              <label htmlFor={`${uid}-products`}>Products</label>
             </legend>
             <TagInput
-              inputId={`${uid}-ppp-exclude-products`}
-              tagIds={userSettings.purchasing_power_parity_excluded_product_ids}
+              inputId={`${uid}-products`}
+              tagIds={replyToEmail.product_ids}
               tagList={userSettings.products.map(({ id, name }) => ({ id, label: name }))}
-              onChangeTagIds={(productIds) => updateReplyToEmail({ applied_product_ids: productIds })}
+              onChangeTagIds={(productIds) => updateReplyToEmail({ product_ids: productIds })}
             />
           </fieldset>
         </div>
@@ -167,7 +167,7 @@ const MainPage = (props: Props) => {
     updateUserSettings({
       reply_to_emails: [
         ...userSettings.reply_to_emails,
-        { id: `${NEW_REPLY_TO_EMAIL_ID_PREFIX}${Math.random()}`, email: "", applied_product_ids: [] },
+        { id: `${NEW_REPLY_TO_EMAIL_ID_PREFIX}${Math.random()}`, email: "", product_ids: [] },
       ],
     });
   }, [userSettings]);
@@ -219,9 +219,12 @@ const MainPage = (props: Props) => {
           user: {
             ...userSettings,
             reply_to_emails: userSettings.reply_to_emails.map((replyToEmail) => ({
-              id: replyToEmail.id && !replyToEmail.id.startsWith(NEW_REPLY_TO_EMAIL_ID_PREFIX) ? replyToEmail.id : null,
+              id:
+                replyToEmail.id && !replyToEmail.id.toString().startsWith(NEW_REPLY_TO_EMAIL_ID_PREFIX)
+                  ? replyToEmail.id
+                  : null,
               email: replyToEmail.email,
-              applied_product_ids: replyToEmail.applied_product_ids,
+              product_ids: replyToEmail.product_ids,
             })),
           },
         },

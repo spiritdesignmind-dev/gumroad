@@ -137,7 +137,7 @@ describe SettingsPresenter do
           {
             id: seller.reply_to_emails.first.id,
             email: "support@example.com",
-            applied_product_ids: [
+            product_ids: [
               product.external_id,
             ]
           }

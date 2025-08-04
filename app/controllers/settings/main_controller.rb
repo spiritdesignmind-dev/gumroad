@@ -89,7 +89,7 @@ class Settings::MainController < Sellers::BaseController
         reply_to_email.save!
 
         if email_data[:product_ids].present?
-          products = current_seller.products.where(id: email_data[:product_ids])
+          products = current_seller.products.by_external_ids(email_data[:product_ids])
           reply_to_email.products = products
         end
 
