@@ -77,30 +77,24 @@ describe ReplyToEmail do
       expect(result).to include(
         id: reply_to_email.id,
         email: reply_to_email.email,
-        applied_products: be_an(Array)
+        applied_product_ids: be_an(Array)
       )
     end
 
     it "includes applied products with correct structure" do
       result = reply_to_email.as_json
 
-      expect(result[:applied_products]).to contain_exactly(
-        {
-          id: product1.external_id,
-          name: product1.name
-        },
-        {
-          id: product2.external_id,
-          name: product2.name
-        }
+      expect(result[:applied_product_ids]).to contain_exactly(
+        product1.external_id,
+        product2.external_id,
       )
     end
 
-    it "returns empty applied_products when no links are associated" do
+    it "returns empty applied_product_ids when no links are associated" do
       reply_to_email_without_links = create(:reply_to_email, user: user)
       result = reply_to_email_without_links.as_json
 
-      expect(result[:applied_products]).to eq([])
+      expect(result[:applied_product_ids]).to eq([])
     end
   end
 end

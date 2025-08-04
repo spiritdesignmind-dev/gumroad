@@ -8,6 +8,7 @@ import { ResponseError, request, assertResponseError } from "$app/utils/request"
 import { register } from "$app/utils/serverComponentUtil";
 
 import { Button } from "$app/components/Button";
+import { Icon } from "$app/components/Icons";
 import { Modal } from "$app/components/Modal";
 import { NumberInput } from "$app/components/NumberInput";
 import { showAlert } from "$app/components/server-components/Alert";
@@ -15,6 +16,14 @@ import { ToggleSettingRow } from "$app/components/SettingRow";
 import { Layout } from "$app/components/Settings/Layout";
 import { TagInput } from "$app/components/TagInput";
 import { Toggle } from "$app/components/Toggle";
+
+const NEW_REPLY_TO_EMAIL_ID_PREFIX = "__REPLY_TO_EMAIL";
+
+type ReplyToEmail = {
+  id: string;
+  email: string;
+  applied_product_ids: string[];
+};
 
 type Props = {
   settings_pages: SettingPage[];
@@ -54,7 +63,90 @@ type Props = {
       fine_print_enabled: boolean;
       fine_print: string | null;
     };
+    reply_to_emails: ReplyToEmail[];
   };
+};
+
+const AddReplyToEmailButton = ({ addNewReplyToEmail }: { addNewReplyToEmail: () => void }) => (
+  <Button color="primary" onClick={() => addNewReplyToEmail()}>
+    <Icon name="plus" />
+    Add reply-to email
+  </Button>
+);
+
+const ReplyToEmailRow = ({
+  replyToEmail,
+  userSettings,
+  updateUserSettings,
+}: {
+  replyToEmail: ReplyToEmail;
+  userSettings: Props["user"];
+  updateUserSettings: (user: Props["user"]) => void;
+}) => {
+  const uid = React.useId();
+  const [expanded, setExpanded] = React.useState(!!replyToEmail.id.startsWith(NEW_REPLY_TO_EMAIL_ID_PREFIX));
+  const updateReplyToEmail = (update: Partial<ReplyToEmail>) => {
+    const replyToEmailIndex = userSettings.reply_to_emails.findIndex(({ id }) => id === replyToEmail.id);
+    updateUserSettings({
+      ...userSettings,
+      reply_to_emails: [
+        ...userSettings.reply_to_emails.slice(0, replyToEmailIndex),
+        { ...replyToEmail, ...update },
+        ...userSettings.reply_to_emails.slice(replyToEmailIndex + 1),
+      ],
+    });
+  };
+
+  return (
+    <div role="listitem">
+      <div className="content">
+        <Icon name="code-square" className="type-icon" />
+        <div>
+          <h4>{replyToEmail.email || "No email set"}</h4>
+        </div>
+      </div>
+      <div className="actions">
+        <Button onClick={() => setExpanded((prevExpanded) => !prevExpanded)} aria-label="Edit snippet">
+          {expanded ? <Icon name="outline-cheveron-up" /> : <Icon name="outline-cheveron-down" />}
+        </Button>
+        <Button
+          onClick={() =>
+            updateUserSettings({
+              ...userSettings,
+              reply_to_emails: userSettings.reply_to_emails.filter(({ id }) => id !== replyToEmail.id),
+            })
+          }
+          aria-label="Delete email"
+        >
+          <Icon name="trash2" />
+        </Button>
+      </div>
+      {expanded ? (
+        <div className="paragraphs">
+          <fieldset>
+            <label htmlFor={`${uid}email`}>Email</label>
+            <input
+              id={`${uid}email`}
+              type="text"
+              value={replyToEmail.email}
+              onChange={(evt) => updateReplyToEmail({ email: evt.target.value })}
+            />
+          </fieldset>
+          <fieldset>
+            <legend>
+              <label htmlFor={`${uid}-ppp-exclude-products`}>Products to exclude</label>
+            </legend>
+            <TagInput
+              inputId={`${uid}-ppp-exclude-products`}
+              tagIds={userSettings.purchasing_power_parity_excluded_product_ids}
+              tagList={userSettings.products.map(({ id, name }) => ({ id, label: name }))}
+              onChangeTagIds={(productIds) => updateReplyToEmail({ applied_product_ids: productIds })}
+            />
+          </fieldset>
+        </div>
+      ) : null}
+    </div>
+  );
 };
 
 const MainPage = (props: Props) => {
@@ -62,15 +154,23 @@ const MainPage = (props: Props) => {
   const [formErrors, setFormErrors] = React.useState<Record<"email", boolean>>({
     email: false,
   });
-  const [userSettings, setUserSettings] = React.useState({
+  const [userSettings, setUserSettings] = React.useState<Props["user"]>({
     ...props.user,
     email: props.user.email ?? "",
     support_email: props.user.support_email ?? "",
-    tax_id: null,
     purchasing_power_parity_excluded_product_ids: props.user.purchasing_power_parity_excluded_product_ids,
   });
   const updateUserSettings = (settings: Partial<typeof userSettings>) =>
     setUserSettings((prev) => ({ ...prev, ...settings }));
+
+  const addNewReplyToEmail = React.useCallback(() => {
+    updateUserSettings({
+      reply_to_emails: [
+        ...userSettings.reply_to_emails,
+        { id: `${NEW_REPLY_TO_EMAIL_ID_PREFIX}${Math.random()}`, email: "", applied_product_ids: [] },
+      ],
+    });
+  }, [userSettings]);
 
   const [isResendingConfirmationEmail, setIsResendingConfirmationEmail] = React.useState(false);
   const [resentConfirmationEmail, setResentConfirmationEmail] = React.useState(false);
@@ -115,7 +215,16 @@ const MainPage = (props: Props) => {
         url: Routes.settings_main_path(),
         method: "PUT",
         accept: "json",
-        data: { user: userSettings },
+        data: {
+          user: {
+            ...userSettings,
+            reply_to_emails: userSettings.reply_to_emails.map((replyToEmail) => ({
+              id: replyToEmail.id && !replyToEmail.id.startsWith(NEW_REPLY_TO_EMAIL_ID_PREFIX) ? replyToEmail.id : null,
+              email: replyToEmail.email,
+              applied_product_ids: replyToEmail.applied_product_ids,
+            })),
+          },
+        },
       });
       const responseData = cast<{ success: true } | { success: false; error_message: string }>(await response.json());
       if (responseData.success) {
@@ -151,7 +260,7 @@ const MainPage = (props: Props) => {
               type="email"
               id={`${uid}-email`}
               ref={emailInputRef}
-              value={userSettings.email}
+              value={userSettings.email ?? ""}
               disabled={props.is_form_disabled}
               aria-invalid={formErrors.email}
               onChange={(e) => updateUserSettings({ email: e.target.value })}
@@ -304,12 +413,32 @@ const MainPage = (props: Props) => {
             <input
               type="email"
               id={`${uid}-support-email`}
-              value={userSettings.support_email}
+              value={userSettings.support_email ?? ""}
               placeholder={props.user.email ?? ""}
               disabled={props.is_form_disabled}
               onChange={(e) => updateUserSettings({ support_email: e.target.value })}
             />
             <small>This email is listed on the receipt of every sale.</small>
+
+            {userSettings.reply_to_emails.length > 0 ? (
+              <>
+                <div className="rows" role="list">
+                  {userSettings.reply_to_emails.map((reply_to_email) => (
+                    <ReplyToEmailRow
+                      key={reply_to_email.id}
+                      replyToEmail={reply_to_email}
+                      userSettings={userSettings}
+                      updateUserSettings={updateUserSettings}
+                    />
+                  ))}
+                </div>
+                <AddReplyToEmailButton addNewReplyToEmail={addNewReplyToEmail} />
+              </>
+            ) : (
+              <div className="placeholder">
+                <AddReplyToEmailButton addNewReplyToEmail={addNewReplyToEmail} />
+              </div>
+            )}
           </fieldset>
         </section>
         {props.user.seller_refund_policy.enabled ? (

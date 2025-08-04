@@ -10,12 +10,7 @@ class ReplyToEmail < ApplicationRecord
     {
       id:,
       email:,
-      applied_products: products.map do |product|
-        {
-          id: product.external_id,
-          name: product.name,
-        }
-      end
+      applied_products: products.map { |product| product.external_id }
     }
   end
 end
