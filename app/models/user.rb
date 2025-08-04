@@ -496,8 +496,10 @@ class User < ApplicationRecord
     products.where.not(reply_to_email: nil).update_all(reply_to_email: nil)
 
     reply_to_emails_data&.each do |email_data|
-      email = email_data[:email]
-      raise ArgumentError, "Invalid email format: #{email}" if email.present? && !email.match?(EMAIL_REGEX)
+      email = email_data[:email]&.strip
+      next if email.blank?
+
+      raise ArgumentError, "Invalid email format: #{email}" if !email.match?(URI::MailTo::EMAIL_REGEXP)
 
       products.by_external_ids(email_data[:product_ids]).update_all(reply_to_email: email)
     end

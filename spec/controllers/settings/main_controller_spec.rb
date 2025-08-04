@@ -319,6 +319,17 @@ describe Settings::MainController do
           expect(product2.reload.reply_to_email).to eq("contact@example.com")
         end
 
+        it "fails when email isn't valid" do
+          reply_to_emails_params = [
+            { email: "invalid-email", product_ids: [product1.external_id] }
+          ]
+
+          put :update, params: { user: user_params.merge(reply_to_emails: reply_to_emails_params) }, format: :json
+
+          expect(response.parsed_body["success"]).to be(false)
+          expect(response.parsed_body["error_message"]).to eq("Invalid email format: invalid-email")
+        end
+
         it "updates existing reply to emails" do
           product1.update!(reply_to_email: "contact@example.com")
 
