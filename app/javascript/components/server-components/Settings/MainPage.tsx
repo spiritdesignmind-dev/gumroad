@@ -128,7 +128,7 @@ const ReplyToEmailRow = ({
           onClick={() =>
             updateUserSettings({
               ...userSettings,
-              reply_to_emails: userSettings.reply_to_emails.filter(({ email }) => email !== replyToEmail.email),
+              reply_to_emails: userSettings.reply_to_emails.filter((_value, index) => index !== idx),
             })
           }
           aria-label="Delete email"
