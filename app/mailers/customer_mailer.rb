@@ -227,13 +227,12 @@ class CustomerMailer < ApplicationMailer
     @product = review.link
     seller = @product.user
     @seller_presenter = UserPresenter.new(user: seller).author_byline_props
-    reply_to = @product.reply_to_email&.email || @product.user.support_or_form_email
 
     mail(
       to: review.purchase.email,
       subject: "#{@seller_presenter[:name]} responded to your review",
       from: from_email_address_with_name(seller.name, "noreply@#{CUSTOMERS_MAIL_DOMAIN}"),
-      reply_to: reply_to,
+      reply_to: @product.user.support_or_form_email,
       delivery_method_options: MailerInfo.random_delivery_method_options(domain: :customers)
     )
   end
