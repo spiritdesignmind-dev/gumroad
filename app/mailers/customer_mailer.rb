@@ -38,8 +38,7 @@ class CustomerMailer < ApplicationMailer
     is_receipt_for_gift_receiver = receipt_for_gift_receiver?(@chargeable)
     @footer_template = "layouts/mailers/receipt_footer" unless is_receipt_for_gift_receiver
     purchase = @chargeable.is_a?(Purchase) ? @chargeable : @chargeable.purchases.last
-    product = purchase.link
-    reply_to = product&.reply_to_email&.email || @chargeable.seller.support_or_form_email
+    reply_to = purchase&.link&.reply_to_email&.email || @chargeable.seller.support_or_form_email
 
     mail(
       to: @chargeable.orderable.email,
