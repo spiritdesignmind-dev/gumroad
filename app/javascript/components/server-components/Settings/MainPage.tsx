@@ -107,7 +107,7 @@ const ReplyToEmailRow = ({
     return userSettings.products
       .filter(({ id }) => !unavailableProductIds.includes(id))
       .map(({ id, name }) => ({ id, label: name }));
-  }, [userSettings.products, userSettings.reply_to_emails]);
+  }, [userSettings.products, userSettings.reply_to_emails, idx]);
 
   return (
     <div role="listitem">
