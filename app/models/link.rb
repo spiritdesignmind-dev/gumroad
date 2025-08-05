@@ -1201,6 +1201,10 @@ class Link < ApplicationRecord
     end
   end
 
+  def support_email
+    reply_to_email || user.support_or_form_email
+  end
+
   protected
     def downcase_filetype
       self.filetype = filetype.downcase if filetype.present?
@@ -1302,10 +1306,6 @@ class Link < ApplicationRecord
 
     def self.short_url_base
       SHORT_DOMAIN.to_s
-    end
-
-    def support_email
-      reply_to_email || user.support_or_form_email
     end
 
   private
