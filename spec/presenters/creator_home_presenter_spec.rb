@@ -297,22 +297,25 @@ describe CreatorHomePresenter do
       end
 
       it "includes tax forms since the seller's account was created" do
-        expect(presenter.creator_home_props[:tax_forms]).to eq({
-          2022 => download_url,
-          2021 => download_url,
-          2020 => download_url,
-        })
+        expect(presenter.creator_home_props[:tax_forms]).to eq(
+          {
+            2022 => download_url,
+            2021 => download_url,
+            2020 => download_url,
+          }
+        )
       end
 
       it "only includes years where the seller is eligible for a 1099" do
-        allow(seller).to receive(:eligible_for_1099?).do |year:|
+        allow(seller).to receive(:eligible_for_1099?) do |year|
           [2022, 2021].include?(year)
         end
 
-        expect(presenter.creator_home_props[:tax_forms]).to eq({
-          2022 => download_url,
-          2021 => download_url,
-        })
+        expect(presenter.creator_home_props[:tax_forms]).to eq(
+          {
+            2022 => download_url,
+            2021 => download_url,
+          })
       end
 
       it "only includes years that have downloadable tax forms" do
@@ -320,9 +323,11 @@ describe CreatorHomePresenter do
           year == 2021 ? download_url : nil
         end
 
-        expect(presenter.creator_home_props[:tax_forms]).to eq({
-          2021 => download_url,
-        })
+        expect(presenter.creator_home_props[:tax_forms]).to eq(
+          {
+            2021 => download_url,
+          }
+        )
       end
     end
   end

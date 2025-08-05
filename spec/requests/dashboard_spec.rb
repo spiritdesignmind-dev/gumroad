@@ -225,6 +225,5 @@ describe "Dashboard", js: true, type: :feature do
 
       expect(page).not_to have_button("Tax forms")
     end
-
   end
 end
