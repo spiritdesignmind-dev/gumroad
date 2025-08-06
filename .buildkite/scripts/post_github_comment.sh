@@ -9,35 +9,20 @@ logger() {
 }
 
 # Required environment variables for GitHub App
-if [[ -z "$GITHUB_APP_ID" ]]; then
-  logger "GITHUB_APP_ID environment variable is required but not set"
-  exit 1
-fi
+check_required_env() {
+  local var_name="$1"
+  if [[ -z "${!var_name}" ]]; then
+    logger "$var_name environment variable is required but not set"
+    exit 1
+  fi
+}
 
-if [[ -z "$GITHUB_APP_PRIVATE_KEY" ]]; then
-  logger "GITHUB_APP_PRIVATE_KEY environment variable is required but not set"
-  exit 1
-fi
-
-if [[ -z "$GITHUB_APP_INSTALLATION_ID" ]]; then
-  logger "GITHUB_APP_INSTALLATION_ID environment variable is required but not set"
-  exit 1
-fi
-
-if [[ -z "$BUILDKITE_COMMIT" ]]; then
-  logger "BUILDKITE_COMMIT environment variable is required but not set"
-  exit 1
-fi
-
-if [[ -z "$BUILDKITE_REPO" ]]; then
-  logger "BUILDKITE_REPO environment variable is required but not set"
-  exit 1
-fi
-
-if [[ -z "$BUILDKITE_BRANCH" ]]; then
-  logger "BUILDKITE_BRANCH environment variable is required but not set"
-  exit 1
-fi
+check_required_env "GITHUB_APP_ID"
+check_required_env "GITHUB_APP_PRIVATE_KEY"
+check_required_env "GITHUB_APP_INSTALLATION_ID"
+check_required_env "BUILDKITE_COMMIT"
+check_required_env "BUILDKITE_REPO"
+check_required_env "BUILDKITE_BRANCH"
 
 # Function to generate JWT token for GitHub App authentication
 generate_jwt_token() {
