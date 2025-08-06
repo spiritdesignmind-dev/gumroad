@@ -18,7 +18,7 @@ check_required_env() {
 }
 
 check_required_env "GITHUB_APP_ID"
-check_required_env "GITHUB_APP_PRIVATE_KEY"
+check_required_env "GITHUB_APP_PRIVATE_KEY_BASE64"
 check_required_env "GITHUB_APP_INSTALLATION_ID"
 check_required_env "BUILDKITE_COMMIT"
 check_required_env "BUILDKITE_REPO"
@@ -69,6 +69,10 @@ get_installation_token() {
 
   echo "$token"
 }
+
+# Decode the base64-encoded private key
+logger "Decoding GitHub App private key"
+GITHUB_APP_PRIVATE_KEY=$(echo "$GITHUB_APP_PRIVATE_KEY_BASE64" | base64 -d)
 
 # Generate JWT and get installation access token
 logger "Authenticating with GitHub App"

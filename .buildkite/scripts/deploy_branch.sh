@@ -86,7 +86,7 @@ BRANCH=$BRANCH \
 cd ../../..
 
 # Post GitHub comment about successful deployment
-if [[ -n "$GITHUB_APP_ID" && -n "$GITHUB_APP_PRIVATE_KEY" && -n "$GITHUB_APP_INSTALLATION_ID" ]]; then
+if [[ -n "$GITHUB_APP_ID" && -n "$GITHUB_APP_PRIVATE_KEY_BASE64" && -n "$GITHUB_APP_INSTALLATION_ID" ]]; then
   logger "Posting GitHub comment about deployment"
   .buildkite/scripts/post_github_comment.sh
 else
