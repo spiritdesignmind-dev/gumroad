@@ -77,12 +77,26 @@ GITHUB_APP_PRIVATE_KEY=$(echo "$GITHUB_APP_PRIVATE_KEY_BASE64" | base64 -d)
 # Generate JWT and get installation access token
 logger "Authenticating with GitHub App"
 JWT_TOKEN=$(generate_jwt_token "$GITHUB_APP_ID" "$GITHUB_APP_PRIVATE_KEY")
+
+if [[ -z "$JWT_TOKEN" ]]; then
+  logger "Failed to generate JWT token"
+  exit 1
+fi
+
 GITHUB_TOKEN=$(get_installation_token "$JWT_TOKEN" "$GITHUB_APP_INSTALLATION_ID")
+
+if [[ -z "$GITHUB_TOKEN" ]]; then
+  logger "Failed to get installation access token"
+  exit 1
+fi
+
 logger "Successfully authenticated with GitHub App"
 
 # Extract GitHub repo info from BUILDKITE_REPO
 # Expected format: git@github.com:owner/repo.git or https://github.com/owner/repo.git
 REPO_URL="$BUILDKITE_REPO"
+logger "Parsing repository URL: $REPO_URL"
+
 if [[ "$REPO_URL" =~ git@github\.com:(.+)\.git$ ]]; then
   REPO_PATH="${BASH_REMATCH[1]}"
 elif [[ "$REPO_URL" =~ https://github\.com/(.+)\.git$ ]]; then
@@ -91,6 +105,8 @@ else
   logger "Unable to parse GitHub repository from BUILDKITE_REPO: $REPO_URL"
   exit 1
 fi
+
+logger "Extracted repository path: $REPO_PATH"
 
 # Get app name using the same function from deploy script
 function get_app_name(){
@@ -113,35 +129,32 @@ COMMENT_BODY="🚀 **Preview app deployed successfully!**
 
 The preview app is now available for testing."
 
-# Find pull request associated with this commit
-logger "Finding pull request for commit $BUILDKITE_COMMIT"
+# Find pull request associated with this branch
+logger "Searching for pull requests on branch $BUILDKITE_BRANCH"
 
-# GitHub API call to find PRs associated with the commit
+# Extract owner from repo path
+REPO_OWNER=$(echo "$REPO_PATH" | cut -d'/' -f1)
+
+# GitHub API call to find PRs for this branch
 PR_RESPONSE=$(curl -s \
   -H "Authorization: token $GITHUB_TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
-  "https://api.github.com/repos/$REPO_PATH/commits/$BUILDKITE_COMMIT/pulls")
+  "https://api.github.com/repos/$REPO_PATH/pulls?head=$REPO_OWNER:$BUILDKITE_BRANCH&state=open")
+
+# Check for API errors
+if [[ $(echo "$PR_RESPONSE" | jq -r '.message' 2>/dev/null) != "null" ]]; then
+  logger "GitHub API error: $(echo "$PR_RESPONSE" | jq -r '.message')"
+  logger "Full response: $PR_RESPONSE"
+  exit 1
+fi
 
 # Check if we found any PRs
-PR_COUNT=$(echo "$PR_RESPONSE" | jq '. | length')
+PR_COUNT=$(echo "$PR_RESPONSE" | jq '. | length' 2>/dev/null || echo "0")
 
 if [[ "$PR_COUNT" -eq 0 ]]; then
-  logger "No pull request found for commit $BUILDKITE_COMMIT"
-
-  # Try to find PRs for this branch instead
-  logger "Searching for pull requests on branch $BUILDKITE_BRANCH"
-
-  PR_RESPONSE=$(curl -s \
-    -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Accept: application/vnd.github.v3+json" \
-    "https://api.github.com/repos/$REPO_PATH/pulls?head=$(echo $REPO_PATH | cut -d'/' -f1):$BUILDKITE_BRANCH&state=open")
-
-  PR_COUNT=$(echo "$PR_RESPONSE" | jq '. | length')
-
-  if [[ "$PR_COUNT" -eq 0 ]]; then
-    logger "No open pull request found for branch $BUILDKITE_BRANCH"
-    exit 0
-  fi
+  logger "No open pull request found for branch $BUILDKITE_BRANCH"
+  logger "Searched for: $REPO_OWNER:$BUILDKITE_BRANCH"
+  exit 0
 fi
 
 # Get the first (most recent) PR number
