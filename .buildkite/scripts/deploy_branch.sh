@@ -81,3 +81,14 @@ cd nomad/staging/deploy_branch
 BRANCH=$BRANCH \
   DEPLOY_TAG=$DEPLOY_TAG \
   ./deploy.sh
+
+# Return to project root
+cd ../../..
+
+# Post GitHub comment about successful deployment
+if [[ -n "$GITHUB_APP_ID" && -n "$GITHUB_APP_PRIVATE_KEY" && -n "$GITHUB_APP_INSTALLATION_ID" ]]; then
+  logger "Posting GitHub comment about deployment"
+  .buildkite/scripts/post_github_comment.sh
+else
+  logger "GitHub App credentials not set, skipping GitHub comment"
+fi

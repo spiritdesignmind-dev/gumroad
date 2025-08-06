@@ -43,6 +43,13 @@ steps:
       - docker-login#v3.0.0:
           username: "gumroadteam"
           password-env: DOCKERHUB_PASSWORD
+    env:
+      # GitHub App credentials for posting deployment comments
+      # Required permissions: "Pull requests: Write" and "Issues: Write"
+      # Setup guide: https://docs.github.com/en/developers/apps/building-github-apps/creating-a-github-app
+      GITHUB_APP_ID: $GITHUB_APP_ID
+      GITHUB_APP_PRIVATE_KEY: $GITHUB_APP_PRIVATE_KEY
+      GITHUB_APP_INSTALLATION_ID: $GITHUB_APP_INSTALLATION_ID
 
   - block: "Approval required for production deployment"
     key: require-approval
