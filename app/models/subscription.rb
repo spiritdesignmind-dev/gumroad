@@ -196,7 +196,16 @@ class Subscription < ApplicationRecord
 
   def current_subscription_price_cents
     if is_installment_plan
-      original_purchase.displayed_price_cents
+      # Find the original installment purchase to get the base price
+      original_installment_purchase = purchases.is_original_subscription_purchase.first
+      base_price_cents = original_installment_purchase&.perceived_price_cents ||
+                        original_installment_purchase&.displayed_price_cents ||
+                        original_purchase&.displayed_price_cents
+
+      next_installment_index = purchases.successful.count
+      installment_plan = last_payment_option&.installment_plan || link.installment_plan
+            installment_amounts = installment_plan.calculate_installment_payment_price_cents(base_price_cents)
+      installment_amounts[next_installment_index] || installment_amounts.last
     else
       discount_applies_to_next_charge? ?
         original_purchase.displayed_price_cents :

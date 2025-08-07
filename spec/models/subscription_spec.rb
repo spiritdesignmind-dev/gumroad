@@ -2996,13 +2996,13 @@ describe Subscription, :vcr do
         end
 
         it "uses original displayed price for subsequent installments" do
-          expect(subscription.current_subscription_price_cents).to eq(69900) # Original $699, not new $999
+          expect(subscription.current_subscription_price_cents).to eq(23300) # Next installment based on original $699, not new $999
         end
 
         it "would create subsequent purchases with preserved pricing" do
-          # Test that our subscription pricing method returns the original price
+          # Test that our subscription pricing method returns the next installment amount based on original price
           # (The actual purchase creation is tested in our comprehensive test file)
-          expect(subscription.current_subscription_price_cents).to eq(69900) # Original total price preserved
+          expect(subscription.current_subscription_price_cents).to eq(23300) # Next installment based on original total price
         end
       end
 
@@ -3012,13 +3012,13 @@ describe Subscription, :vcr do
         end
 
         it "uses original displayed price, not the reduced price" do
-          expect(subscription.current_subscription_price_cents).to eq(69900) # Still original $699
+          expect(subscription.current_subscription_price_cents).to eq(23300) # Next installment based on original $699, not reduced $399
         end
 
         it "would create subsequent purchases with preserved original pricing" do
-          # Test that our subscription pricing method returns the original price, not the reduced price
+          # Test that our subscription pricing method returns the next installment amount based on original price, not the reduced price
           # (The actual purchase creation is tested in our comprehensive test file)
-          expect(subscription.current_subscription_price_cents).to eq(69900) # Original total price, not $399
+          expect(subscription.current_subscription_price_cents).to eq(23300) # Next installment based on original total price, not $399
         end
       end
 
@@ -3037,7 +3037,10 @@ describe Subscription, :vcr do
         end
 
         it "preserves the discounted original price for subsequent installments" do
-          expect(discounted_subscription.current_subscription_price_cents).to eq(59900) # Original $599 (with discount), not $999
+          # For 59900 cents ÷ 3 installments: base=19966, remainder=2
+          # First installment: 19966 + 2 = 19968, subsequent: 19966 each
+          # Since we already have 1 purchase, next installment should be 19966
+          expect(discounted_subscription.current_subscription_price_cents).to eq(19966) # Next installment based on original $599 (with discount), not $999
         end
       end
     end

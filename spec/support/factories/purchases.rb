@@ -202,11 +202,25 @@ FactoryBot.define do
 
       before(:create) do |purchase|
         purchase.installment_plan = purchase.link.installment_plan
+        # For installment purchases, perceived_price_cents should be the total price before installment division
+        # Calculate the total price after discounts but before installment division
+        total_price_before_installments = purchase.link.price_cents
+        if purchase.offer_code.present?
+          discount_amount = purchase.offer_code.is_percent? ?
+            (total_price_before_installments * purchase.offer_code.amount / 100) :
+            purchase.offer_code.amount
+          total_price_before_installments -= discount_amount
+        end
+        purchase.perceived_price_cents = total_price_before_installments
         purchase.set_price_and_rate
       end
 
       after(:create) do |purchase, evaluator|
         purchase.subscription ||= create(:subscription, link: purchase.link, is_installment_plan: true, user: purchase.purchaser)
+        # Ensure the subscription's original_purchase relationship is established
+        if purchase.subscription && purchase.is_original_subscription_purchase?
+          purchase.subscription.reload # Refresh the association cache
+        end
         purchase.save!
       end
     end
@@ -218,6 +232,16 @@ FactoryBot.define do
 
       before(:create) do |purchase|
         purchase.installment_plan = purchase.link.installment_plan
+        # For installment purchases, perceived_price_cents should be the total price before installment division
+        # Calculate the total price after discounts but before installment division
+        total_price_before_installments = purchase.link.price_cents
+        if purchase.offer_code.present?
+          discount_amount = purchase.offer_code.is_percent? ?
+            (total_price_before_installments * purchase.offer_code.amount / 100) :
+            purchase.offer_code.amount
+          total_price_before_installments -= discount_amount
+        end
+        purchase.perceived_price_cents = total_price_before_installments
         purchase.set_price_and_rate
       end
     end

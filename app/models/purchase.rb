@@ -1250,7 +1250,7 @@ class Purchase < ApplicationRecord
   def minimum_paid_price_cents
     return 0 if is_gift_receiver_purchase
     return perceived_price_cents if perceived_price_cents.present? &&
-      (is_applying_plan_change || is_commission_completion_purchase || is_installment_payment)
+      (is_applying_plan_change || is_commission_completion_purchase)
 
     if is_recurring_subscription_charge
       minimum_price = subscription.current_subscription_price_cents
@@ -1270,7 +1270,9 @@ class Purchase < ApplicationRecord
       elsif link.native_type == Link::NATIVE_TYPE_COMMISSION
         minimum_price *= Commission::COMMISSION_DEPOSIT_PROPORTION
       elsif is_installment_payment
-        minimum_price = calculate_installment_payment_price_cents(minimum_price_cents)
+        # Use perceived_price_cents for installment calculations to preserve original pricing
+        installment_base_price = perceived_price_cents.present? ? perceived_price_cents : minimum_price_cents
+        minimum_price = calculate_installment_payment_price_cents(installment_base_price)
       end
 
       # We allow offer codes that are larger than the price of the product. In that case minimum_price_cents could be negative here. Set it to 0.
