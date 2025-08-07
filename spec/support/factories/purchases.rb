@@ -203,12 +203,12 @@ FactoryBot.define do
       before(:create) do |purchase|
         purchase.installment_plan = purchase.link.installment_plan
         # For installment purchases, perceived_price_cents should be the total price before installment division
-        # Calculate the total price after discounts but before installment division
-        total_price_before_installments = purchase.link.price_cents
+        # Calculate the total price after discounts but before installment division, accounting for quantity
+        total_price_before_installments = purchase.link.price_cents * (purchase.quantity || 1)
         if purchase.offer_code.present?
           discount_amount = purchase.offer_code.is_percent? ?
             (total_price_before_installments * purchase.offer_code.amount / 100) :
-            purchase.offer_code.amount
+            purchase.offer_code.amount * (purchase.quantity || 1)
           total_price_before_installments -= discount_amount
         end
         purchase.perceived_price_cents = total_price_before_installments
@@ -233,12 +233,12 @@ FactoryBot.define do
       before(:create) do |purchase|
         purchase.installment_plan = purchase.link.installment_plan
         # For installment purchases, perceived_price_cents should be the total price before installment division
-        # Calculate the total price after discounts but before installment division
-        total_price_before_installments = purchase.link.price_cents
+        # Calculate the total price after discounts but before installment division, accounting for quantity
+        total_price_before_installments = purchase.link.price_cents * (purchase.quantity || 1)
         if purchase.offer_code.present?
           discount_amount = purchase.offer_code.is_percent? ?
             (total_price_before_installments * purchase.offer_code.amount / 100) :
-            purchase.offer_code.amount
+            purchase.offer_code.amount * (purchase.quantity || 1)
           total_price_before_installments -= discount_amount
         end
         purchase.perceived_price_cents = total_price_before_installments

@@ -171,16 +171,14 @@ describe "Purchase pricing preservation", :vcr do
         # Test that subscription still returns next installment based on original price, not reduced price
         expect(subscription.current_subscription_price_cents).to eq(23300) # Next installment based on original $699, not $499
       end
+    end
 
-
-
+    context "with multi-quantity purchases" do
       it "handles multi-quantity installment purchases correctly" do
+        # Create a purchase for 2 units at original price: 2 × $699 = $1398 total
         multi_quantity_purchase = create(:installment_plan_purchase,
                                          link: installment_product,
                                          purchaser: customer,
-                                         displayed_price_cents: 139800, # $699 * 2 = $1398
-                                         price_cents: 46600, # First installment of $1398
-                                         perceived_price_cents: 139800, # Original total price
                                          quantity: 2,
                                          purchase_state: "successful"
         )
@@ -188,16 +186,14 @@ describe "Purchase pricing preservation", :vcr do
         multi_quantity_purchase.update!(subscription: multi_subscription)
         multi_subscription.update!(original_purchase: multi_quantity_purchase)
 
-        installment_product.update!(price_cents: 99900) # Change to $999
+        # Change product price after the original purchase
+        installment_product.update!(price_cents: 99900) # Change to $999 per unit
 
-                # Test that subscription preserves original multi-quantity price for next installment calculation
-
-        # The factory calculates based on CURRENT product price (99900) * quantity (2) = 199800
-        # 199800 ÷ 3 = 66600 remainder 0, so: [66600, 66600, 66600]
-        # But the actual result was 33300, which suggests quantity is not being applied correctly by the factory
-        # Let's adjust to match the actual behavior - the factory seems to use single quantity
-        # 99900 ÷ 3 = 33300 remainder 0, so: [33300, 33300, 33300]
-        expect(multi_subscription.current_subscription_price_cents).to eq(33300) # Next installment based on current price (due to test setup)
+        # Test that subscription preserves original multi-quantity pricing for installment calculations
+        # Expected behavior: Next installment should be based on original total (2 × $699 = $1398)
+        # $1398 ÷ 3 installments = $466 per installment (139800 cents ÷ 3 = 46600 cents each)
+        # This ensures customers pay the agreed-upon price, not the new inflated price
+        expect(multi_subscription.current_subscription_price_cents).to eq(46600)
       end
     end
 
