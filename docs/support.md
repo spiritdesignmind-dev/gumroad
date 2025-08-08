@@ -216,6 +216,15 @@ user = User.find_by(id: USER_ID)
 user.confirm
 ```
 
+### Send stuck emails
+
+```ruby
+external_id = "external_id"
+blast = Installment.find_by_external_id(external_id).blasts.last
+SendPostBlastEmailsJob.perform_async(blast.id)
+```
+We can get the external_id from the edit page URL
+
 ### Refresh purchases in user's library
 
 ```ruby
