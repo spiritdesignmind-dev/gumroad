@@ -20,7 +20,8 @@ class Api::V2::LinksController < Api::V2::BaseController
         :preorder_link, :tags, :taxonomy,
         variant_categories_alive: [:alive_variants],
         asset_previews: [:thumbnail],
-        prices: []
+        prices: [],
+        sales: []
       ).order(created_at: :desc)
 
     as_json_options = {
