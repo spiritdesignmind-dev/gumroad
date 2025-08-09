@@ -8,10 +8,21 @@ class Api::V2::LinksController < Api::V2::BaseController
   before_action :fetch_product, only: [:show, :update, :disable, :enable, :destroy]
 
   def index
-    products = current_resource_owner.products.visible.includes(
-      :preorder_link, :tags, :taxonomy,
-      variant_categories_alive: [:alive_variants],
-    ).order(created_at: :desc)
+    products = current_resource_owner.products.visible
+      .select(
+        :id, :user_id, :name, :description, :require_shipping, :preview_url,
+        :custom_receipt, :customizable_price, :custom_permalink, :subscription_duration,
+        :price_currency_type, :deleted_at, :max_purchase_count, :purchase_disabled_at,
+        :banned_at, :flags, :price_cents, :rental_price_cents,
+        :unique_permalink, :native_type, :purchase_type, :json_data, :created_at, :taxonomy_id
+      )
+      .includes(
+        :preorder_link, :tags, :taxonomy,
+        variant_categories_alive: [:alive_variants],
+        asset_previews: [:thumbnail],
+        prices: [:user_account],
+        user: [:account]
+      ).order(created_at: :desc)
 
     as_json_options = {
       api_scopes: doorkeeper_token.scopes,

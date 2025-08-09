@@ -1321,7 +1321,7 @@ class Link < ApplicationRecord
         "currency" => price_currency_type,
         "short_url" => long_url,
         "thumbnail_url" => thumbnail&.alive&.url.presence,
-        "tags" => tags.pluck(:name),
+        "tags" => association(:tags).loaded? ? tags.pluck(:name) : tags.pluck(:name),
         "formatted_price" => price_formatted_verbose,
         "published" => alive?,
         "file_info" => multifile_aware_product_file_info,
@@ -1331,7 +1331,7 @@ class Link < ApplicationRecord
         "custom_summary" => custom_summary,
         "is_tiered_membership" => is_tiered_membership?,
         "recurrences" => is_tiered_membership? ? prices.alive.is_buy.map(&:recurrence).uniq : nil,
-        "variants" => variant_categories_alive.map do |cat|
+        "variants" => (association(:variant_categories_alive).loaded? ? variant_categories_alive : variant_categories_alive.includes(:alive_variants)).map do |cat|
           {
             title: cat.title,
             options: cat.alive_variants.map do |variant|
