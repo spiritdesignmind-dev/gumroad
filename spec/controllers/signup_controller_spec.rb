@@ -174,6 +174,19 @@ describe SignupController do
     end
 
     it "turns notifications off the user if the user is from Canada" do
+      if !BUILDING_ON_CI
+        allow(GeoIp).to receive(:lookup).with("76.66.210.142").and_return(
+          GeoIp::Result.new(
+            country_name: "Canada",
+            country_code: "CA",
+            region_name: nil,
+            city_name: nil,
+            postal_code: nil,
+            latitude: nil,
+            longitude: nil
+          )
+        )
+      end
       @request.env["REMOTE_ADDR"] = "76.66.210.142"
       user = build(:user, password: "password")
       post "create", params: { user: { email: user.email, password: "password" } }

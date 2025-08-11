@@ -2968,6 +2968,19 @@ describe Link, :vcr do
 
     it "blocks ips from 'bad' countries, like Libya" do
       ip = "41.208.70.70" # Tripoly Libya Telecom
+      if !BUILDING_ON_CI
+        allow(GeoIp).to receive(:lookup).with("41.208.70.70").and_return(
+          GeoIp::Result.new(
+            country_name: "Libya",
+            country_code: "LY",
+            region_name: nil,
+            city_name: nil,
+            postal_code: nil,
+            latitude: nil,
+            longitude: nil
+          )
+        )
+      end
       expect(build(:product).compliance_blocked(ip)).to be(true)
     end
 
@@ -4408,6 +4421,19 @@ describe Link, :vcr do
 
     context "when the PPP factor exists and isn't 1" do
       it "returns the PPP details" do
+        if !BUILDING_ON_CI
+          allow(GeoIp).to receive(:lookup).with("109.110.31.255").and_return(
+            GeoIp::Result.new(
+              country_name: "Latvia",
+              country_code: "LV",
+              region_name: nil,
+              city_name: nil,
+              postal_code: nil,
+              latitude: nil,
+              longitude: nil
+            )
+          )
+        end
         expect(@product.ppp_details(@lv_ip)).to eq(
           {
             country: "Latvia",
