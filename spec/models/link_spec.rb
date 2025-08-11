@@ -2968,7 +2968,7 @@ describe Link, :vcr do
 
     it "blocks ips from 'bad' countries, like Libya" do
       ip = "41.208.70.70" # Tripoly Libya Telecom
-      if !BUILDING_ON_CI
+      if defined?(BUILDING_ON_CI) && !BUILDING_ON_CI
         allow(GeoIp).to receive(:lookup).with("41.208.70.70").and_return(
           GeoIp::Result.new(
             country_name: "Libya",
@@ -4421,7 +4421,7 @@ describe Link, :vcr do
 
     context "when the PPP factor exists and isn't 1" do
       it "returns the PPP details" do
-        if !BUILDING_ON_CI
+        if defined?(BUILDING_ON_CI) && !BUILDING_ON_CI
           allow(GeoIp).to receive(:lookup).with("109.110.31.255").and_return(
             GeoIp::Result.new(
               country_name: "Latvia",

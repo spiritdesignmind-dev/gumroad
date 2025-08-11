@@ -18,7 +18,7 @@ describe GeoIp do
       let(:ip) { "104.193.168.19" }
 
       it "returns a result" do
-        if !BUILDING_ON_CI
+        if defined?(BUILDING_ON_CI) && !BUILDING_ON_CI
           allow(GeoIp).to receive(:lookup).with("104.193.168.19").and_return(
             GeoIp::Result.new(
               country_name: "United States",
@@ -45,7 +45,7 @@ describe GeoIp do
       let(:ip) { "2001:861:5bc0:cb60:500d:3535:e6a7:62a0" }
 
       it "returns a result" do
-        if !BUILDING_ON_CI
+        if defined?(BUILDING_ON_CI) && !BUILDING_ON_CI
           allow(GeoIp).to receive(:lookup).with("2001:861:5bc0:cb60:500d:3535:e6a7:62a0").and_return(
             GeoIp::Result.new(
               country_name: "France",

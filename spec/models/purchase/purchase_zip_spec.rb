@@ -38,7 +38,7 @@ describe "Purchase Zip Scenarios", :vcr do
 
   describe "zip_code" do
     it "is set on successful if ip_address is present" do
-      if !BUILDING_ON_CI
+      if defined?(BUILDING_ON_CI) && !BUILDING_ON_CI
         allow(GeoIp).to receive(:lookup).with("199.21.86.138").and_return(
           GeoIp::Result.new(
             country_name: "United States",
