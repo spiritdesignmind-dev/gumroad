@@ -136,6 +136,11 @@ Charge.find_by_external_id("abcdefghijklmno==").purchases
 
 ## Product management
 
+### Undelete a product from library for a specific purchase ID (e.g., 12345)
+
+```ruby
+Onetime::RestoreDeletedPurchase.new(12345, :buyer_deleted).process_with_logging
+```
 ### Undelete a product
 
 ```ruby
