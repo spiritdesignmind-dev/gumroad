@@ -141,6 +141,7 @@ Charge.find_by_external_id("abcdefghijklmno==").purchases
 ```ruby
 Onetime::RestoreDeletedPurchase.new(12345, :buyer_deleted).process_with_logging
 ```
+
 ### Undelete a product
 
 ```ruby
