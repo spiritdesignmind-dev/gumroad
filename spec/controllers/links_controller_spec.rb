@@ -4107,7 +4107,6 @@ describe LinksController, :vcr do
         end
 
         it "sets country and state from custom IP address" do
-          if defined?(BUILDING_ON_CI) && !BUILDING_ON_CI
             allow(GeoIp).to receive(:lookup).with("54.234.242.13").and_return(
               GeoIp::Result.new(
                 country_name: "United States",
@@ -4119,7 +4118,6 @@ describe LinksController, :vcr do
                 longitude: -77.4874
               )
             )
-          end
           @request.remote_ip = "54.234.242.13"
           post :increment_views, params: { id: @product.to_param }
           expect(last_page_view_data.with_indifferent_access).to include(

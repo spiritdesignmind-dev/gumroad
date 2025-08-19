@@ -2968,7 +2968,6 @@ describe Link, :vcr do
 
     it "blocks ips from 'bad' countries, like Libya" do
       ip = "41.208.70.70" # Tripoly Libya Telecom
-      if defined?(BUILDING_ON_CI) && !BUILDING_ON_CI
         allow(GeoIp).to receive(:lookup).with("41.208.70.70").and_return(
           GeoIp::Result.new(
             country_name: "Libya",
@@ -2980,7 +2979,6 @@ describe Link, :vcr do
             longitude: nil
           )
         )
-      end
       expect(build(:product).compliance_blocked(ip)).to be(true)
     end
 

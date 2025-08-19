@@ -764,7 +764,6 @@ describe Purchase, :vcr do
     end
 
     it "returns country and state based on ip_address if they don't exist" do
-      if !BUILDING_ON_CI
         allow(GeoIp).to receive(:lookup).with("199.241.200.176").and_return(
           GeoIp::Result.new(
             country_name: "United States",
@@ -776,7 +775,6 @@ describe Purchase, :vcr do
             longitude: nil
           )
         )
-      end
       @purchase.update!(ip_address: "199.241.200.176")
       expect(@purchase.country).to eq(nil)
       expect(@purchase.state).to eq(nil)

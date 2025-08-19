@@ -18,7 +18,6 @@ describe GeoIp do
       let(:ip) { "104.193.168.19" }
 
       it "returns a result" do
-        if defined?(BUILDING_ON_CI) && !BUILDING_ON_CI
           allow(GeoIp).to receive(:lookup).with("104.193.168.19").and_return(
             GeoIp::Result.new(
               country_name: "United States",
@@ -30,7 +29,6 @@ describe GeoIp do
               longitude: nil
             )
           )
-        end
         expect(result.country_name).to eq("United States")
         expect(result.country_code).to eq("US")
         expect(result.region_name).to eq("CA")
@@ -45,7 +43,6 @@ describe GeoIp do
       let(:ip) { "2001:861:5bc0:cb60:500d:3535:e6a7:62a0" }
 
       it "returns a result" do
-        if defined?(BUILDING_ON_CI) && !BUILDING_ON_CI
           allow(GeoIp).to receive(:lookup).with("2001:861:5bc0:cb60:500d:3535:e6a7:62a0").and_return(
             GeoIp::Result.new(
               country_name: "France",
@@ -57,7 +54,6 @@ describe GeoIp do
               longitude: nil
             )
           )
-        end
         expect(result.country_name).to eq("France")
         expect(result.country_code).to eq("FR")
         expect(result.city_name).to eq("Belfort")
