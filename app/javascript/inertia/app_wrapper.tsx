@@ -49,7 +49,7 @@ export default function AppWrapper({ children, global }: { children: React.React
           <LoggedInUserProvider value={parseLoggedInUser(global.logged_in_user)}>
             <CurrentSellerProvider value={parseCurrentSeller(global.current_seller)}>
               <SSRLocationProvider value={global.href}>
-                <div id="inertia-shell" className="grid grid-cols-[1fr] grid-rows-[1fr]">
+                <div id="inertia-shell" className="override grid grid-cols-1 grid-rows-1">
                   <SPANav title="Dashboard" />
                   {children}
                 </div>
