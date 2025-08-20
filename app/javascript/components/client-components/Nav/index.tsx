@@ -19,6 +19,14 @@ type Props = {
   compact?: boolean;
 };
 
+type InertiaNavigateEvent = {
+  detail: {
+    page: {
+      url: string;
+    };
+  };
+};
+
 const NavLinkDropdownMembershipItem = ({ teamMembership }: { teamMembership: TeamMembership }) => {
   const onClick = (ev: React.MouseEvent<HTMLAnchorElement>) => {
     const currentUrl = new URL(window.location.href);
@@ -60,7 +68,8 @@ const useInertiaUrl = () => {
   const [url, setUrl] = React.useState(window.location.pathname);
 
   React.useEffect(() => {
-    const update = (event: any) => setUrl(new URL(event.detail.page.url, window.location.origin).pathname);
+    const update = (event: InertiaNavigateEvent) =>
+      setUrl(new URL(event.detail.page.url, window.location.origin).pathname);
     Inertia.on("navigate", update);
   }, []);
 
