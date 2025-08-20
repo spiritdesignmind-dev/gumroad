@@ -164,10 +164,10 @@ export const SPANav = (props: Props) => {
     >
       <section>
         <SPANavLink text="Home" icon="shop-window-fill" href="/dashboard" />
-        <NavLink
+        <SPANavLink
           text="Products"
           icon="archive-fill"
-          href={Routes.products_url(routeParams)}
+          href="/products"
           additionalPatterns={[Routes.bundle_path(".", routeParams).slice(0, -1)]}
         />
         {loggedInUser?.policies.collaborator.create ? (

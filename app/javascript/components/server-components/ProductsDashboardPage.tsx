@@ -1,8 +1,6 @@
 import React from "react";
-import { createCast } from "ts-safe-cast";
 
 import { Membership, Product } from "$app/data/products";
-import { register } from "$app/utils/serverComponentUtil";
 
 import { NavigationButton } from "$app/components/Button";
 import { Icon } from "$app/components/Icons";
@@ -110,4 +108,4 @@ export const ProductsDashboardPage = ({
   );
 };
 
-export default register({ component: ProductsDashboardPage, propParser: createCast() });
+export default ProductsDashboardPage;

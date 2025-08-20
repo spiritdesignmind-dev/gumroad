@@ -5,6 +5,8 @@ class LinksController < ApplicationController
           ActionView::Helpers::AssetUrlHelper, CustomDomainConfig, AffiliateCookie,
           CreateDiscoverSearch, DiscoverCuratedProducts, FetchProductByUniquePermalink
 
+  layout "inertia"
+
   DEFAULT_PRICE = 500
   PER_PAGE = 50
 
@@ -21,7 +23,7 @@ class LinksController < ApplicationController
 
   before_action :set_affiliate_cookie, only: [:show]
 
-  before_action :set_body_id_as_app
+  # before_action :set_body_id_as_app
   before_action :hide_layouts, only: %i[show]
   before_action :fetch_product, only: %i[increment_views track_user_action]
   before_action :ensure_seller_is_not_deleted, only: [:show]
@@ -54,6 +56,10 @@ class LinksController < ApplicationController
       products: @products,
       products_pagination: @products_pagination
     ).page_props
+
+    render inertia: "Products/index", props:  RenderingExtension.custom_context(view_context).merge(
+          react_products_page_props: @react_products_page_props
+        )
   end
 
   def memberships_paged
