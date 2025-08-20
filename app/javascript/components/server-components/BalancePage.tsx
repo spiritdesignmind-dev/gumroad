@@ -1,12 +1,11 @@
 import * as React from "react";
-import { cast, createCast } from "ts-safe-cast";
+import { cast } from "ts-safe-cast";
 
 import { exportPayouts } from "$app/data/balance";
 import { createInstantPayout } from "$app/data/payout";
 import { formatPriceCentsWithCurrencySymbol, formatPriceCentsWithoutCurrencySymbol } from "$app/utils/currency";
 import { asyncVoid } from "$app/utils/promise";
 import { assertResponseError, request } from "$app/utils/request";
-import { register } from "$app/utils/serverComponentUtil";
 
 import { Button, NavigationButton } from "$app/components/Button";
 import { Icon } from "$app/components/Icons";
@@ -923,4 +922,4 @@ const BalancePage = ({
   );
 };
 
-export default register({ component: BalancePage, propParser: createCast() });
+export default BalancePage;

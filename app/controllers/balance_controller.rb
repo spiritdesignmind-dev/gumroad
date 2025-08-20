@@ -5,6 +5,8 @@ class BalanceController < Sellers::BaseController
   include PayoutsHelper
   include Pagy::Backend
 
+  layout "inertia"
+
   PAST_PAYMENTS_PER_PAGE = 3
 
   before_action :set_body_id_as_app
@@ -23,6 +25,11 @@ class BalanceController < Sellers::BaseController
       pagination:,
       past_payouts:
     )
+
+    render inertia: "Payouts/index", props:
+        RenderingExtension.custom_context(view_context).merge(
+          payout_presenter: @payout_presenter.props
+        )
   end
 
   def payments_paged

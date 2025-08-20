@@ -188,9 +188,7 @@ export const SPANav = (props: Props) => {
         <NavLink text="Workflows" icon="diagram-2-fill" href={Routes.workflows_url(routeParams)} />
         <SPANavLink text="Sales" icon="solid-currency-dollar" href="/customers" />
         <SPANavLink text="Analytics" icon="bar-chart-fill" href="/dashboard/sales" />
-        {loggedInUser?.policies.balance.index ? (
-          <NavLink text="Payouts" icon="bank" href={Routes.balance_url(routeParams)} />
-        ) : null}
+        {loggedInUser?.policies.balance.index ? <SPANavLink text="Payouts" icon="bank" href="/payouts" /> : null}
         {loggedInUser?.policies.community.index ? (
           <NavLink text="Community" icon="solid-chat-alt" href={Routes.community_path(routeParams)} />
         ) : null}
