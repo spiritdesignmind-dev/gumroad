@@ -130,7 +130,7 @@ const AnalyticsPage = ({
         const [byState, byReferral] = await Promise.all([byStateRequest.response, byReferralRequest.response]);
         setData({ byState, byReferral });
         activeRequests.current = null;
-      } catch (e: any) {
+      } catch (e) {
         if (e instanceof AbortError) return;
         showAlert("Sorry, something went wrong. Please try again.", "error");
       }

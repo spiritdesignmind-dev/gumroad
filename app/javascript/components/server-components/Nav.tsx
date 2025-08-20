@@ -55,7 +55,7 @@ const NavLinkDropdownMembershipItem = ({ teamMembership }: { teamMembership: Tea
   );
 };
 
-const Nav = (props: Props) => {
+export const Nav = (props: Props) => {
   const routeParams = { host: useAppDomain() };
   const loggedInUser = useLoggedInUser();
   const currentSeller = useCurrentSeller();
