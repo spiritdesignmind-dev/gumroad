@@ -18,6 +18,7 @@ end
 Rails.application.routes.draw do
   get "/healthcheck" => "healthcheck#index"
   get "/healthcheck/sidekiq" => "healthcheck#sidekiq"
+  get "/something" => "something#index"
 
   use_doorkeeper do
     controllers applications: "oauth/applications"

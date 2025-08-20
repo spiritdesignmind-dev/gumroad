@@ -2,6 +2,9 @@
 
 class DashboardController < Sellers::BaseController
   include ActionView::Helpers::NumberHelper, CurrencyHelper
+
+  layout "inertia"
+
   skip_before_action :check_suspended
   before_action :check_payment_details, only: :index
 
@@ -12,7 +15,10 @@ class DashboardController < Sellers::BaseController
       redirect_to products_url
     else
       presenter = CreatorHomePresenter.new(pundit_user)
-      @creator_home_props = presenter.creator_home_props
+       render inertia: "Dashboard/index", props:
+        RenderingExtension.custom_context(view_context).merge(
+          creator_home: presenter.creator_home_props
+        )
     end
   end
 
