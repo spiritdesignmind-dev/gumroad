@@ -7,7 +7,6 @@ class BalanceController < Sellers::BaseController
 
   PAST_PAYMENTS_PER_PAGE = 3
 
-  # before_action :set_body_id_as_app
   before_action :set_on_balance_page
 
   def index

@@ -4,7 +4,6 @@ class CustomersController < Sellers::BaseController
   include CurrencyHelper
 
   before_action :authorize
-  # before_action :set_body_id_as_app
   before_action :set_on_page_type
 
   CUSTOMERS_PER_PAGE = 20
@@ -12,7 +11,7 @@ class CustomersController < Sellers::BaseController
   def index
     product = Link.fetch(params[:link_id]) if params[:link_id].present?
     sales = fetch_sales(products: [product].compact)
-    customers_presenter = CustomersPresenter.new(
+    @customers_presenter = CustomersPresenter.new(
       pundit_user:,
       product:,
       customers: load_sales(sales),
@@ -21,7 +20,7 @@ class CustomersController < Sellers::BaseController
     )
     create_user_event("customers_view")
 
-    render inertia: "Customers/index", props: RenderingExtension.custom_context(view_context).merge(customers_presenter: customers_presenter.customers_props)
+    render inertia: "Customers/index", props: RenderingExtension.custom_context(view_context).merge(customers_presenter: @customers_presenter.customers_props)
   end
 
   def paged

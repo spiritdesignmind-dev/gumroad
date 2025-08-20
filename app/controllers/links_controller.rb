@@ -21,7 +21,6 @@ class LinksController < ApplicationController
 
   before_action :set_affiliate_cookie, only: [:show]
 
-  # before_action :set_body_id_as_app
   before_action :hide_layouts, only: %i[show]
   before_action :fetch_product, only: %i[increment_views track_user_action]
   before_action :ensure_seller_is_not_deleted, only: [:show]
