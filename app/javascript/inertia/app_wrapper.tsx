@@ -31,37 +31,35 @@ export default function AppWrapper({ children, global }: { children: React.React
   // Grab the body classes from the DOM
 
   return (
-    <React.StrictMode>
-      <DesignContextProvider value={global.design_settings}>
-        <DomainSettingsProvider
+    <DesignContextProvider value={global.design_settings}>
+      <DomainSettingsProvider
+        value={{
+          scheme: global.domain_settings.scheme,
+          appDomain: global.domain_settings.app_domain,
+          rootDomain: global.domain_settings.root_domain,
+          shortDomain: global.domain_settings.short_domain,
+          discoverDomain: global.domain_settings.discover_domain,
+          thirdPartyAnalyticsDomain: global.domain_settings.third_party_analytics_domain,
+        }}
+      >
+        <UserAgentProvider
           value={{
-            scheme: global.domain_settings.scheme,
-            appDomain: global.domain_settings.app_domain,
-            rootDomain: global.domain_settings.root_domain,
-            shortDomain: global.domain_settings.short_domain,
-            discoverDomain: global.domain_settings.discover_domain,
-            thirdPartyAnalyticsDomain: global.domain_settings.third_party_analytics_domain,
+            isMobile: global.user_agent_info.is_mobile,
+            locale: global.locale,
           }}
         >
-          <UserAgentProvider
-            value={{
-              isMobile: global.user_agent_info.is_mobile,
-              locale: global.locale,
-            }}
-          >
-            <LoggedInUserProvider value={parseLoggedInUser(global.logged_in_user)}>
-              <CurrentSellerProvider value={parseCurrentSeller(global.current_seller)}>
-                <SSRLocationProvider value={global.href}>
-                  <div id="inertia-shell" className="grid grid-cols-[1fr] grid-rows-[1fr]">
-                    <SPANav title="Dashboard" />
-                    {children}
-                  </div>
-                </SSRLocationProvider>
-              </CurrentSellerProvider>
-            </LoggedInUserProvider>
-          </UserAgentProvider>
-        </DomainSettingsProvider>
-      </DesignContextProvider>
-    </React.StrictMode>
+          <LoggedInUserProvider value={parseLoggedInUser(global.logged_in_user)}>
+            <CurrentSellerProvider value={parseCurrentSeller(global.current_seller)}>
+              <SSRLocationProvider value={global.href}>
+                <div id="inertia-shell" className="grid grid-cols-[1fr] grid-rows-[1fr]">
+                  <SPANav title="Dashboard" />
+                  {children}
+                </div>
+              </SSRLocationProvider>
+            </CurrentSellerProvider>
+          </LoggedInUserProvider>
+        </UserAgentProvider>
+      </DomainSettingsProvider>
+    </DesignContextProvider>
   );
 }

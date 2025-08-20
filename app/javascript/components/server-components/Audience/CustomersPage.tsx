@@ -3,7 +3,6 @@ import cx from "classnames";
 import { lightFormat, subMonths } from "date-fns";
 import { format } from "date-fns-tz";
 import * as React from "react";
-import { createCast } from "ts-safe-cast";
 
 import {
   Address,
@@ -56,7 +55,6 @@ import FileUtils from "$app/utils/file";
 import { asyncVoid } from "$app/utils/promise";
 import { RecurrenceId, recurrenceLabels } from "$app/utils/recurringPricing";
 import { AbortError, assertResponseError } from "$app/utils/request";
-import { register } from "$app/utils/serverComponentUtil";
 
 import { Button, NavigationButton } from "$app/components/Button";
 import { useCurrentSeller } from "$app/components/CurrentSeller";
@@ -2547,4 +2545,4 @@ const CommissionSection = ({
   );
 };
 
-export default register({ component: CustomersPage, propParser: createCast() });
+export default CustomersPage;

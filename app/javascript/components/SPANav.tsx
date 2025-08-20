@@ -55,7 +55,7 @@ const NavLinkDropdownMembershipItem = ({ teamMembership }: { teamMembership: Tea
 };
 
 const SPANavLink = ({ text, icon, href }: { text: string; icon?: IconName; href: string }) => (
-  <Link href={href}>
+  <Link href={href} preserveScroll>
     {icon ? <Icon name={icon} /> : null}
     {text}
   </Link>
@@ -152,13 +152,8 @@ export const SPANav = (props: Props) => {
           additionalPatterns={[Routes.followers_url(routeParams)]}
         />
         <NavLink text="Workflows" icon="diagram-2-fill" href={Routes.workflows_url(routeParams)} />
-        <NavLink text="Sales" icon="solid-currency-dollar" href={Routes.customers_url(routeParams)} />
-        <NavLink
-          text="Analytics"
-          icon="bar-chart-fill"
-          href={Routes.sales_dashboard_url(routeParams)}
-          additionalPatterns={[Routes.audience_dashboard_url(routeParams), Routes.utm_links_dashboard_url(routeParams)]}
-        />
+        <SPANavLink text="Sales" icon="solid-currency-dollar" href="/customers" />
+        <SPANavLink text="Analytics" icon="bar-chart-fill" href="/dashboard/sales" />
         {loggedInUser?.policies.balance.index ? (
           <NavLink text="Payouts" icon="bank" href={Routes.balance_url(routeParams)} />
         ) : null}

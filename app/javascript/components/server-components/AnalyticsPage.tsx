@@ -1,7 +1,6 @@
 import { lightFormat } from "date-fns";
 import pickBy from "lodash/pickBy";
 import * as React from "react";
-import { createCast } from "ts-safe-cast";
 
 import {
   AnalyticsDataByReferral,
@@ -11,7 +10,6 @@ import {
 } from "$app/data/analytics";
 import { assertDefined } from "$app/utils/assert";
 import { AbortError } from "$app/utils/request";
-import { register } from "$app/utils/serverComponentUtil";
 
 import { AnalyticsLayout } from "$app/components/Analytics/AnalyticsLayout";
 import { LocationsTable } from "$app/components/Analytics/LocationsTable";
@@ -132,7 +130,7 @@ const AnalyticsPage = ({
         const [byState, byReferral] = await Promise.all([byStateRequest.response, byReferralRequest.response]);
         setData({ byState, byReferral });
         activeRequests.current = null;
-      } catch (e) {
+      } catch (e: any) {
         if (e instanceof AbortError) return;
         showAlert("Sorry, something went wrong. Please try again.", "error");
       }
@@ -226,4 +224,4 @@ const AnalyticsPage = ({
   );
 };
 
-export default register({ component: AnalyticsPage, propParser: createCast() });
+export default AnalyticsPage;
