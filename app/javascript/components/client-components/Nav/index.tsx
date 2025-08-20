@@ -67,7 +67,7 @@ const useInertiaUrl = () => {
   return url;
 };
 
-const SPANavLink = ({
+const ClientNavLink = ({
   text,
   icon,
   href,
@@ -95,7 +95,7 @@ const SPANavLink = ({
   );
 };
 
-export const SPANav = (props: Props) => {
+export const Nav = (props: Props) => {
   const routeParams = { host: useAppDomain() };
   const loggedInUser = useLoggedInUser();
   const currentSeller = useCurrentSeller();
@@ -163,15 +163,15 @@ export const SPANav = (props: Props) => {
       {...props}
     >
       <section>
-        <SPANavLink text="Home" icon="shop-window-fill" href="/dashboard" />
-        <SPANavLink
+        <ClientNavLink text="Home" icon="shop-window-fill" href="/dashboard" />
+        <ClientNavLink
           text="Products"
           icon="archive-fill"
           href="/products"
           additionalPatterns={[Routes.bundle_path(".", routeParams).slice(0, -1)]}
         />
         {loggedInUser?.policies.collaborator.create ? (
-          <SPANavLink text="Collaborators" icon="deal-fill" href="/collaborators" />
+          <ClientNavLink text="Collaborators" icon="deal-fill" href="/collaborators" />
         ) : null}
         <NavLink
           text="Checkout"
@@ -186,9 +186,9 @@ export const SPANav = (props: Props) => {
           additionalPatterns={[Routes.followers_url(routeParams)]}
         />
         <NavLink text="Workflows" icon="diagram-2-fill" href={Routes.workflows_url(routeParams)} />
-        <SPANavLink text="Sales" icon="solid-currency-dollar" href="/customers" />
-        <SPANavLink text="Analytics" icon="bar-chart-fill" href="/dashboard/sales" />
-        {loggedInUser?.policies.balance.index ? <SPANavLink text="Payouts" icon="bank" href="/payouts" /> : null}
+        <ClientNavLink text="Sales" icon="solid-currency-dollar" href="/customers" />
+        <ClientNavLink text="Analytics" icon="bar-chart-fill" href="/dashboard/sales" />
+        {loggedInUser?.policies.balance.index ? <ClientNavLink text="Payouts" icon="bank" href="/payouts" /> : null}
         {loggedInUser?.policies.community.index ? (
           <NavLink text="Community" icon="solid-chat-alt" href={Routes.community_path(routeParams)} />
         ) : null}

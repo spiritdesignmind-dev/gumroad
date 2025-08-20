@@ -1,10 +1,10 @@
 import React from "react";
 
+import { Nav } from "$app/components/client-components/Nav";
 import { CurrentSellerProvider, parseCurrentSeller } from "$app/components/CurrentSeller";
 import { DesignContextProvider, DesignSettings } from "$app/components/DesignSettings";
 import { DomainSettingsProvider } from "$app/components/DomainSettings";
 import { LoggedInUserProvider, parseLoggedInUser } from "$app/components/LoggedInUser";
-import { SPANav } from "$app/components/SPANav";
 import { SSRLocationProvider } from "$app/components/useOriginalLocation";
 import { UserAgentProvider } from "$app/components/UserAgent";
 
@@ -50,7 +50,7 @@ export default function AppWrapper({ children, global }: { children: React.React
             <CurrentSellerProvider value={parseCurrentSeller(global.current_seller)}>
               <SSRLocationProvider value={global.href}>
                 <div id="inertia-shell" className="override grid h-[100vh] grid-cols-1 grid-rows-1">
-                  <SPANav title="Dashboard" />
+                  <Nav title="Dashboard" />
                   {children}
                 </div>
               </SSRLocationProvider>
