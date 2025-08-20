@@ -4,9 +4,11 @@ class CollaboratorsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_meta, only: [:index]
   after_action :verify_authorized
+  layout "inertia"
 
   def index
     authorize Collaborator
+    render inertia: "Collaborators/index", props: RenderingExtension.custom_context(view_context)
   end
 
   private

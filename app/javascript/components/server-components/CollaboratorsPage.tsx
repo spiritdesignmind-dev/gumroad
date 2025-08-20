@@ -698,7 +698,7 @@ const CollaboratorForm = () => {
   );
 };
 
-const CollaboratorsPage = () => {
+export const CollaboratorsPage = () => {
   const router = createBrowserRouter([
     {
       path: "/collaborators",

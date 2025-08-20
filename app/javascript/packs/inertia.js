@@ -7,10 +7,7 @@ import { createRoot } from "react-dom/client";
 import AppWrapper from "../inertia/app_wrapper.tsx";
 
 // Initialize progress bar
-InertiaProgress.init({
-  color: "#3B82F6",
-  showSpinner: true,
-});
+InertiaProgress.init();
 
 async function resolvePageComponent(name) {
   try {
