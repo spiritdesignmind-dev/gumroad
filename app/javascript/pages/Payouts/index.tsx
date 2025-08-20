@@ -1,10 +1,10 @@
 import { usePage } from "@inertiajs/react";
 import React from "react";
 
-import BalancePage from "$app/components/server-components/BalancePage";
+import { default as BalancePage, BalancePageProps } from "$app/components/server-components/BalancePage";
 
 function index() {
-  const { payout_presenter } = usePage().props as any;
+  const { payout_presenter } = usePage<{ payout_presenter: BalancePageProps }>().props;
 
   return <BalancePage {...payout_presenter} />;
 }

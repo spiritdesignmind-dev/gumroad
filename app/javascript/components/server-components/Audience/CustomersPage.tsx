@@ -85,6 +85,18 @@ import placeholder from "$assets/images/placeholders/customers.png";
 
 type Product = { id: string; name: string; variants: { id: string; name: string }[] };
 
+export type CustomerPageProps = {
+  customers: Customer[];
+  pagination: PaginationProps | null;
+  product_id: string | null;
+  products: Product[];
+  count: number;
+  currency_type: CurrencyCode;
+  countries: string[];
+  can_ping: boolean;
+  show_refund_fee_notice: boolean;
+};
+
 const year = new Date().getFullYear();
 
 const formatPrice = (priceCents: number, currencyType: CurrencyCode, recurrence?: RecurrenceId | null) =>
@@ -107,17 +119,7 @@ const CustomersPage = ({
   can_ping,
   show_refund_fee_notice,
   ...initialState
-}: {
-  customers: Customer[];
-  pagination: PaginationProps | null;
-  product_id: string | null;
-  products: Product[];
-  count: number;
-  currency_type: CurrencyCode;
-  countries: string[];
-  can_ping: boolean;
-  show_refund_fee_notice: boolean;
-}) => {
+}: CustomerPageProps) => {
   const currentSeller = useCurrentSeller();
   const userAgentInfo = useUserAgentInfo();
 

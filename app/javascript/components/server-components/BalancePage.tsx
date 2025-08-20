@@ -241,6 +241,30 @@ type PastPeriodPayoutsData = {
   type: PayoutType;
 };
 
+export type BalancePageProps = {
+  next_payout_period_data:
+    | CurrentPayoutsDataWithUserNotPayable
+    | CurrentPayoutsDataAndPaymentMethodWithUserPayable
+    | null;
+  processing_payout_periods_data: PayoutPeriodData[];
+  payouts_status: "paused" | "payable";
+  past_payout_period_data: PayoutPeriodData[];
+  instant_payout: {
+    payable_amount_cents: number;
+    payable_balances: {
+      id: string;
+      date: string;
+      amount_cents: number;
+    }[];
+    bank_account_type: string;
+    bank_name: string | null;
+    routing_number: string;
+    account_number: string;
+  } | null;
+  show_instant_payouts_notice: boolean;
+  pagination: PaginationProps;
+};
+
 // TODO: move BankAccount|PaypalAccount out of CurrentPayoutsDataAndPaymentMethodWithUserPayable
 export type CurrentPayoutsDataAndPaymentMethodWithUserPayable = CurrentPeriodPayoutData &
   (NoPayoutAccount | BankAccount | PaypalAccount | StripeConnectAccount);
@@ -606,29 +630,7 @@ const BalancePage = ({
   instant_payout,
   show_instant_payouts_notice,
   pagination: initialPagination,
-}: {
-  next_payout_period_data:
-    | CurrentPayoutsDataWithUserNotPayable
-    | CurrentPayoutsDataAndPaymentMethodWithUserPayable
-    | null;
-  processing_payout_periods_data: PayoutPeriodData[];
-  payouts_status: "paused" | "payable";
-  past_payout_period_data: PayoutPeriodData[];
-  instant_payout: {
-    payable_amount_cents: number;
-    payable_balances: {
-      id: string;
-      date: string;
-      amount_cents: number;
-    }[];
-    bank_account_type: string;
-    bank_name: string | null;
-    routing_number: string;
-    account_number: string;
-  } | null;
-  show_instant_payouts_notice: boolean;
-  pagination: PaginationProps;
-}) => {
+}: BalancePageProps) => {
   const loggedInUser = useLoggedInUser();
   const userAgentInfo = useUserAgentInfo();
 

@@ -93,15 +93,13 @@ const formatData = (data: AnalyticsDataByReferral, selectedPermalinks: string[])
   return result;
 };
 
-const AnalyticsPage = ({
-  products: initialProducts,
-  country_codes,
-  state_names,
-}: {
+export type AnalyticsPageProps = {
   products: Product[];
   country_codes: Record<string, string>;
   state_names: Record<string, string>;
-}) => {
+};
+
+const AnalyticsPage = ({ products: initialProducts, country_codes, state_names }: AnalyticsPageProps) => {
   const [products, setProducts] = React.useState(
     initialProducts.map((product) => ({ ...product, selected: product.alive })),
   );
