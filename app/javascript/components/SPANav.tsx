@@ -82,7 +82,7 @@ const SPANavLink = ({
 
   const ariaCurrent = [href, ...additionalPatterns].some((pattern) => {
     const escaped = escapeRegExp(pattern);
-    return new RegExp(escaped, "u").test(currentPath);
+    return new RegExp(`^${escaped}/?$`, "u").test(currentPath);
   })
     ? "page"
     : undefined;
