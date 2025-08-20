@@ -1,16 +1,15 @@
+import { Link } from "@inertiajs/react";
 import * as React from "react";
-import { createCast } from "ts-safe-cast";
 
 import { assertResponseError, request, ResponseError } from "$app/utils/request";
-import { register } from "$app/utils/serverComponentUtil";
 import { initTeamMemberReadOnlyAccess } from "$app/utils/team_member_read_only";
 
 import { useCurrentSeller } from "$app/components/CurrentSeller";
 import { useAppDomain, useDiscoverUrl } from "$app/components/DomainSettings";
+import { Icon } from "$app/components/Icons";
 import { useLoggedInUser, TeamMembership } from "$app/components/LoggedInUser";
 import { Nav as NavFramework, NavLink, NavLinkDropdownItem, UnbecomeDropdownItem } from "$app/components/Nav";
 import { Popover } from "$app/components/Popover";
-import { showAlert } from "$app/components/server-components/Alert";
 import { useRunOnce } from "$app/components/useRunOnce";
 
 type Props = {
@@ -38,7 +37,7 @@ const NavLinkDropdownMembershipItem = ({ teamMembership }: { teamMembership: Tea
       })
       .catch((e: unknown) => {
         assertResponseError(e);
-        showAlert("Something went wrong.", "error");
+        // showAlert("Something went wrong.", "error");
       });
   };
 
@@ -55,7 +54,14 @@ const NavLinkDropdownMembershipItem = ({ teamMembership }: { teamMembership: Tea
   );
 };
 
-const Nav = (props: Props) => {
+const SPANavLink = ({ text, icon, href }: { text: string; icon?: IconName; href: string }) => (
+  <Link href={href}>
+    {icon ? <Icon name={icon} /> : null}
+    {text}
+  </Link>
+);
+
+export const SPANav = (props: Props) => {
   const routeParams = { host: useAppDomain() };
   const loggedInUser = useLoggedInUser();
   const currentSeller = useCurrentSeller();
@@ -123,7 +129,7 @@ const Nav = (props: Props) => {
       {...props}
     >
       <section>
-        <NavLink text="Home" icon="shop-window-fill" href={Routes.dashboard_url(routeParams)} exactHrefMatch />
+        <SPANavLink text="Home" icon="shop-window-fill" href="/dashboard" />
         <NavLink
           text="Products"
           icon="archive-fill"
@@ -131,7 +137,7 @@ const Nav = (props: Props) => {
           additionalPatterns={[Routes.bundle_path(".", routeParams).slice(0, -1)]}
         />
         {loggedInUser?.policies.collaborator.create ? (
-          <NavLink text="Collaborators" icon="deal-fill" href={Routes.collaborators_url(routeParams)} />
+          <SPANavLink text="Collaborators" icon="deal-fill" href="/collaborators" />
         ) : null}
         <NavLink
           text="Checkout"
@@ -174,5 +180,3 @@ const Nav = (props: Props) => {
     </NavFramework>
   );
 };
-
-export default register({ component: Nav, propParser: createCast() });
