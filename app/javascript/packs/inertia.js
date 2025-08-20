@@ -1,4 +1,3 @@
-// app/javascript/packs/inertia.tsx
 import { InertiaProgress } from "@inertiajs/progress";
 import { createInertiaApp } from "@inertiajs/react";
 import { createElement } from "react";

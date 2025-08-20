@@ -3,8 +3,6 @@
 class DashboardController < Sellers::BaseController
   include ActionView::Helpers::NumberHelper, CurrencyHelper
 
-  layout "inertia"
-
   skip_before_action :check_suspended
   before_action :check_payment_details, only: :index
 

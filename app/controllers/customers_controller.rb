@@ -3,8 +3,6 @@
 class CustomersController < Sellers::BaseController
   include CurrencyHelper
 
-  layout "inertia"
-
   before_action :authorize
   # before_action :set_body_id_as_app
   before_action :set_on_page_type

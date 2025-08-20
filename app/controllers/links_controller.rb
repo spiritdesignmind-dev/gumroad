@@ -5,8 +5,6 @@ class LinksController < ApplicationController
           ActionView::Helpers::AssetUrlHelper, CustomDomainConfig, AffiliateCookie,
           CreateDiscoverSearch, DiscoverCuratedProducts, FetchProductByUniquePermalink
 
-  layout "inertia"
-
   DEFAULT_PRICE = 500
   PER_PAGE = 50
 
