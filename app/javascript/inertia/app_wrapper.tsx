@@ -28,8 +28,6 @@ type GlobalProps = {
 };
 
 export default function AppWrapper({ children, global }: { children: React.ReactNode; global: GlobalProps }) {
-  // Grab the body classes from the DOM
-
   return (
     <DesignContextProvider value={global.design_settings}>
       <DomainSettingsProvider

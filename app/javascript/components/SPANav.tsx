@@ -1,6 +1,8 @@
+import { Inertia } from "@inertiajs/inertia";
 import { Link } from "@inertiajs/react";
 import * as React from "react";
 
+import { escapeRegExp } from "$app/utils";
 import { assertResponseError, request, ResponseError } from "$app/utils/request";
 import { initTeamMemberReadOnlyAccess } from "$app/utils/team_member_read_only";
 
@@ -54,12 +56,44 @@ const NavLinkDropdownMembershipItem = ({ teamMembership }: { teamMembership: Tea
   );
 };
 
-const SPANavLink = ({ text, icon, href }: { text: string; icon?: IconName; href: string }) => (
-  <Link href={href} preserveScroll>
-    {icon ? <Icon name={icon} /> : null}
-    {text}
-  </Link>
-);
+const useInertiaUrl = () => {
+  const [url, setUrl] = React.useState(window.location.pathname);
+
+  React.useEffect(() => {
+    const update = (event: any) => setUrl(new URL(event.detail.page.url, window.location.origin).pathname);
+    Inertia.on("navigate", update);
+  }, []);
+
+  return url;
+};
+
+const SPANavLink = ({
+  text,
+  icon,
+  href,
+  additionalPatterns = [],
+}: {
+  text: string;
+  icon?: IconName;
+  href: string;
+  additionalPatterns?: string[];
+}) => {
+  const currentPath = useInertiaUrl();
+
+  const ariaCurrent = [href, ...additionalPatterns].some((pattern) => {
+    const escaped = escapeRegExp(pattern);
+    return new RegExp(escaped, "u").test(currentPath);
+  })
+    ? "page"
+    : undefined;
+
+  return (
+    <Link href={href} preserveScroll aria-current={ariaCurrent}>
+      {icon ? <Icon name={icon} /> : null}
+      {text}
+    </Link>
+  );
+};
 
 export const SPANav = (props: Props) => {
   const routeParams = { host: useAppDomain() };
