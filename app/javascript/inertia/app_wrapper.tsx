@@ -4,9 +4,11 @@ import { Nav } from "$app/components/client-components/Nav";
 import { CurrentSellerProvider, parseCurrentSeller } from "$app/components/CurrentSeller";
 import { DesignContextProvider, DesignSettings } from "$app/components/DesignSettings";
 import { DomainSettingsProvider } from "$app/components/DomainSettings";
+import LoadingSkeleton from "$app/components/LoadingSkeleton";
 import { LoggedInUserProvider, parseLoggedInUser } from "$app/components/LoggedInUser";
 import { SSRLocationProvider } from "$app/components/useOriginalLocation";
 import { UserAgentProvider } from "$app/components/UserAgent";
+import useRouteLoading from "$app/components/useRouteLoading";
 
 type GlobalProps = {
   design_settings: DesignSettings;
@@ -28,6 +30,8 @@ type GlobalProps = {
 };
 
 export default function AppWrapper({ children, global }: { children: React.ReactNode; global: GlobalProps }) {
+  const isRouteLoading = useRouteLoading();
+
   return (
     <DesignContextProvider value={global.design_settings}>
       <DomainSettingsProvider
@@ -51,7 +55,8 @@ export default function AppWrapper({ children, global }: { children: React.React
               <SSRLocationProvider value={global.href}>
                 <div id="inertia-shell" className="override grid h-[100vh] grid-cols-1 grid-rows-1">
                   <Nav title="Dashboard" />
-                  {children}
+                  {isRouteLoading ? <LoadingSkeleton /> : null}
+                  <div className={isRouteLoading ? "hidden" : ""}>{children}</div>
                 </div>
               </SSRLocationProvider>
             </CurrentSellerProvider>
