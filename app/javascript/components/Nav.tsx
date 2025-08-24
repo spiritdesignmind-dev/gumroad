@@ -1,3 +1,5 @@
+import { Inertia } from "@inertiajs/inertia";
+import { Link } from "@inertiajs/react";
 import cx from "classnames";
 import * as React from "react";
 import { cast } from "ts-safe-cast";
@@ -9,6 +11,54 @@ import { assertResponseError, request } from "$app/utils/request";
 import { Icon } from "$app/components/Icons";
 import { showAlert } from "$app/components/server-components/Alert";
 import { useOriginalLocation } from "$app/components/useOriginalLocation";
+
+type InertiaNavigateEvent = {
+  detail: {
+    page: {
+      url: string;
+    };
+  };
+};
+
+const useInertiaUrl = () => {
+  const [url, setUrl] = React.useState(window.location.pathname);
+
+  React.useEffect(() => {
+    const update = (event: InertiaNavigateEvent) =>
+      setUrl(new URL(event.detail.page.url, window.location.origin).pathname);
+    Inertia.on("navigate", update);
+  }, []);
+
+  return url;
+};
+
+export const ClientNavLink = ({
+  text,
+  icon,
+  href,
+  additionalPatterns = [],
+}: {
+  text: string;
+  icon?: IconName;
+  href: string;
+  additionalPatterns?: string[];
+}) => {
+  const currentPath = useInertiaUrl();
+
+  const ariaCurrent = [href, ...additionalPatterns].some((pattern) => {
+    const escaped = escapeRegExp(pattern);
+    return new RegExp(`^${escaped}/?$`, "u").test(currentPath);
+  })
+    ? "page"
+    : undefined;
+
+  return (
+    <Link href={href} preserveScroll aria-current={ariaCurrent}>
+      {icon ? <Icon name={icon} /> : null}
+      {text}
+    </Link>
+  );
+};
 
 export const NavLink = ({
   text,
