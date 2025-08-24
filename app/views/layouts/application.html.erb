@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
   <%= render("layouts/application/head") %>
-  <%= inertia_ssr_head %>
   <% bclass = ["group/body"] %>
   <% bclass.push "mac" if request.headers["User-Agent"]&.include? "Macintosh" %>
   <% bclass.push(@body_class) if @body_class %>
@@ -13,7 +12,7 @@
     <div id="user-agent-info" data-settings="<%= custom_context[:user_agent_info].to_json %>" style="display: none;"></div>
     <%= render("layouts/shared/flash") %>
     <% if show_nav %>
-      <%= react_component "Nav", props: { helper_host: helper_widget_host, helper_session:, title: @title }, prerender: false %>
+      <%= react_component "Nav", props: { helper_host: helper_widget_host, helper_session:, title: @title }, prerender: true %>
     <% end %>
     <%= content_for?(:content) ? yield(:content) : yield %>
     <% if content_for? :footer %>
