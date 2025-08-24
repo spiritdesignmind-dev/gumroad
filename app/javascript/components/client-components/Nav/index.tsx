@@ -1,4 +1,3 @@
-import { Inertia } from "@inertiajs/inertia";
 import { Link } from "@inertiajs/react";
 import * as React from "react";
 
@@ -12,19 +11,12 @@ import { Icon } from "$app/components/Icons";
 import { useLoggedInUser, TeamMembership } from "$app/components/LoggedInUser";
 import { Nav as NavFramework, NavLink, NavLinkDropdownItem, UnbecomeDropdownItem } from "$app/components/Nav";
 import { Popover } from "$app/components/Popover";
+import { useInertiaURL } from "$app/components/useInertiaURL";
 import { useRunOnce } from "$app/components/useRunOnce";
 
 type Props = {
   title: string;
   compact?: boolean;
-};
-
-type InertiaNavigateEvent = {
-  detail: {
-    page: {
-      url: string;
-    };
-  };
 };
 
 const NavLinkDropdownMembershipItem = ({ teamMembership }: { teamMembership: TeamMembership }) => {
@@ -64,18 +56,6 @@ const NavLinkDropdownMembershipItem = ({ teamMembership }: { teamMembership: Tea
   );
 };
 
-const useInertiaUrl = () => {
-  const [url, setUrl] = React.useState(window.location.pathname);
-
-  React.useEffect(() => {
-    const update = (event: InertiaNavigateEvent) =>
-      setUrl(new URL(event.detail.page.url, window.location.origin).pathname);
-    Inertia.on("navigate", update);
-  }, []);
-
-  return url;
-};
-
 const ClientNavLink = ({
   text,
   icon,
@@ -87,7 +67,7 @@ const ClientNavLink = ({
   href: string;
   additionalPatterns?: string[];
 }) => {
-  const currentPath = useInertiaUrl();
+  const currentPath = useInertiaURL();
 
   const ariaCurrent = [href, ...additionalPatterns].some((pattern) => {
     const escaped = escapeRegExp(pattern);

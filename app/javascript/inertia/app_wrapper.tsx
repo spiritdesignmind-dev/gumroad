@@ -56,7 +56,7 @@ export default function AppWrapper({ children, global }: { children: React.React
                 <div id="inertia-shell" className="override grid h-[100vh] grid-cols-1 grid-rows-1">
                   <Nav title="Dashboard" />
                   {isRouteLoading ? <LoadingSkeleton /> : null}
-                  <div className={isRouteLoading ? "hidden" : ""}>{children}</div>
+                  <div className={isRouteLoading ? "hidden" : "overflow-y-scroll"}>{children}</div>
                 </div>
               </SSRLocationProvider>
             </CurrentSellerProvider>
