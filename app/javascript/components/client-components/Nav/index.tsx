@@ -16,7 +16,6 @@ import {
   NavLinkDropdownMembershipItem,
 } from "$app/components/Nav";
 import { Popover } from "$app/components/Popover";
-import { useInertiaURL } from "$app/components/useInertiaURL";
 import { useRunOnce } from "$app/components/useRunOnce";
 
 type Props = {
@@ -41,7 +40,7 @@ export const ClientNavLink = ({
   additionalPatterns?: string[];
   onClick?: (event: React.MouseEvent) => void;
 }) => {
-  const currentPath = useInertiaURL();
+  const currentPath = window.location.href;
 
   const ariaCurrent = [href, ...additionalPatterns].some((pattern) => {
     const escaped = escapeRegExp(pattern);
