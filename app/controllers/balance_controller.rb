@@ -24,9 +24,10 @@ class BalanceController < Sellers::BaseController
       past_payouts:
     )
 
-    render inertia: "Payouts/index", props: RenderingExtension.custom_context(view_context).merge(
-      payout_presenter: @payout_presenter.props
-    )
+    render inertia: "Payouts/index",
+           props: RenderingExtension.custom_context(view_context).merge(
+             payout_presenter: @payout_presenter.props
+           )
   end
 
   def payments_paged

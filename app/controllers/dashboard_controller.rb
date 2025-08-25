@@ -13,10 +13,10 @@ class DashboardController < Sellers::BaseController
       redirect_to products_url
     else
       presenter = CreatorHomePresenter.new(pundit_user)
-       render inertia: "Dashboard/index", props:
-        RenderingExtension.custom_context(view_context).merge(
-          creator_home: presenter.creator_home_props
-        )
+      render inertia: "Dashboard/index",
+             props: RenderingExtension.custom_context(view_context).merge(
+               creator_home: presenter.creator_home_props
+             )
     end
   end
 

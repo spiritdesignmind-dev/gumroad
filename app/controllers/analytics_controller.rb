@@ -13,10 +13,10 @@ class AnalyticsController < Sellers::BaseController
     @analytics_props = AnalyticsPresenter.new(seller: current_seller).page_props
     LargeSeller.create_if_warranted(current_seller)
 
-     render inertia: "Analytics/index", props:
-        RenderingExtension.custom_context(view_context).merge(
-          analytics_props: @analytics_props
-        )
+    render inertia: "Analytics/index",
+           props: RenderingExtension.custom_context(view_context).merge(
+             analytics_props: @analytics_props
+           )
   end
 
   def data_by_date
