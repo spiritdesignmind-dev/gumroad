@@ -949,7 +949,7 @@ const PaymentsPage = (props: Props) => {
           <header>
             <h2>Payout method</h2>
             <div>
-              <a data-helper-prompt="I have a question about my payout settings?">
+              <a href="/help/article/260-your-payout-settings-page" target="_blank" rel="noreferrer">
                 Any questions about these payout settings?
               </a>
             </div>
@@ -1073,7 +1073,7 @@ const PaymentsPage = (props: Props) => {
             )}
           </section>
         </section>
-        {props.paypal_connect.allow_paypal_connect ? (
+        {props.paypal_connect.show_paypal_connect ? (
           <PayPalConnectSection
             paypalConnect={props.paypal_connect}
             isFormDisabled={props.is_form_disabled}

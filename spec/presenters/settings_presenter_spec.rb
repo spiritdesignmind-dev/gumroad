@@ -62,6 +62,8 @@ describe SettingsPresenter do
   end
 
   describe "#main_props" do
+    before { Feature.activate(:product_level_support_emails) }
+
     it "returns correct props" do
       expect(presenter.main_props).to eq(
         settings_pages: presenter.pages,
@@ -86,14 +88,15 @@ describe SettingsPresenter do
           purchasing_power_parity_excluded_product_ids: [product.external_id],
           enable_payment_email: true,
           enable_payment_push_notification: true,
-          enable_recurring_subscription_charge_email: true,
-          enable_recurring_subscription_charge_push_notification: true,
+          enable_recurring_subscription_charge_email: false,
+          enable_recurring_subscription_charge_push_notification: false,
           enable_free_downloads_email: true,
           enable_free_downloads_push_notification: true,
           announcement_notification_enabled: true,
           disable_comments_email: false,
           disable_reviews_email: false,
           show_nsfw_products: false,
+          product_level_support_emails: [],
           seller_refund_policy: {
             enabled: true,
             allowed_refund_periods_in_days: [
@@ -124,6 +127,28 @@ describe SettingsPresenter do
           }
         }
       )
+    end
+
+    context "when support emails exist" do
+      before { product.update!(support_email: "support@example.com") }
+
+      it "includes product_level_support_emails in main_props" do
+        expect(presenter.main_props[:user][:product_level_support_emails]).to contain_exactly(
+          {
+            email: "support@example.com",
+            product_ids: [product.external_id]
+          }
+        )
+      end
+    end
+
+    context "when product_level_support_emails feature is disabled" do
+      before { Feature.deactivate(:product_level_support_emails) }
+      before { product.update!(support_email: "support@example.com") }
+
+      it "returns nil for product_level_support_emails" do
+        expect(presenter.main_props[:user][:product_level_support_emails]).to be_nil
+      end
     end
 
     context "when user has unconfirmed email" do
@@ -435,6 +460,7 @@ describe SettingsPresenter do
         paypal_address: seller.payment_address,
         show_verification_section: false,
         paypal_connect: {
+          show_paypal_connect: false,
           allow_paypal_connect: false,
           unsupported_countries: PaypalMerchantAccountManager::COUNTRY_CODES_NOT_SUPPORTED_BY_PCP.map { |code| ISO3166::Country[code].common_name },
           email: nil,
@@ -627,7 +653,8 @@ describe SettingsPresenter do
                                                                                                               show_bank_account: true,
                                                                                                             }),
                                              paypal_connect: @base_props[:paypal_connect].merge({
-                                                                                                  allow_paypal_connect: true,
+                                                                                                  show_paypal_connect: true,
+                                                                                                  allow_paypal_connect: false,
                                                                                                 }),
                                              aus_backtax_details: @base_props[:aus_backtax_details].merge({
                                                                                                             legal_entity_name: @user_compliance_info.first_and_last_name,
@@ -639,8 +666,34 @@ describe SettingsPresenter do
         expect(presenter.payments_props).to eq(@base_us_props)
       end
 
+      it "returns correct props when seller is eligible for PayPal Connect" do
+        expect(presenter.payments_props).to eq(@base_us_props)
+        expect(presenter.payments_props[:paypal_connect][:allow_paypal_connect]).to be false
+
+        seller.mark_compliant!(author_name: "Iffy")
+        allow_any_instance_of(User).to receive(:sales_cents_total).and_return(100_00)
+        create(:payment_completed, user: seller)
+
+        expect(presenter.payments_props).to eq(@base_us_props.merge!({
+                                                                       paypal_connect: {
+                                                                         show_paypal_connect: true,
+                                                                         allow_paypal_connect: true,
+                                                                         unsupported_countries: PaypalMerchantAccountManager::COUNTRY_CODES_NOT_SUPPORTED_BY_PCP.map { |code| ISO3166::Country[code].common_name },
+                                                                         email: nil,
+                                                                         charge_processor_merchant_id: nil,
+                                                                         charge_processor_verified: false,
+                                                                         needs_email_confirmation: false,
+                                                                         paypal_disconnect_allowed: true,
+                                                                       },
+                                                                     }))
+        expect(presenter.payments_props[:paypal_connect][:allow_paypal_connect]).to be true
+      end
+
       it "returns correct props when seller has a bank account and a PayPal Connect account", :vcr do
         active_bank_account = create(:ach_account, user: seller)
+        seller.mark_compliant!(author_name: "Iffy")
+        allow_any_instance_of(User).to receive(:sales_cents_total).and_return(100_00)
+        create(:payment_completed, user: seller)
         paypal_connect_account = create(:merchant_account_paypal, user: seller, charge_processor_merchant_id: "B66YJBBNCRW6L", charge_processor_verified_at: Time.current)
 
         bank_account_details = @base_us_props[:bank_account_details].merge({
@@ -653,6 +706,7 @@ describe SettingsPresenter do
                                                                            })
 
         paypal_connect_details = @base_us_props[:paypal_connect].merge({
+                                                                         show_paypal_connect: true,
                                                                          allow_paypal_connect: true,
                                                                          email: paypal_connect_account.paypal_account_details["primary_email"],
                                                                          charge_processor_merchant_id: paypal_connect_account.charge_processor_merchant_id,
