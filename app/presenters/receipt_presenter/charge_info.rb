@@ -25,10 +25,6 @@ class ReceiptPresenter::ChargeInfo
     chargeable.external_id_for_invoice
   end
 
-  def formatted_order_id
-    "Order ID: #{order_id}"
-  end
-
   def product_questions_note
     return if chargeable.orderable.receipt_for_gift_sender?
 
