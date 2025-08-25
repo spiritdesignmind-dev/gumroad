@@ -21,7 +21,10 @@ class CustomersController < Sellers::BaseController
     create_user_event("customers_view")
     @hide_nav = true
 
-    render inertia: "Customers/index", props: RenderingExtension.custom_context(view_context).merge(customers_presenter: @customers_presenter.customers_props)
+    render inertia: "Customers/index",
+           props: RenderingExtension.custom_context(view_context).merge(
+             customers_presenter: @customers_presenter.customers_props
+           )
   end
 
   def paged
