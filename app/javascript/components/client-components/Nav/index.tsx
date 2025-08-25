@@ -2,14 +2,19 @@ import { Link } from "@inertiajs/react";
 import * as React from "react";
 
 import { escapeRegExp } from "$app/utils";
-import { assertResponseError, request, ResponseError } from "$app/utils/request";
 import { initTeamMemberReadOnlyAccess } from "$app/utils/team_member_read_only";
 
 import { useCurrentSeller } from "$app/components/CurrentSeller";
 import { useAppDomain, useDiscoverUrl } from "$app/components/DomainSettings";
 import { Icon } from "$app/components/Icons";
-import { useLoggedInUser, TeamMembership } from "$app/components/LoggedInUser";
-import { Nav as NavFramework, NavLink, NavLinkDropdownItem, UnbecomeDropdownItem } from "$app/components/Nav";
+import { useLoggedInUser } from "$app/components/LoggedInUser";
+import {
+  Nav as NavFramework,
+  NavLink,
+  NavLinkDropdownItem,
+  UnbecomeDropdownItem,
+  NavLinkDropdownMembershipItem,
+} from "$app/components/Nav";
 import { Popover } from "$app/components/Popover";
 import { useInertiaURL } from "$app/components/useInertiaURL";
 import { useRunOnce } from "$app/components/useRunOnce";
@@ -19,67 +24,42 @@ type Props = {
   compact?: boolean;
 };
 
-const NavLinkDropdownMembershipItem = ({ teamMembership }: { teamMembership: TeamMembership }) => {
-  const onClick = (ev: React.MouseEvent<HTMLAnchorElement>) => {
-    const currentUrl = new URL(window.location.href);
-    // It is difficult to tell if the account to be switched has access to the current page via policies in this context.
-    // Pundit deals with that, and PunditAuthorization concern handles Pundit::NotAuthorizedError.
-    // account_switched param is solely for the purpose of not showing the error message when redirecting to the
-    // dashboard in case the user doesn't have access to the page.
-    currentUrl.searchParams.set("account_switched", "true");
-    ev.preventDefault();
-    request({
-      method: "POST",
-      accept: "json",
-      url: Routes.sellers_switch_path({ team_membership_id: teamMembership.id }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new ResponseError();
-        window.location.href = currentUrl.toString();
-      })
-      .catch((e: unknown) => {
-        assertResponseError(e);
-        // showAlert("Something went wrong.", "error");
-      });
-  };
-
-  return (
-    <a
-      role="menuitemradio"
-      href={Routes.sellers_switch_path()}
-      onClick={onClick}
-      aria-checked={teamMembership.is_selected}
-    >
-      <img className="user-avatar" src={teamMembership.seller_avatar_url} alt={teamMembership.seller_name} />
-      <span title={teamMembership.seller_name}>{teamMembership.seller_name}</span>
-    </a>
-  );
-};
-
-const ClientNavLink = ({
+export const ClientNavLink = ({
   text,
   icon,
+  badge,
   href,
+  exactHrefMatch,
   additionalPatterns = [],
+  onClick,
 }: {
   text: string;
   icon?: IconName;
+  badge?: React.ReactNode;
   href: string;
+  exactHrefMatch?: boolean;
   additionalPatterns?: string[];
+  onClick?: (event: React.MouseEvent) => void;
 }) => {
   const currentPath = useInertiaURL();
 
   const ariaCurrent = [href, ...additionalPatterns].some((pattern) => {
     const escaped = escapeRegExp(pattern);
-    return new RegExp(`^${escaped}/?$`, "u").test(currentPath);
+    return new RegExp(exactHrefMatch ? `^${escaped}/?$` : escaped, "u").test(currentPath);
   })
     ? "page"
     : undefined;
 
   return (
-    <Link href={href} preserveScroll aria-current={ariaCurrent}>
+    <Link aria-current={ariaCurrent} href={href} title={text} {...(onClick && { onClick })}>
       {icon ? <Icon name={icon} /> : null}
       {text}
+      {badge ? (
+        <>
+          <span className="flex-1" />
+          {badge}
+        </>
+      ) : null}
     </Link>
   );
 };
@@ -152,15 +132,15 @@ export const Nav = (props: Props) => {
       {...props}
     >
       <section>
-        <ClientNavLink text="Home" icon="shop-window-fill" href="/dashboard" />
+        <ClientNavLink text="Home" icon="shop-window-fill" href={Routes.dashboard_url(routeParams)} exactHrefMatch />
         <ClientNavLink
           text="Products"
           icon="archive-fill"
-          href="/products"
+          href={Routes.products_url(routeParams)}
           additionalPatterns={[Routes.bundle_path(".", routeParams).slice(0, -1)]}
         />
         {loggedInUser?.policies.collaborator.create ? (
-          <ClientNavLink text="Collaborators" icon="deal-fill" href="/collaborators" />
+          <ClientNavLink text="Collaborators" icon="deal-fill" href={Routes.collaborators_url(routeParams)} />
         ) : null}
         <NavLink
           text="Checkout"
@@ -175,9 +155,16 @@ export const Nav = (props: Props) => {
           additionalPatterns={[Routes.followers_url(routeParams)]}
         />
         <NavLink text="Workflows" icon="diagram-2-fill" href={Routes.workflows_url(routeParams)} />
-        <ClientNavLink text="Sales" icon="solid-currency-dollar" href="/customers" />
-        <ClientNavLink text="Analytics" icon="bar-chart-fill" href="/dashboard/sales" />
-        {loggedInUser?.policies.balance.index ? <ClientNavLink text="Payouts" icon="bank" href="/payouts" /> : null}
+        <ClientNavLink text="Sales" icon="solid-currency-dollar" href={Routes.customers_url(routeParams)} />
+        <ClientNavLink
+          text="Analytics"
+          icon="bar-chart-fill"
+          href={Routes.sales_dashboard_url(routeParams)}
+          additionalPatterns={[Routes.audience_dashboard_url(routeParams), Routes.utm_links_dashboard_url(routeParams)]}
+        />
+        {loggedInUser?.policies.balance.index ? (
+          <ClientNavLink text="Payouts" icon="bank" href={Routes.balance_url(routeParams)} />
+        ) : null}
         {loggedInUser?.policies.community.index ? (
           <NavLink text="Community" icon="solid-chat-alt" href={Routes.community_path(routeParams)} />
         ) : null}
