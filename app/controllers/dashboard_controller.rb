@@ -7,6 +7,7 @@ class DashboardController < Sellers::BaseController
 
   def index
     authorize :dashboard
+    @hide_nav = true
 
     if current_seller.suspended_for_tos_violation?
       redirect_to products_url

@@ -12,6 +12,7 @@ class BalanceController < Sellers::BaseController
   def index
     authorize :balance
 
+    @hide_nav = true
     @title = "Payouts"
     @seller_stats = UserBalanceStatsService.new(user: current_seller).fetch
     pagination, past_payouts = fetch_payouts

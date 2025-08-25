@@ -36,6 +36,7 @@ class LinksController < ApplicationController
 
     @guid = SecureRandom.hex
     @title = "Products"
+    @hide_nav = true
 
     @memberships_pagination, @memberships = paginated_memberships(page: 1)
     @products_pagination, @products = paginated_products(page: 1)

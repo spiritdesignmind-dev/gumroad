@@ -19,6 +19,7 @@ class CustomersController < Sellers::BaseController
       count: sales.results.total
     )
     create_user_event("customers_view")
+    @hide_nav = true
 
     render inertia: "Customers/index", props: RenderingExtension.custom_context(view_context).merge(customers_presenter: @customers_presenter.customers_props)
   end

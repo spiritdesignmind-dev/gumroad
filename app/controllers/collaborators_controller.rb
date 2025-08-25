@@ -7,6 +7,7 @@ class CollaboratorsController < ApplicationController
 
   def index
     authorize Collaborator
+    @hide_nav = true
     render inertia: "Collaborators/index", props: RenderingExtension.custom_context(view_context)
   end
 
