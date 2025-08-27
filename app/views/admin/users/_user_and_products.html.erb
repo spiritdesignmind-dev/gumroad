@@ -1,22 +1,66 @@
 <%= load_pack("admin_review") %>
 
 <div class="paragraphs">
-  <%= render("admin/users/user", user: user, is_affiliate_user: is_affiliate_user) %>
-  <% if products.none? %>
-    <div class="info" role="status"><%= is_affiliate_user ? "No affiliated products." : "No products created." %></div>
-  <% end %>
-  <% products.each do |product| %>
-    <%= render("admin/links/product", product: product, show_purchases: true, is_affiliate_user: is_affiliate_user, user_id: user.id) %>
-  <% end %>
-  <% if pagy.pages > 1 %>
-    <div class="pagination" role="navigation" aria-label="Pagination">
-      <%= link_to("‹ Previous", pagy_url_for(pagy, pagy.prev), class: "button", inert: !pagy.prev) %>
-      <menu>
-        <% (1..pagy.pages).map do |page| %>
-          <li><%= link_to(page, pagy_url_for(pagy, page), class: "button", inert: page == pagy.page) %></li>
-        <% end %>
-      </menu>
-      <%= link_to("Next ›", pagy_url_for(pagy, pagy.next), class: "button", inert: !pagy.next) %>
+  <div role="tablist" class="tab-buttons" aria-label="Profile Tabs">
+    <div
+      role="tab"
+      aria-selected="true"
+      onclick="switchTab('profile', this)"
+      style="cursor: pointer;"
+    >
+      Profile
     </div>
-  <% end %>
+    <div
+      role="tab"
+      aria-selected="false"
+      onclick="switchTab('products', this)"
+      style="cursor: pointer;"
+    >
+      Products
+    </div>
+  </div>
+
+  <div id="profile-tab" style="display: block;">
+    <%= render("admin/users/user", user: user, is_affiliate_user: is_affiliate_user) %>
+  </div>
+
+  <div id="products-tab" style="display: none;">
+    <% if products.none? %>
+      <div class="info" role="status"><%= is_affiliate_user ? "No affiliated products." : "No products created." %></div>
+    <% else %>
+      <% products.each do |product| %>
+        <%= render("admin/links/product", product: product, show_purchases: true, is_affiliate_user: is_affiliate_user, user_id: user.id) %>
+      <% end %>
+      <% if pagy.pages > 1 %>
+        <div class="pagination" role="navigation" aria-label="Pagination">
+          <%= link_to("‹ Previous", pagy_url_for(pagy, pagy.prev), class: "button", inert: !pagy.prev) %>
+          <menu>
+            <% (1..pagy.pages).map do |page| %>
+              <li><%= link_to(page, pagy_url_for(pagy, page), class: "button", inert: page == pagy.page) %></li>
+            <% end %>
+          </menu>
+          <%= link_to("Next ›", pagy_url_for(pagy, pagy.next), class: "button", inert: !pagy.next) %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
 </div>
+
+<script>
+  function switchTab(tabName, clickedTab) {
+    const allTabs = document.querySelectorAll('[role="tab"]');
+    allTabs.forEach(tab => tab.setAttribute('aria-selected', 'false'));
+    clickedTab.setAttribute('aria-selected', 'true');
+
+    document.getElementById('profile-tab').style.display = 'none';
+    document.getElementById('products-tab').style.display = 'none';
+
+    if (tabName === 'profile') {
+      document.getElementById('profile-tab').style.display = 'block';
+    } else if (tabName === 'products') {
+      document.getElementById('products-tab').style.display = 'block';
+    }
+
+    alert(tabName)
+  }
+</script>
