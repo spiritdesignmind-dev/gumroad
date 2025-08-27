@@ -1,5 +1,27 @@
 <%= load_pack("admin_review") %>
 
+<div class="paragraphs">
+  <form method="get" style="margin-bottom: var(--spacer-4);">
+    <%= hidden_field_tag :query, params[:query] %>
+    <div style="display: flex; gap: var(--spacer-2); align-items: center;">
+      <label for="status">Filter by status:</label>
+      <select name="status" id="status" onchange="this.form.submit()">
+        <option value="">All statuses</option>
+        <option value="successful" <%= 'selected' if params[:status] == 'successful' %>>Successful</option>
+        <option value="failed" <%= 'selected' if params[:status] == 'failed' %>>Failed</option>
+        <option value="in_progress" <%= 'selected' if params[:status] == 'in_progress' %>>In progress</option>
+        <option value="not_charged" <%= 'selected' if params[:status] == 'not_charged' %>>Not charged</option>
+        <option value="preorder_authorization_successful" <%= 'selected' if params[:status] == 'preorder_authorization_successful' %>>Preorder authorized</option>
+        <option value="preorder_authorization_failed" <%= 'selected' if params[:status] == 'preorder_authorization_failed' %>>Preorder failed</option>
+        <option value="gift_receiver_purchase_successful" <%= 'selected' if params[:status] == 'gift_receiver_purchase_successful' %>>Gift received</option>
+        <option value="test_successful" <%= 'selected' if params[:status] == 'test_successful' %>>Test successful</option>
+        <option value="refunded" <%= 'selected' if params[:status] == 'refunded' %>>Refunded</option>
+        <option value="chargeback" <%= 'selected' if params[:status] == 'chargeback' %>>Chargeback</option>
+      </select>
+    </div>
+  </form>
+</div>
+
 <% if @purchases&.exists? %>
   <%= render("purchases", purchases: @purchases) %>
 <% else %>

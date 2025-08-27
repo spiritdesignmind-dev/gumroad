@@ -3,7 +3,7 @@
 class AdminSearchService
   class InvalidDateError < StandardError; end
 
-  def search_purchases(query: nil, creator_email: nil, license_key: nil, transaction_date: nil, last_4: nil, card_type: nil, price: nil, expiry_date: nil, limit: nil)
+  def search_purchases(query: nil, creator_email: nil, license_key: nil, transaction_date: nil, last_4: nil, card_type: nil, price: nil, expiry_date: nil, status: nil, limit: nil)
     purchases = Purchase.order(created_at: :desc)
 
     if query.present?
@@ -53,6 +53,14 @@ class AdminSearchService
         purchases = purchases.where(card_expiry_year: "20#{expiry_year}") if expiry_year.present?
         purchases = purchases.where(card_expiry_month: expiry_month) if expiry_month.present?
       end
+    end
+
+    if status.present? && !%w[refunded chargeback].include?(status)
+      purchases = purchases.where(purchase_state: status)
+    elsif status == 'refunded'
+      purchases = purchases.where.not(stripe_refunded: [nil, 0])
+    elsif status == 'chargeback'
+      purchases = purchases.where.not(chargeback_date: nil)
     end
 
     purchases.limit(limit)
