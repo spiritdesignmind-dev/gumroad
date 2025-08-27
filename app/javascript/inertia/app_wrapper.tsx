@@ -59,7 +59,6 @@ type GlobalProps = {
 
 export default function AppWrapper({ children, global }: { children: React.ReactNode; global: GlobalProps }) {
   const isRouteLoading = useRouteLoading();
-  console.log({ cs: global.logged_in_user });
 
   return (
     <DesignContextProvider value={global.design_settings}>
