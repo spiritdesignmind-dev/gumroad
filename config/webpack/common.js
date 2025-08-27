@@ -134,9 +134,9 @@ const config = {
       $assets: path.join(rootPath, "app/assets"),
     },
     fallback: {
-      "tty": false,
-      "os": false,
-      "util": false,
+      tty: false,
+      os: false,
+      util: false,
     },
   },
 
