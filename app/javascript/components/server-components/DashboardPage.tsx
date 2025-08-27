@@ -212,7 +212,7 @@ const ProductsTable = ({ sales }: TableProps) => {
 
   if (sales.every((b) => b.sales === 0)) {
     return (
-      <div style={{ display: "grid", gap: "var(--spacer-4)" }}>
+      <div style={{ display: "grid", gap: "var(--spacer-4)" }} className="p-8">
         <h2>Best selling</h2>
         <div className="placeholder">
           <p>
@@ -291,8 +291,6 @@ const ProductsTable = ({ sales }: TableProps) => {
 const GETTING_STARTED_MINIMIZED_KEY = "dashboardGettingStartedMinimized";
 
 export const DashboardPage = ({
-  name,
-  has_sale,
   getting_started_stats,
   sales,
   activity_items,
@@ -316,98 +314,93 @@ export const DashboardPage = ({
 
   return (
     <main>
-      <header>
-        <h1>
-          {name ? `Hey, ${name}! ` : null}
-          {has_sale ? "Welcome back to Gumroad." : "Welcome to Gumroad."}
-        </h1>
+      <header className="border-gray-200 border-b p-8">
+        <h1 className="text-2xl">Dashboard</h1>
         <div className="actions flex gap-2">
           {Object.keys(tax_forms).length > 0 && <DownloadTaxFormsPopover taxForms={tax_forms} />}
         </div>
       </header>
-      <div className="main-app-content" style={{ display: "grid", gap: "var(--spacer-7)" }}>
-        {stripe_verification_message ? (
-          <div role="alert" className="warning">
-            <div>
-              {stripe_verification_message} <a href={Routes.settings_payments_path()}>Update</a>
-            </div>
+      {stripe_verification_message ? (
+        <div role="alert" className="warning">
+          <div>
+            {stripe_verification_message} <a href={Routes.settings_payments_path()}>Update</a>
           </div>
-        ) : null}
-        {show_1099_download_notice ? (
-          <div role="alert" className="info">
-            <div>
-              Your 1099 tax form for {new Date().getFullYear() - 1} is ready!{" "}
-              <a href={Routes.dashboard_download_tax_form_path()}>Click here to download</a>.
-            </div>
-          </div>
-        ) : null}
-
-        {loggedInUser?.policies.settings_payments_user.show
-          ? Object.values(getting_started_stats).some((v) => !v) && (
-              <div className="override grid gap-4">
-                <div className="flex items-center justify-between">
-                  <h2>Getting started</h2>
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      toggleGettingStarted();
-                    }}
-                    aria-label={gettingStartedMinimized ? "Expand getting started" : "Minimize getting started"}
-                    style={{ display: "flex", alignItems: "center", gap: "var(--spacer-1)" }}
-                  >
-                    <span>{gettingStartedMinimized ? "Show more" : "Show less"}</span>
-                    <Icon
-                      name={gettingStartedMinimized ? "arrows-expand" : "arrows-collapse"}
-                      style={{ width: "20px", height: "20px" }}
-                    />
-                  </a>
-                </div>
-                <div className="override grid w-full grid-cols-[repeat(auto-fit,minmax(15rem,1fr))] gap-4">
-                  {GETTING_STARTED_ITEMS.map((item) => (
-                    <GettingStartedItem
-                      key={item.name}
-                      name={item.name}
-                      completed={item.getCompleted(getting_started_stats)}
-                      link={item.link}
-                      IconComponent={item.IconComponent}
-                      description={item.description}
-                      minimized={gettingStartedMinimized}
-                    />
-                  ))}
-                </div>
-              </div>
-            )
-          : null}
-
-        {!getting_started_stats.first_product && loggedInUser?.policies.product.create ? <Greeter /> : null}
-
-        <ProductsTable sales={sales} />
-
-        <div className="grid gap-4">
-          <h2>Activity</h2>
-
-          <div className="stats-grid">
-            <Stats title="Balance" description="Your current balance available for payout" value={balances.balance} />
-            <Stats
-              title="Last 7 days"
-              description="Your total sales in the last 7 days"
-              value={balances.last_seven_days_sales_total}
-            />
-            <Stats
-              title="Last 28 days"
-              description="Your total sales in the last 28 days"
-              value={balances.last_28_days_sales_total}
-            />
-            <Stats
-              title="Total earnings"
-              description="Your all-time net earnings from all products, excluding refunds and chargebacks"
-              value={balances.total}
-            />
-          </div>
-
-          <ActivityFeed items={activity_items} />
         </div>
+      ) : null}
+      {show_1099_download_notice ? (
+        <div role="alert" className="info">
+          <div>
+            Your 1099 tax form for {new Date().getFullYear() - 1} is ready!{" "}
+            <a href={Routes.dashboard_download_tax_form_path()}>Click here to download</a>.
+          </div>
+        </div>
+      ) : null}
+
+      {loggedInUser?.policies.settings_payments_user.show
+        ? Object.values(getting_started_stats).some((v) => !v) && (
+            <div className="override grid gap-4 p-8">
+              <div className="flex items-center justify-between">
+                <h2>Getting started</h2>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toggleGettingStarted();
+                  }}
+                  aria-label={gettingStartedMinimized ? "Expand getting started" : "Minimize getting started"}
+                  style={{ display: "flex", alignItems: "center", gap: "var(--spacer-1)" }}
+                >
+                  <span>{gettingStartedMinimized ? "Show more" : "Show less"}</span>
+                  <Icon
+                    name={gettingStartedMinimized ? "arrows-expand" : "arrows-collapse"}
+                    style={{ width: "20px", height: "20px" }}
+                  />
+                </a>
+              </div>
+              <div className="override grid w-full grid-cols-[repeat(auto-fit,minmax(15rem,1fr))] gap-4">
+                {GETTING_STARTED_ITEMS.map((item) => (
+                  <GettingStartedItem
+                    key={item.name}
+                    name={item.name}
+                    completed={item.getCompleted(getting_started_stats)}
+                    link={item.link}
+                    IconComponent={item.IconComponent}
+                    description={item.description}
+                    minimized={gettingStartedMinimized}
+                  />
+                ))}
+              </div>
+            </div>
+          )
+        : null}
+
+      {!getting_started_stats.first_product && loggedInUser?.policies.product.create ? <Greeter /> : null}
+
+      <ProductsTable sales={sales} />
+
+      <div className="grid gap-4 p-8">
+        <h2>Activity</h2>
+
+        <div className="stats-grid">
+          <Stats title="Balance" description="Your current balance available for payout" value={balances.balance} />
+          <Stats
+            title="Last 7 days"
+            description="Your total sales in the last 7 days"
+            value={balances.last_seven_days_sales_total}
+          />
+          <Stats
+            title="Last 28 days"
+            description="Your total sales in the last 28 days"
+            value={balances.last_28_days_sales_total}
+          />
+          <Stats
+            title="Total earnings"
+            description="Your all-time net earnings from all products, excluding refunds and chargebacks"
+            value={balances.total}
+          />
+        </div>
+
+        <ActivityFeed items={activity_items} />
       </div>
     </main>
   );

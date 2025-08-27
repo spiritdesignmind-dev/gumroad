@@ -21,12 +21,7 @@ export function SupportHeader({
 
   return (
     <>
-      <h1 className="hidden group-[.sidebar-nav]/body:block">Help</h1>
-      <h1 className="group-[.sidebar-nav]/body:hidden">
-        <a href={Routes.root_path()} className="flex items-center">
-          <img src="logo.svg" alt="Gumroad" className="h-8 dark:invert" width={32} height={32} />
-        </a>
-      </h1>
+      <h1 className="text-2xl">Help Center</h1>
       <div className="actions">
         {isHelpArticle ? (
           <a href={Routes.help_center_root_path()} className="button" aria-label="Search" title="Search">
