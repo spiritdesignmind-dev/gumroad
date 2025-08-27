@@ -1,4 +1,4 @@
-import { useCreateConversation, useCreateMessage } from "@helperai/react";
+import { useCreateConversation } from "@helperai/react";
 import React from "react";
 
 import FileUtils from "$app/utils/file";
@@ -19,11 +19,6 @@ export function NewTicketModal({
   onCreated: (slug: string) => void;
 }) {
   const { mutateAsync: createConversation } = useCreateConversation({
-    onError: (error) => {
-      showAlert(error.message, "error");
-    },
-  });
-  const { mutateAsync: createMessage } = useCreateMessage({
     onError: (error) => {
       showAlert(error.message, "error");
     },
@@ -66,7 +61,6 @@ export function NewTicketModal({
             setIsSubmitting(true);
             try {
               const { conversationSlug } = await createConversation({ subject: subject.trim() });
-              await createMessage({ conversationSlug, content: message.trim(), attachments });
               onCreated(conversationSlug);
             } finally {
               setIsSubmitting(false);
