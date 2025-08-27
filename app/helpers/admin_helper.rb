@@ -92,13 +92,13 @@ module AdminHelper
   def related_suspended_accounts_for_comment(comment)
     return [] unless comment.author_name == "suspend_sellers_other_accounts"
     return [] unless comment.commentable_type == "User"
-    
+
     user = comment.commentable
     return [] unless user.payment_address.present?
-    
+
     User.where(payment_address: user.payment_address)
         .where.not(id: user.id)
-        .where(risk_state: ['suspended_for_fraud', 'suspended_for_tos_violation'])
+        .where(risk_state: ["suspended_for_fraud", "suspended_for_tos_violation"])
         .pluck(:id)
   end
 end
