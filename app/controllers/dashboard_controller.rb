@@ -14,9 +14,7 @@ class DashboardController < Sellers::BaseController
     else
       presenter = CreatorHomePresenter.new(pundit_user)
       render inertia: "Dashboard/index",
-             props: RenderingExtension.custom_context(view_context).merge(
-               creator_home: presenter.creator_home_props
-             )
+             props: inertia_props(creator_home: presenter.creator_home_props)
     end
   end
 

@@ -56,9 +56,7 @@ class LinksController < ApplicationController
     ).page_props
 
     render inertia: "Products/index",
-           props: RenderingExtension.custom_context(view_context).merge(
-             react_products_page_props: @react_products_page_props
-           )
+           props: inertia_props(react_products_page_props: @react_products_page_props)
   end
 
   def memberships_paged

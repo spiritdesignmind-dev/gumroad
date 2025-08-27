@@ -9,7 +9,7 @@ class CollaboratorsController < ApplicationController
     authorize Collaborator
     @hide_nav = true
     render inertia: "Collaborators/index",
-           props: RenderingExtension.custom_context(view_context)
+           props: inertia_props()
   end
 
   private

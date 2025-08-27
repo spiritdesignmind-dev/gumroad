@@ -110,6 +110,7 @@ gem "httparty", "~> 0.21"
 gem "ibandit", "~> 1.26"
 gem "image_sorcery", "~> 1.1"
 gem "image_processing", "~> 1.12"
+gem "inertia_rails", "~> 3.10"
 gem "mini_magick", "~> 4.12"
 gem "jbuilder", "~> 2.11"
 gem "js-routes", "~> 2.2"
@@ -198,5 +199,3 @@ group :development do
   gem "derailed_benchmarks", "~> 2.1"
   gem "bullet"
 end
-
-gem "inertia_rails", "~> 3.10"
