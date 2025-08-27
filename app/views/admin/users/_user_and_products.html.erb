@@ -1,47 +1,45 @@
 <%= load_pack("admin_review") %>
 
-<div class="paragraphs">
-  <div class="css-tabs">
-    <!-- Hidden radio buttons for state management -->
-    <input type="radio" name="user-tabs" id="profile-tab-radio" checked style="display: none;">
-    <input type="radio" name="user-tabs" id="products-tab-radio" style="display: none;">
+<div class="paragraphs css-tabs">
+  <!-- Hidden radio buttons for state management -->
+  <input type="radio" name="user-tabs" id="profile-tab-radio" checked style="display: none;">
+  <input type="radio" name="user-tabs" id="products-tab-radio" style="display: none;">
 
-    <!-- Tab buttons -->
-    <div role="tablist" class="tab-buttons" aria-label="Profile Tabs">
-      <label for="profile-tab-radio" role="tab" style="cursor: pointer;">
-        Profile
-      </label>
-      <label for="products-tab-radio" role="tab" style="cursor: pointer;">
-        Products
-      </label>
+  <!-- Tab buttons -->
+  <div role="tablist" class="tab-buttons" aria-label="Profile Tabs">
+    <label for="profile-tab-radio" role="tab" style="cursor: pointer;">
+      Profile
+    </label>
+    <label for="products-tab-radio" role="tab" style="cursor: pointer;">
+      Products
+    </label>
+  </div>
+
+  <!-- Tab content -->
+  <div class="tab-content">
+    <div id="profile-tab" class="tab-panel">
+      <%= render("admin/users/user", user: user, is_affiliate_user: is_affiliate_user) %>
     </div>
 
-    <!-- Tab content -->
-    <div class="tab-content">
-      <div id="profile-tab" class="tab-panel">
-        <%= render("admin/users/user", user: user, is_affiliate_user: is_affiliate_user) %>
-      </div>
-
-      <div id="products-tab" class="tab-panel">
-        <% if products.none? %>
-          <div class="info" role="status"><%= is_affiliate_user ? "No affiliated products." : "No products created." %></div>
-        <% else %>
-          <% products.each do |product| %>
-            <%= render("admin/links/product", product: product, show_purchases: true, is_affiliate_user: is_affiliate_user, user_id: user.id) %>
-          <% end %>
-          <% if pagy.pages > 1 %>
-            <div class="pagination" role="navigation" aria-label="Pagination">
-              <%= link_to("‹ Previous", pagy_url_for(pagy, pagy.prev), class: "button", inert: !pagy.prev) %>
-              <menu>
-                <% (1..pagy.pages).map do |page| %>
-                  <li><%= link_to(page, pagy_url_for(pagy, page), class: "button", inert: page == pagy.page) %></li>
-                <% end %>
-              </menu>
-              <%= link_to("Next ›", pagy_url_for(pagy, pagy.next), class: "button", inert: !pagy.next) %>
-            </div>
-          <% end %>
+    <div id="products-tab" class="tab-panel">
+      <% if products.none? %>
+        <div class="info" role="status"><%= is_affiliate_user ? "No affiliated products." : "No products created." %></div>
+      <% else %>
+        <% products.each do |product| %>
+          <%= render("admin/links/product", product: product, show_purchases: true, is_affiliate_user: is_affiliate_user, user_id: user.id) %>
         <% end %>
-      </div>
+        <% if pagy.pages > 1 %>
+          <div class="pagination" role="navigation" aria-label="Pagination">
+            <%= link_to("‹ Previous", pagy_url_for(pagy, pagy.prev), class: "button", inert: !pagy.prev) %>
+            <menu>
+              <% (1..pagy.pages).map do |page| %>
+                <li><%= link_to(page, pagy_url_for(pagy, page), class: "button", inert: page == pagy.page) %></li>
+              <% end %>
+            </menu>
+            <%= link_to("Next ›", pagy_url_for(pagy, pagy.next), class: "button", inert: !pagy.next) %>
+          </div>
+        <% end %>
+      <% end %>
     </div>
   </div>
 </div>
@@ -72,5 +70,6 @@
   #products-tab-radio:checked ~ .tab-buttons label[for="products-tab-radio"] {
     opacity: 1;
     font-weight: bold;
+    background: white;
   }
 </style>
