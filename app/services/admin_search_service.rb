@@ -57,9 +57,9 @@ class AdminSearchService
 
     if status.present? && !%w[refunded chargeback].include?(status)
       purchases = purchases.where(purchase_state: status)
-    elsif status == 'refunded'
+    elsif status == "refunded"
       purchases = purchases.where.not(stripe_refunded: [nil, 0])
-    elsif status == 'chargeback'
+    elsif status == "chargeback"
       purchases = purchases.where.not(chargeback_date: nil)
     end
 
