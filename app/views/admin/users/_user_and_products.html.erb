@@ -1,30 +1,31 @@
 <%= load_pack("admin_review") %>
 
 <div class="paragraphs">
-  <div role="tablist" class="tab-buttons" aria-label="Profile Tabs">
-    <div
+  <div class="tab-pills" role="tablist" aria-label="User Tabs">
+    <button
+      type="button"
+      class="pill"
       role="tab"
       aria-selected="true"
-      onclick="switchTab('profile', this)"
-      style="cursor: pointer;"
+      onclick="document.getElementById('profile-tab').classList.remove('hidden');document.getElementById('products-tab').classList.add('hidden');this.setAttribute('aria-selected','true');this.nextElementSibling.setAttribute('aria-selected','false');"
     >
       Profile
-    </div>
-    <div
+    </button>
+    <button
+      type="button"
       role="tab"
       aria-selected="false"
-      onclick="switchTab('products', this)"
-      style="cursor: pointer;"
+      onclick="document.getElementById('profile-tab').classList.add('hidden');document.getElementById('products-tab').classList.remove('hidden');this.setAttribute('aria-selected','true');this.previousElementSibling.setAttribute('aria-selected','false');"
     >
       Products
-    </div>
+    </button>
   </div>
 
-  <div id="profile-tab" style="display: block;">
+  <div id="profile-tab" class="block">
     <%= render("admin/users/user", user: user, is_affiliate_user: is_affiliate_user) %>
   </div>
 
-  <div id="products-tab" style="display: none;">
+  <div id="products-tab" class="hidden">
     <% if products.none? %>
       <div class="info" role="status"><%= is_affiliate_user ? "No affiliated products." : "No products created." %></div>
     <% else %>
@@ -45,22 +46,3 @@
     <% end %>
   </div>
 </div>
-
-<script>
-  function switchTab(tabName, clickedTab) {
-    const allTabs = document.querySelectorAll('[role="tab"]');
-    allTabs.forEach(tab => tab.setAttribute('aria-selected', 'false'));
-    clickedTab.setAttribute('aria-selected', 'true');
-
-    document.getElementById('profile-tab').style.display = 'none';
-    document.getElementById('products-tab').style.display = 'none';
-
-    if (tabName === 'profile') {
-      document.getElementById('profile-tab').style.display = 'block';
-    } else if (tabName === 'products') {
-      document.getElementById('products-tab').style.display = 'block';
-    }
-
-    alert(tabName)
-  }
-</script>
