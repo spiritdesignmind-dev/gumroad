@@ -55,12 +55,14 @@ function ChatMessageItem({ message }: { message: Message }) {
 
 function ChatContent({
   conversation,
+  initialMessage,
   onClose,
 }: {
   conversation: ConversationDetails;
+  initialMessage: { content: string; attachments: File[] } | undefined;
   onClose: (isEscalated: boolean) => void;
 }) {
-  const { messages, agentTyping, input, handleInputChange, handleSubmit } = useChat({ conversation });
+  const { messages, agentTyping, input, handleInputChange, handleSubmit, append } = useChat({ conversation });
   const formRef = React.useRef<HTMLFormElement>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -69,6 +71,21 @@ function ChatContent({
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  React.useEffect(() => {
+    if (initialMessage && messages.length === 0) {
+      const attachmentObjects = initialMessage.attachments.map((file) => ({
+        name: file.name,
+        contentType: file.type,
+        url: URL.createObjectURL(file),
+      }));
+      void append({
+        role: "user",
+        content: initialMessage.content,
+        experimental_attachments: attachmentObjects,
+      }).finally(() => attachmentObjects.forEach((attachment) => URL.revokeObjectURL(attachment.url)));
+    }
+  }, [initialMessage]);
 
   React.useEffect(() => {
     scrollToBottom();
@@ -115,17 +132,10 @@ function ChatContent({
 
       <form
         onSubmit={(e) => {
-          const attachmentObjects = attachments.map((file) => ({
-            name: file.name,
-            contentType: file.type,
-            url: URL.createObjectURL(file),
-          }));
-          try {
-            handleSubmit(e, { experimental_attachments: attachmentObjects });
-            setAttachments([]);
-          } finally {
-            attachmentObjects.forEach((attachment) => URL.revokeObjectURL(attachment.url));
-          }
+          const dataTransfer = new DataTransfer();
+          attachments.forEach((attachment) => dataTransfer.items.add(attachment));
+          handleSubmit(e, { experimental_attachments: dataTransfer.files });
+          setAttachments([]);
         }}
         ref={formRef}
       >
@@ -200,10 +210,12 @@ function ChatContent({
 
 export function ChatModal({
   conversation,
+  initialMessage,
   open,
   onClose,
 }: {
-  conversation: ConversationDetails | null;
+  conversation: ConversationDetails | undefined;
+  initialMessage: { content: string; attachments: File[] } | undefined;
   open: boolean;
   onClose: (isEscalated: boolean) => void;
 }) {
@@ -211,7 +223,7 @@ export function ChatModal({
     <Modal open={open} onClose={() => onClose(false)} title="Chat with AI Assistant" footer={null}>
       <div className="flex h-[600px] flex-col md:w-[700px]">
         {conversation ? (
-          <ChatContent conversation={conversation} onClose={onClose} />
+          <ChatContent conversation={conversation} initialMessage={initialMessage} onClose={onClose} />
         ) : (
           <div className="flex flex-1 items-center justify-center">
             <div className="text-center">

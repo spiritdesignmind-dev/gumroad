@@ -1,5 +1,4 @@
-import { ConversationDetails } from "@helperai/client";
-import { useHelperClient } from "@helperai/react";
+import { useConversation } from "@helperai/react";
 import React, { useEffect } from "react";
 
 import { assertDefined } from "$app/utils/assert";
@@ -18,9 +17,16 @@ export default function SupportPortal() {
   const { searchParams } = new URL(useOriginalLocation());
   const [selectedConversationSlug, setSelectedConversationSlug] = React.useState<string | null>(searchParams.get("id"));
   const [isNewTicketOpen, setIsNewTicketOpen] = React.useState(!!searchParams.get("new_ticket"));
-  const [chatConversationSlug, setChatConversationSlug] = React.useState<string | null>(searchParams.get("chat"));
-  const [chatConversation, setChatConversation] = React.useState<ConversationDetails | null>(null);
-  const { client } = useHelperClient();
+  const [chatConversationState, setChatConversationState] = React.useState<{
+    slug: string;
+    message?: string;
+    attachments?: File[];
+  } | null>(searchParams.get("chat") ? { slug: assertDefined(searchParams.get("chat")) } : null);
+  const { data: chatConversation } = useConversation(
+    chatConversationState?.slug ?? "",
+    {},
+    { enabled: !!chatConversationState?.slug },
+  );
 
   useEffect(() => {
     const url = new URL(location.href);
@@ -29,12 +35,6 @@ export default function SupportPortal() {
       history.replaceState(null, "", url.toString());
     }
   }, [isNewTicketOpen]);
-
-  useEffect(() => {
-    if (chatConversationSlug && !chatConversation) {
-      void client.conversations.get(assertDefined(chatConversationSlug)).then(setChatConversation);
-    }
-  }, [chatConversationSlug, chatConversation, searchParams]);
 
   useEffect(() => {
     const url = new URL(location.href);
@@ -50,7 +50,7 @@ export default function SupportPortal() {
     const params = new URL(location.href).searchParams;
     setSelectedConversationSlug(params.get("id"));
     setIsNewTicketOpen(!!params.get("new_ticket"));
-    setChatConversationSlug(params.get("chat"));
+    setChatConversationState(params.get("chat") ? { slug: assertDefined(params.get("chat")) } : null);
   });
 
   if (selectedConversationSlug != null) {
@@ -73,15 +73,20 @@ export default function SupportPortal() {
       <NewTicketModal
         open={isNewTicketOpen}
         onClose={() => setIsNewTicketOpen(false)}
-        onCreated={(slug) => {
+        onCreated={(slug, message, attachments) => {
           setIsNewTicketOpen(false);
-          setChatConversationSlug(slug);
+          setChatConversationState({ slug, message, attachments });
         }}
       />
       <ChatModal
-        open={!!chatConversationSlug}
+        open={!!chatConversationState?.slug}
+        initialMessage={
+          chatConversationState?.message
+            ? { content: chatConversationState.message, attachments: chatConversationState.attachments ?? [] }
+            : undefined
+        }
         onClose={(isEscalated) => {
-          setChatConversationSlug(null);
+          setChatConversationState(null);
           if (isEscalated) {
             showAlert("Our support team will respond to your message shortly. Thank you for your patience.", "success");
           }

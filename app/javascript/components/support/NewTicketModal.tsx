@@ -16,7 +16,7 @@ export function NewTicketModal({
 }: {
   open: boolean;
   onClose: () => void;
-  onCreated: (slug: string) => void;
+  onCreated: (slug: string, message: string, attachments: File[]) => void;
 }) {
   const { mutateAsync: createConversation } = useCreateConversation({
     onError: (error) => {
@@ -61,7 +61,7 @@ export function NewTicketModal({
             setIsSubmitting(true);
             try {
               const { conversationSlug } = await createConversation({ subject: subject.trim() });
-              onCreated(conversationSlug);
+              onCreated(conversationSlug, message, attachments);
             } finally {
               setIsSubmitting(false);
             }
