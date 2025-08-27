@@ -49,7 +49,12 @@ export const Nav = ({ title, current_user }: Props) => {
               </>
             ) : null}
             <NavLinkDropdownItem text="Logout" icon="box-arrow-in-right-fill" href={Routes.logout_url()} />
-            {loggedInUser?.isImpersonating ? <UnbecomeDropdownItem /> : null}
+            {loggedInUser?.isImpersonating ? (
+              <>
+                <NavLinkDropdownItem text="Go to admin" icon="gear-fill" href="/admin" />
+                <UnbecomeDropdownItem />
+              </>
+            ) : null}
           </div>
         </Popover>
       }
