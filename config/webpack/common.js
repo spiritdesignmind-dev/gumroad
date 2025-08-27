@@ -133,6 +133,11 @@ const config = {
       $app: path.join(rootPath, "app/javascript"),
       $assets: path.join(rootPath, "app/assets"),
     },
+    fallback: {
+      "tty": false,
+      "os": false,
+      "util": false,
+    },
   },
 
   // Remove when migrated to React 18
