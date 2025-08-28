@@ -486,7 +486,8 @@ const ProductTypeSelector = ({
   >
     {types.map((type) => {
       const isBundleType = type === "bundle";
-      const isDisabled = disabled || (isBundleType && bundleDisabled);
+      const isBundleDisabled = isBundleType && bundleDisabled;
+      const isDisabled = disabled || isBundleDisabled;
       const typeButton = (
         <Button
           key={type}
@@ -510,7 +511,7 @@ const ProductTypeSelector = ({
         </Button>
       );
       if (isDisabled) {
-        const tooltipMessage = isBundleType && bundleDisabled 
+        const tooltipMessage = isBundleDisabled 
           ? "Create at least two products to unlock Bundles."
           : "Service products are disabled until your account is 30 days old.";
         return (

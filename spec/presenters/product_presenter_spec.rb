@@ -27,6 +27,7 @@ describe ProductPresenter do
           release_at_date:,
           show_orientation_text: true,
           eligible_for_service_products: false,
+          eligible_for_bundle_products: false,
           ai_generation_enabled: false,
           ai_promo_dismissed: false,
         }
@@ -45,6 +46,7 @@ describe ProductPresenter do
           release_at_date:,
           show_orientation_text: false,
           eligible_for_service_products: false,
+          eligible_for_bundle_products: true,
           ai_generation_enabled: false,
           ai_promo_dismissed: false,
         }
@@ -72,6 +74,38 @@ describe ProductPresenter do
 
       it "sets eligible_for_service_products to true" do
         expect(described_class.new_page_props(current_seller: existing_seller)[:eligible_for_service_products]).to eq(true)
+      end
+    end
+
+    context "user is eligible for bundle products" do
+      let(:seller_with_two_products) { create(:user) }
+
+      before do
+        create_list(:product, 2, user: seller_with_two_products)
+      end
+
+      it "sets eligible_for_bundle_products to true" do
+        expect(described_class.new_page_props(current_seller: seller_with_two_products)[:eligible_for_bundle_products]).to eq(true)
+      end
+
+      it "includes bundle in the native product types" do
+        expect(described_class.new_page_props(current_seller: seller_with_two_products)[:native_product_types]).to include("bundle")
+      end
+    end
+
+    context "user is not eligible for bundle products" do
+      let(:seller_with_one_product) { create(:user) }
+
+      before do
+        create(:product, user: seller_with_one_product)
+      end
+
+      it "sets eligible_for_bundle_products to false" do
+        expect(described_class.new_page_props(current_seller: seller_with_one_product)[:eligible_for_bundle_products]).to eq(false)
+      end
+
+      it "excludes bundle from the native product types" do
+        expect(described_class.new_page_props(current_seller: seller_with_one_product)[:native_product_types]).not_to include("bundle")
       end
     end
   end
