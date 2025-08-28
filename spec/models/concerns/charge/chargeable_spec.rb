@@ -293,8 +293,8 @@ describe Charge::Chargeable do
   end
 
   describe "#unbundled_purchases" do
-    let(:seller) { create(:named_seller) }
-    let(:product) { create(:product, user: create(:user, :eligible_for_bundle_products), is_bundle: true) }
+    let(:seller) { create(:named_seller, :eligible_for_bundle_products) }
+    let(:product) { create(:product, user: seller, is_bundle: true) }
     let(:chargeable) { create(:purchase, link: product, seller:) }
 
     context "when is not a bundle purchase" do
