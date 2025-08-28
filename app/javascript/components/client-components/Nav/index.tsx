@@ -1,3 +1,11 @@
+/*
+  We need a dedicated client-side navbar that uses Inertia’s components since they rely on browser-side APIs.
+  The existing server-rendered navbar cannot be reused here because doing so would require disabling pre-rendering across the app, which isn’t desirable.
+
+  Since we’re migrating incrementally to Inertia, both navbars will coexist for now - the server-side version for pre-rendered views,
+  and the client-side version for Inertia-powered views. Once the migration is complete, the server-side navbar will be phased out.
+*/
+
 import { Link } from "@inertiajs/react";
 import * as React from "react";
 

@@ -36,7 +36,7 @@ type GlobalProps = {
       has_some_read_only_access: boolean;
       is_selected: boolean;
     }[];
-    policies: Record<string, Record<string, boolean>>;;
+    policies: Record<string, Record<string, boolean>>;
     is_gumroad_admin: boolean;
     is_impersonating: boolean;
   };
