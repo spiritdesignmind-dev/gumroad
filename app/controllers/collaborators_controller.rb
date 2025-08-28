@@ -7,7 +7,6 @@ class CollaboratorsController < ApplicationController
 
   def index
     authorize Collaborator
-    @hide_nav = true
     render inertia: "Collaborators/index",
            props: inertia_props()
   end

@@ -9,7 +9,6 @@ class AnalyticsController < Sellers::BaseController
   def index
     authorize :analytics
 
-    @hide_nav = true
     @analytics_props = AnalyticsPresenter.new(seller: current_seller).page_props
     LargeSeller.create_if_warranted(current_seller)
 
