@@ -2,9 +2,9 @@
 
 describe Purchase::UpdateBundlePurchaseContentService do
   describe "#perform" do
-    let(:seller) { create(:named_seller) }
+    let(:seller) { create(:named_seller, :eligible_for_bundle_products) }
     let(:purchaser) { create(:buyer_user) }
-    let(:bundle) { create(:product, user: seller, is_bundle: true) }
+    let(:bundle) { create(:product, :bundle, user: seller) }
 
     let(:product) { create(:product, user: seller) }
     let!(:bundle_product) { create(:bundle_product, bundle:, product:, updated_at: 1.year.ago) }

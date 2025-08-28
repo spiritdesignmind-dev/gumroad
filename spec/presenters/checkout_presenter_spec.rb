@@ -429,7 +429,7 @@ describe CheckoutPresenter do
     end
 
     context "when the product is a bundle product" do
-      let(:bundle) { create(:product, is_bundle: true) }
+      let(:bundle) { create(:product, :bundle) }
 
       before do
         create(:bundle_product, bundle:, product: create(:product, :with_custom_fields, user: bundle.user, require_shipping: true), quantity: 2, position: 1)

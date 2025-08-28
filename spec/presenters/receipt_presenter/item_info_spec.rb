@@ -359,7 +359,7 @@ describe ReceiptPresenter::ItemInfo do
         end
 
         context "when the purchase is bundle" do
-          let(:bundle) { create(:product, user: seller, is_bundle: true, name: "Bundle product") }
+          let(:bundle) { create(:product, user: create(:user, :eligible_for_bundle_products), is_bundle: true, name: "Bundle product") }
           let(:purchase) { create(:purchase, link: bundle) }
 
           let!(:product) { create(:product, user: seller, name: "Product") }
@@ -524,7 +524,7 @@ describe ReceiptPresenter::ItemInfo do
       end
 
       context "when the purchase is a bundle product purchase" do
-        let(:bundle) { create(:product, user: seller, is_bundle: true, name: "Bundle product") }
+        let(:bundle) { create(:product, user: create(:user, :eligible_for_bundle_products), is_bundle: true, name: "Bundle product") }
         let(:purchase) { create(:purchase, link: bundle, seller:) }
         let!(:product) { create(:product, user: seller, name: "Product") }
         let!(:bundle_product) { create(:bundle_product, bundle:, product:) }

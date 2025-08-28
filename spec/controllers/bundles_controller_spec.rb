@@ -5,7 +5,7 @@ require "shared_examples/sellers_base_controller_concern"
 require "shared_examples/authorize_called"
 
 describe BundlesController do
-  let(:seller) { create(:named_seller, :eligible_for_service_products) }
+  let(:seller) { create(:named_seller, :eligible_for_service_products, :eligible_for_bundle_products) }
   let(:bundle) { create(:product, :bundle, user: seller, price_cents: 2000) }
 
   include_context "with user signed in as admin for seller"

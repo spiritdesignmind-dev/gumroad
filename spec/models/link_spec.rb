@@ -1805,7 +1805,7 @@ describe Link, :vcr do
 
     context "product is in bundle" do
       before do
-        bundle = create(:product, user: product.user, is_bundle: true)
+        bundle = create(:product, :bundle, user: product.user)
         create(:bundle_product, product:, bundle:)
       end
 
@@ -1818,7 +1818,7 @@ describe Link, :vcr do
 
     context "product was in bundle" do
       before do
-        bundle = create(:product, user: product.user, is_bundle: true)
+        bundle = create(:product, :bundle, user: product.user)
         create(:bundle_product, product:, bundle:, deleted_at: Time.current)
       end
 
@@ -2528,7 +2528,7 @@ describe Link, :vcr do
     end
 
     describe "bundle product" do
-      let(:bundle) { create(:product, :bundle, max_purchase_count: 3) }
+      let(:bundle) { create(:product, :bundle, user: create(:user, :eligible_for_bundle_products), max_purchase_count: 3) }
 
       it "returns the minimum quantity remaining out of the bundle and the bundle products" do
         expect(bundle.remaining_for_sale_count).to eq(3)

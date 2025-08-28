@@ -716,7 +716,7 @@ describe("Download Page", type: :system, js: true) do
   end
 
   describe "bundle product" do
-    let(:seller) { create(:named_seller) }
+    let(:seller) { create(:named_seller, :eligible_for_bundle_products) }
     let(:purchase) { create(:purchase, seller:, link: create(:product, :bundle, user: seller)) }
 
     before { purchase.create_artifacts_and_send_receipt! }

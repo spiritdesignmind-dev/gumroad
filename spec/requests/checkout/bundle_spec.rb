@@ -3,8 +3,8 @@
 require "spec_helper"
 
 describe "Checkout bundles", :js, type: :system do
-  let(:seller) { create(:named_seller) }
-  let(:bundle) { create(:product, user: seller, is_bundle: true, price_cents: 1000) }
+  let(:seller) { create(:named_seller, :eligible_for_bundle_products) }
+  let(:bundle) { create(:product, :bundle, user: seller, price_cents: 1000) }
 
   let(:product) { create(:product, user: seller, name: "Product", price_cents: 500) }
   let!(:bundle_product) { create(:bundle_product, bundle:, product:) }
@@ -90,7 +90,7 @@ describe "Checkout bundles", :js, type: :system do
   end
 
   context "when the bundle products have custom fields" do
-    let(:custom_fields_bundle) { create(:product, :with_custom_fields, is_bundle: true, user: seller, name: "Bundle") }
+    let(:custom_fields_bundle) { create(:product, :with_custom_fields, :bundle, user: seller, name: "Bundle") }
     let(:product1) { create(:product, :with_custom_fields, user: seller, name: "Product 1") }
     let!(:product1_bundle_product) { create(:bundle_product, bundle: custom_fields_bundle, product: product1) }
     let(:product2) { create(:product, :with_custom_fields, user: seller, name: "Product 2") }
@@ -153,7 +153,7 @@ describe "Checkout bundles", :js, type: :system do
   end
 
   context "gifting bundles with license keys" do
-    let(:bundle_with_licensed_product) { create(:product, user: seller, is_bundle: true) }
+    let(:bundle_with_licensed_product) { create(:product, :bundle, user: seller) }
     let(:licensed_product) { create(:product, user: seller, name: "Licensed product", is_licensed: true) }
     let!(:licensed_bundle_product) { create(:bundle_product, bundle: bundle_with_licensed_product, product: licensed_product) }
     let(:giftee_email) { "giftee@gumroad.com" }

@@ -144,7 +144,7 @@ describe PurchasesController, :vcr do
       end
 
       it "updates email addresses of bundle product purchases" do
-        bundle_purchase = create(:purchase, link: create(:product, :bundle, user: seller))
+        bundle_purchase = create(:purchase, link: create(:product, :bundle, user: create(:user, :eligible_for_bundle_products)))
         bundle_purchase.create_artifacts_and_send_receipt!
         put :update, params: { id: bundle_purchase.external_id, email: "newemail@gumroad.com" }
         expect(response.parsed_body["success"]).to be(true)

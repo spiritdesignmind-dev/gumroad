@@ -219,7 +219,7 @@ describe("Product Edit Previews", type: :system, js: true) do
     it_behaves_like "displaying collaborator"
 
     context "that is a bundle" do
-      let(:product) { create(:product, :bundle, user: seller) }
+      let(:product) { create(:product, :bundle, user: create(:user, :eligible_for_bundle_products)) }
 
       it_behaves_like "displaying collaborator"
     end

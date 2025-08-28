@@ -135,6 +135,7 @@ My email is test@gmail.com <i>Reach out and say hi!</i>
       name { "Bundle" }
       description { "This is a bundle of products" }
       is_bundle { true }
+      user { create(:user, :eligible_for_bundle_products) }
 
       bundle_products do
         build_list(:bundle_product, 2, bundle: instance) do |bundle_product, i|

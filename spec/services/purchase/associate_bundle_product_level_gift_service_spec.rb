@@ -2,7 +2,7 @@
 
 describe Purchase::AssociateBundleProductLevelGiftService do
   describe "#perform" do
-    let(:seller) { create(:named_seller) }
+    let(:seller) { create(:named_seller, :eligible_for_bundle_products) }
     let(:gifter_email) { "gifter@example.com" }
     let(:giftee_email) { "giftee@example.com" }
 

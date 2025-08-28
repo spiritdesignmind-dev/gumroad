@@ -68,7 +68,7 @@ RSpec.describe ProductInstallmentPlan do
     end
 
     context "with a bundle product" do
-      let(:seller) { create(:user, :eligible_for_service_products) }
+      let(:seller) { create(:user, :eligible_for_service_products, :eligible_for_bundle_products) }
 
       let(:bundle) { create(:product, :bundle, user: seller, price_cents: 1000) }
       let(:course_product) { create(:product, native_type: Link::NATIVE_TYPE_COURSE, user: seller) }

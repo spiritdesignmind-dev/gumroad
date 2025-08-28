@@ -184,5 +184,11 @@ FactoryBot.define do
     trait :eligible_for_service_products do
       created_at { User::MIN_AGE_FOR_SERVICE_PRODUCTS.ago - 1.day }
     end
+
+    trait :eligible_for_bundle_products do
+      after(:create) do |user|
+        create_list(:product, 2, user: user)
+      end
+    end
   end
 end

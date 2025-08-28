@@ -387,7 +387,7 @@ describe ProductPresenter::ProductProps do
     end
 
     context "bundle product" do
-      let(:bundle) { create(:product, user: seller, is_bundle: true) }
+      let(:bundle) { create(:product, user: create(:user, :eligible_for_bundle_products), is_bundle: true) }
 
       before do
         create(:bundle_product, bundle:, product: create(:product, user: seller), quantity: 2, position: 1)

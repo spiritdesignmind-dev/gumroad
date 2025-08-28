@@ -2,9 +2,9 @@
 
 describe Purchase::CreateBundleProductPurchaseService do
   describe "#perform" do
-    let(:seller) { create(:named_seller) }
+    let(:seller) { create(:named_seller, :eligible_for_bundle_products) }
     let(:purchaser) { create(:buyer_user) }
-    let(:bundle) { create(:product, user: seller, is_bundle: true) }
+    let(:bundle) { create(:product, :bundle, user: seller) }
 
     let(:versioned_product) { create(:product_with_digital_versions, user: seller, name: "Versioned product") }
     let!(:versioned_bundle_product) { create(:bundle_product, bundle:, product: versioned_product, variant: versioned_product.alive_variants.first, quantity: 3) }

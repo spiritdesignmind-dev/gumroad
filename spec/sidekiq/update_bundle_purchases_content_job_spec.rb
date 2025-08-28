@@ -3,7 +3,7 @@
 require "spec_helper"
 
 describe UpdateBundlePurchasesContentJob do
-  let(:seller) { create(:named_seller) }
+  let(:seller) { create(:named_seller, :eligible_for_bundle_products) }
   let(:purchaser) { create(:buyer_user) }
   let(:bundle) { create(:product, user: seller, is_bundle: true, has_outdated_purchases: true) }
 

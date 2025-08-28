@@ -395,7 +395,7 @@ describe CustomersController, :vcr do
   end
 
   describe "GET product_purchases" do
-    let(:purchase) { create(:purchase, link: create(:product, :bundle, user: seller), seller:) }
+    let(:purchase) { create(:purchase, link: create(:product, :bundle, user: create(:user, :eligible_for_bundle_products)), seller:) }
 
     before { purchase.create_artifacts_and_send_receipt! }
 

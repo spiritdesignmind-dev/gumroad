@@ -514,7 +514,7 @@ describe("Email Creation Flow", :js, type: :system) do
   end
 
   it "auto populates the new email form when URL contains bundle product related query parameter" do
-    product = create(:product, :bundle, user: seller)
+    product = create(:product, :bundle, user: create(:user, :eligible_for_bundle_products))
     create(:purchase, link: product)
 
     visit edit_link_path(product.unique_permalink)

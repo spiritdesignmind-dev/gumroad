@@ -146,7 +146,7 @@ describe BundleProduct do
     end
 
     describe "installment plans" do
-      let(:seller) { create(:user, :eligible_for_service_products) }
+      let(:seller) { create(:user, :eligible_for_service_products, :eligible_for_bundle_products) }
       let(:bundle) { create(:product, :bundle, user: seller, price_cents: 1000) }
 
       let(:eligible_product) { create(:product, native_type: Link::NATIVE_TYPE_DIGITAL, user: seller) }

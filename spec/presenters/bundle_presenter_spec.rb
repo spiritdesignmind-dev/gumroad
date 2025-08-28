@@ -4,7 +4,7 @@ describe BundlePresenter do
   include Rails.application.routes.url_helpers
 
   describe "#bundle_props" do
-    let(:seller) { create(:named_seller, :eligible_for_service_products) }
+    let(:seller) { create(:named_seller, :eligible_for_service_products, :eligible_for_bundle_products) }
     let(:product) { create(:product, user: seller) }
     let(:versioned_product) { create(:product_with_digital_versions, user: seller, quantity_enabled: true) }
     let(:bundle) do create(:product, :bundle, user: seller, name: "Bundle", description: "I am a bundle!", custom_permalink: "bundle",

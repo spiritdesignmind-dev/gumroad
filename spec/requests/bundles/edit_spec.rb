@@ -5,7 +5,7 @@ require "shared_examples/authorize_called"
 require "shared_examples/creator_dashboard_page"
 
 describe("Bundle edit page", type: :system, js: true) do
-  let(:seller) { create(:named_seller) }
+  let(:seller) { create(:named_seller, :eligible_for_bundle_products) }
   let(:bundle) { create(:product, :bundle, user: seller, price_cents: 200) }
   let!(:asset_preview1) { create(:asset_preview, link: bundle) }
   let!(:asset_preview2) { create(:asset_preview_gif, link: bundle) }
@@ -296,7 +296,7 @@ describe("Bundle edit page", type: :system, js: true) do
     end
 
     context "when the bundle has no products" do
-      let(:empty_bundle) { create(:product, :unpublished, user: seller, is_bundle: true) }
+      let(:empty_bundle) { create(:product, :unpublished, user: create(:user, :eligible_for_bundle_products), is_bundle: true) }
 
       it "displays a placeholder" do
         visit "#{bundle_path(empty_bundle.external_id)}/content"
