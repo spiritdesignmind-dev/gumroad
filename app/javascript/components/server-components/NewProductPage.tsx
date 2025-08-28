@@ -511,7 +511,7 @@ const ProductTypeSelector = ({
         </Button>
       );
       if (isDisabled) {
-        const tooltipMessage = isBundleDisabled 
+        const tooltipMessage = isBundleDisabled
           ? "Create at least two products to unlock Bundles."
           : "Service products are disabled until your account is 30 days old.";
         return (
