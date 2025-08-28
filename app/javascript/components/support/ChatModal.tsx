@@ -96,7 +96,9 @@ function ChatContent({
   initialMessage: { content: string; attachments: File[] } | undefined;
   onClose: (isEscalated: boolean) => void;
 }) {
-  const { messages, agentTyping, input, handleInputChange, handleSubmit, append, status } = useChat({ conversation });
+  const { messages, agentTyping, input, handleInputChange, handleSubmit, append, status, error } = useChat({
+    conversation,
+  });
   const formRef = React.useRef<HTMLFormElement>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
