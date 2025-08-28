@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Eligibility
+module User::Eligibility
   extend ActiveSupport::Concern
 
   private
