@@ -1,4 +1,4 @@
-import { useCreateConversation } from "@helperai/react";
+import { useAttachments, useCreateConversation } from "@helperai/react";
 import React from "react";
 
 import FileUtils from "$app/utils/file";
@@ -26,7 +26,7 @@ export function NewTicketModal({
 
   const [subject, setSubject] = React.useState("");
   const [message, setMessage] = React.useState("");
-  const [attachments, setAttachments] = React.useState<File[]>([]);
+  const { attachments, addAttachments, removeAttachment } = useAttachments();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const formRef = React.useRef<HTMLFormElement | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -84,7 +84,7 @@ export function NewTicketModal({
           onChange={(e) => {
             const files = Array.from(e.target.files ?? []);
             if (files.length === 0) return;
-            setAttachments((prev) => [...prev, ...files]);
+            addAttachments(files);
             e.currentTarget.value = "";
           }}
         />
@@ -102,12 +102,7 @@ export function NewTicketModal({
                   />
                 </div>
                 <div className="actions">
-                  <Button
-                    outline
-                    color="danger"
-                    aria-label="Remove"
-                    onClick={() => setAttachments((prev) => prev.filter((_, i) => i !== index))}
-                  >
+                  <Button outline color="danger" aria-label="Remove" onClick={() => removeAttachment(index)}>
                     <Icon name="trash2" />
                   </Button>
                 </div>

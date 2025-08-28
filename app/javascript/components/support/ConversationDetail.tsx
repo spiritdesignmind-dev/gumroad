@@ -1,5 +1,5 @@
 import type { Message } from "@helperai/client";
-import { useConversation, useRealtimeEvents, useCreateMessage, MessageContent } from "@helperai/react";
+import { useConversation, useRealtimeEvents, useCreateMessage, MessageContent, useAttachments } from "@helperai/react";
 import cx from "classnames";
 import pinkIcon from "images/pink-icon.png";
 import startCase from "lodash/startCase";
@@ -86,7 +86,7 @@ export function ConversationDetail({ conversationSlug, onBack }: { conversationS
   useRealtimeEvents(conversation?.slug ?? "", { enabled: Boolean(conversation?.slug) });
 
   const [input, setInput] = React.useState("");
-  const [attachments, setAttachments] = React.useState<File[]>([]);
+  const { attachments, addAttachments, removeAttachment, clearAttachments } = useAttachments();
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -95,7 +95,7 @@ export function ConversationDetail({ conversationSlug, onBack }: { conversationS
     if (!trimmed) return;
     await createMessage({ conversationSlug, content: trimmed, attachments });
     setInput("");
-    setAttachments([]);
+    clearAttachments();
     void refetch();
   };
 
@@ -139,7 +139,7 @@ export function ConversationDetail({ conversationSlug, onBack }: { conversationS
             onChange={(e) => {
               const files = Array.from(e.target.files ?? []);
               if (files.length === 0) return;
-              setAttachments((prev) => [...prev, ...files]);
+              addAttachments(files);
               e.currentTarget.value = "";
             }}
           />
@@ -157,12 +157,7 @@ export function ConversationDetail({ conversationSlug, onBack }: { conversationS
                     />
                   </div>
                   <div className="actions">
-                    <Button
-                      outline
-                      color="danger"
-                      aria-label="Remove"
-                      onClick={() => setAttachments((prev) => prev.filter((_, i) => i !== index))}
-                    >
+                    <Button outline color="danger" aria-label="Remove" onClick={() => removeAttachment(index)}>
                       <Icon name="trash2" />
                     </Button>
                   </div>

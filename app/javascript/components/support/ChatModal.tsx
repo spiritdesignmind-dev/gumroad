@@ -1,11 +1,10 @@
 import { ConversationDetails, Message } from "@helperai/client";
-import { MessageContent, useChat } from "@helperai/react";
+import { MessageContent, useAttachments, useChat, useHelperClient } from "@helperai/react";
 import cx from "classnames";
 import pinkIcon from "images/pink-icon.png";
 import React from "react";
 
 import FileUtils from "$app/utils/file";
-import { readFileAsDataURL } from "$app/utils/image";
 
 import { Button } from "$app/components/Button";
 import { FileRowContent } from "$app/components/FileRowContent";
@@ -101,7 +100,7 @@ function ChatContent({
   const formRef = React.useRef<HTMLFormElement>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-  const [attachments, setAttachments] = React.useState<File[]>([]);
+  const { attachments, addAttachments, removeAttachment, clearAttachments, prepareAttachments } = useAttachments();
   const [feedbackButtonsStatus, setFeedbackButtonsStatus] = React.useState<
     "hidden" | "initialButtons" | "moreDetailsPrompt" | "talkToHuman" | "dismissed"
   >("hidden");
@@ -132,20 +131,15 @@ function ChatContent({
     }
   };
 
+  const { client } = useHelperClient();
+
   useRunOnce(() => {
     const sendInitialMessage = async () => {
       if (initialMessage && messages.length === 0) {
-        const attachmentObjects = await Promise.all(
-          initialMessage.attachments.map(async (file) => ({
-            name: file.name,
-            contentType: file.type,
-            url: await readFileAsDataURL(file),
-          })),
-        );
         void append({
           role: "user",
           content: initialMessage.content,
-          experimental_attachments: attachmentObjects,
+          experimental_attachments: await Promise.all(attachments.map(client.chat.attachment)),
         }).then(() => {
           setFeedbackButtonsStatus("initialButtons");
         });
@@ -160,9 +154,16 @@ function ChatContent({
 
   React.useEffect(() => {
     if (conversation.isEscalated) {
-      // onClose(true);
+      onClose(true);
     }
   }, [conversation.isEscalated]);
+
+  const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleSubmit(e, { experimental_attachments: await prepareAttachments() });
+    clearAttachments();
+    setFeedbackButtonsStatus((status) => (status === "moreDetailsPrompt" ? "talkToHuman" : "initialButtons"));
+  };
 
   return (
     <>
@@ -212,16 +213,7 @@ function ChatContent({
         </div>
       ) : null}
 
-      <form
-        onSubmit={(e) => {
-          const dataTransfer = new DataTransfer();
-          attachments.forEach((attachment) => dataTransfer.items.add(attachment));
-          handleSubmit(e, { experimental_attachments: dataTransfer.files });
-          setAttachments([]);
-          setFeedbackButtonsStatus((status) => (status === "moreDetailsPrompt" ? "talkToHuman" : "initialButtons"));
-        }}
-        ref={formRef}
-      >
+      <form onSubmit={(e) => void submitForm(e)} ref={formRef}>
         <input
           ref={fileInputRef}
           type="file"
@@ -230,7 +222,7 @@ function ChatContent({
           onChange={(e) => {
             const files = Array.from(e.target.files ?? []);
             if (files.length === 0) return;
-            setAttachments((prev) => [...prev, ...files]);
+            addAttachments(files);
             e.currentTarget.value = "";
           }}
         />
@@ -248,12 +240,7 @@ function ChatContent({
                     details={<li>{FileUtils.getReadableFileSize(file.size)}</li>}
                   />
                 </div>
-                <Button
-                  outline
-                  color="danger"
-                  aria-label="Remove attachment"
-                  onClick={() => setAttachments((prev) => prev.filter((_, i) => i !== index))}
-                >
+                <Button outline color="danger" aria-label="Remove attachment" onClick={() => removeAttachment(index)}>
                   <Icon name="trash2" />
                 </Button>
               </div>
