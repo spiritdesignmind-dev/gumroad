@@ -93,5 +93,4 @@ class Admin::BaseController < ApplicationController
     def xhr_or_json_request?
       request.xhr? || request.format.json?
     end
-
 end
