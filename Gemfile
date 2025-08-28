@@ -7,7 +7,7 @@ ruby file: ".ruby-version"
 gem "rails", "7.1.3.4"
 gem "rake", "13.2.1"
 
-install_if -> { ENV["BUNDLE_GEMS__CONTRIBSYS__COM"] } do
+group :staging, :production do
   source "https://gems.contribsys.com/" do
     gem "sidekiq-pro", "~> 7.2"
   end
