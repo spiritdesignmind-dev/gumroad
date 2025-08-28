@@ -38,7 +38,14 @@ export const NavLink = ({
     : undefined;
 
   return (
-    <a aria-current={ariaCurrent} href={href} title={text} onClick={onClick} className="flex items-center" data-turbo={dataTurbo}>
+    <a
+      aria-current={ariaCurrent}
+      href={href}
+      title={text}
+      onClick={onClick}
+      className="flex items-center"
+      data-turbo={dataTurbo}
+    >
       {icon ? <Icon name={icon} /> : null}
       {text}
       {badge ? (
