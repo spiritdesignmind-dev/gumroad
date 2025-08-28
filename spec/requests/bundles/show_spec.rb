@@ -4,7 +4,7 @@ require "spec_helper"
 
 describe("Bundle page", type: :system, js: true) do
   let(:seller) { create(:named_seller, :eligible_for_bundle_products) }
-  let(:bundle) { create(:product, user: seller, is_bundle: true, price_cents: 1000) }
+  let(:bundle) { create(:product, :bundle, user: seller, price_cents: 1000) }
 
   let(:product) { create(:product, user: seller, name: "Product", price_cents: 500) }
   let!(:bundle_product) { create(:bundle_product, bundle:, product:) }

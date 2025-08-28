@@ -359,7 +359,7 @@ describe ReceiptPresenter::ItemInfo do
         end
 
         context "when the purchase is bundle" do
-          let(:bundle) { create(:product, user: seller, is_bundle: true, name: "Bundle product") }
+          let(:bundle) { create(:product, :bundle, user: seller, name: "Bundle product") }
           let(:purchase) { create(:purchase, link: bundle) }
 
           let!(:product) { create(:product, user: seller, name: "Product") }
@@ -524,7 +524,7 @@ describe ReceiptPresenter::ItemInfo do
       end
 
       context "when the purchase is a bundle product purchase" do
-        let(:bundle) { create(:product, user: seller, is_bundle: true, name: "Bundle product") }
+        let(:bundle) { create(:product, :bundle, user: seller, name: "Bundle product") }
         let(:purchase) { create(:purchase, link: bundle, seller:) }
         let!(:product) { create(:product, user: seller, name: "Product") }
         let!(:bundle_product) { create(:bundle_product, bundle:, product:) }
@@ -552,7 +552,7 @@ describe ReceiptPresenter::ItemInfo do
       end
 
       context "when the purchase is a bundle gift receiver purchase" do
-        let(:bundle) { create(:product, user: seller, is_bundle: true, name: "Bundle product") }
+        let(:bundle) { create(:product, :bundle, user: seller, name: "Bundle product") }
         let(:gift) { create(:gift, gift_note: "Hope you like it!", giftee_email: "giftee@example.com", link: bundle) }
         let(:gifter_purchase) { create(:purchase, link: bundle, seller:, gift_given: gift, is_gift_sender_purchase: true) }
         let(:purchase) { create(:purchase, link: bundle, seller:, gift_received: gift, is_gift_receiver_purchase: true) }

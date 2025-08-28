@@ -5,7 +5,7 @@ require "spec_helper"
 describe UpdateBundlePurchasesContentJob do
   let(:seller) { create(:named_seller, :eligible_for_bundle_products) }
   let(:purchaser) { create(:buyer_user) }
-  let(:bundle) { create(:product, user: seller, is_bundle: true, has_outdated_purchases: true) }
+  let(:bundle) { create(:product, :bundle, user: seller, has_outdated_purchases: true) }
 
   let(:product) { create(:product, user: seller, name: "Product", custom_fields: [create(:custom_field, name: "Key")]) }
   let!(:bundle_product) { create(:bundle_product, bundle:, product:, updated_at: 2.years.ago) }
