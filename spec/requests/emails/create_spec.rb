@@ -6,7 +6,7 @@ require "shared_examples/authorize_called"
 describe("Email Creation Flow", :js, type: :system) do
   include EmailHelpers
 
-  let(:seller) { create(:named_seller) }
+  let(:seller) { create(:named_seller, :eligible_for_bundle_products) }
 
   before do
     allow_any_instance_of(User).to receive(:sales_cents_total).and_return(Installment::MINIMUM_SALES_CENTS_VALUE)
@@ -514,7 +514,7 @@ describe("Email Creation Flow", :js, type: :system) do
   end
 
   it "auto populates the new email form when URL contains bundle product related query parameter" do
-    product = create(:product, :bundle, user: create(:user, :eligible_for_bundle_products))
+    product = create(:product, :bundle, user: seller)
     create(:purchase, link: product)
 
     visit edit_link_path(product.unique_permalink)

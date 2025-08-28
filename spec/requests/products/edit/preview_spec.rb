@@ -12,7 +12,7 @@ describe("Product Edit Previews", type: :system, js: true) do
     el
   end
 
-  let(:seller) { create(:named_seller) }
+  let(:seller) { create(:named_seller, :eligible_for_bundle_products) }
   let(:product) { create(:product_with_pdf_file, user: seller, size: 1024) }
 
   include_context "with switching account to user as admin for seller"
@@ -219,7 +219,7 @@ describe("Product Edit Previews", type: :system, js: true) do
     it_behaves_like "displaying collaborator"
 
     context "that is a bundle" do
-      let(:product) { create(:product, :bundle, user: create(:user, :eligible_for_bundle_products)) }
+      let(:product) { create(:product, :bundle, user: seller) }
 
       it_behaves_like "displaying collaborator"
     end

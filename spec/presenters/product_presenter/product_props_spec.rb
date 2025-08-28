@@ -9,7 +9,7 @@ describe ProductPresenter::ProductProps do
   let(:presenter) { described_class.new(product:) }
 
   describe "#props", :vcr do
-    let(:seller) { create(:user, name: "Testy", username: "testy", created_at: 60.days.ago) }
+    let(:seller) { create(:user, :eligible_for_bundle_products, name: "Testy", username: "testy", created_at: 60.days.ago) }
     let(:buyer) { create(:user) }
     let(:request) { OpenStruct.new(remote_ip: "12.12.128.128", host: "example.com", host_with_port: "example.com") }
 
@@ -387,7 +387,7 @@ describe ProductPresenter::ProductProps do
     end
 
     context "bundle product" do
-      let(:bundle) { create(:product, user: create(:user, :eligible_for_bundle_products), is_bundle: true) }
+      let(:bundle) { create(:product, user: seller, is_bundle: true) }
 
       before do
         create(:bundle_product, bundle:, product: create(:product, user: seller), quantity: 2, position: 1)

@@ -2921,9 +2921,9 @@ describe Purchase, :vcr do
 
   describe "#create_artifacts_and_send_receipt!" do
     context "purchase is a bundle purchase" do
-      let(:seller) { create(:named_seller) }
+      let(:seller) { create(:named_seller, :eligible_for_bundle_products) }
       let(:purchaser) { create(:buyer_user) }
-      let(:bundle) { create(:product, user: create(:user, :eligible_for_bundle_products), is_bundle: true) }
+      let(:bundle) { create(:product, user: seller, is_bundle: true) }
 
       let(:product) { create(:product, user: seller, name: "Product", custom_fields: [create(:custom_field, name: "Key")]) }
       let!(:bundle_product) { create(:bundle_product, bundle:, product:) }

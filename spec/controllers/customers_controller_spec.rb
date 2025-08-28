@@ -6,7 +6,7 @@ require "shared_examples/authorize_called"
 describe CustomersController, :vcr do
   render_views
 
-  let(:seller) { create(:named_user) }
+  let(:seller) { create(:named_user, :eligible_for_bundle_products) }
 
   include_context "with user signed in as admin for seller"
 
@@ -395,7 +395,7 @@ describe CustomersController, :vcr do
   end
 
   describe "GET product_purchases" do
-    let(:purchase) { create(:purchase, link: create(:product, :bundle, user: create(:user, :eligible_for_bundle_products)), seller:) }
+    let(:purchase) { create(:purchase, link: create(:product, :bundle, user: seller), seller:) }
 
     before { purchase.create_artifacts_and_send_receipt! }
 
