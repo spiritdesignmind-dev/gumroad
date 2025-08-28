@@ -45,8 +45,9 @@ RUN sed -r 's/(name="memory" value=")[^"]+"/\11GiB"/' -i /etc/ImageMagick-6/poli
 
 ARG BUNDLE_GEMS__CONTRIBSYS__COM
 RUN cd $APP_DIR \
+  && bundle config gems.contribsys.com $BUNDLE_GEMS__CONTRIBSYS__COM \
   && bundle config set without 'development test' \
-  && BUNDLE_GEMS__CONTRIBSYS__COM=$BUNDLE_GEMS__CONTRIBSYS__COM bundle install
+  && bundle install
 
 ENV DATABASE_HOST="db" \
   DATABASE_NAME="gumroad_development" \

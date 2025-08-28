@@ -94,7 +94,8 @@ RUN cd /tmp \
   # install gems
   && cd $APP_DIR \
   && gem install bundler:$(awk '/BUNDLED\ WITH/{getline; print}' Gemfile.lock | tr -d " ") \
-  && BUNDLE_GEMS__CONTRIBSYS__COM=${BUNDLE_GEMS__CONTRIBSYS__COM} bundle install \
+  && bundle config gems.contribsys.com ${BUNDLE_GEMS__CONTRIBSYS__COM} \
+  && bundle install \
   # cleanup
   && apt-get remove -y \
   build-essential \
