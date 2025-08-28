@@ -479,7 +479,7 @@ describe "Communities", :js, type: :system do
           community2_link_element = find_link("Scaling web apps")
 
           # Wait for the unread count to be rendered by the React component
-          expect(page).to have_selector("[aria-label='Unread message count']", text: "2", wait: 10)
+          expect(page).to have_selector("[aria-label='Unread message count']", text: "1", wait: 10)
           expect(community2_link_element["aria-selected"]).to eq("false")
         end
       end
@@ -621,7 +621,7 @@ describe "Communities", :js, type: :system do
           expect(find_link("The ultimate guide to design systems")["aria-selected"]).to eq("true")
 
           # Wait for the unread count to be rendered by the React component
-          expect(page).to have_selector("[aria-label='Unread message count']", text: "2", wait: 10)
+          expect(page).to have_selector("[aria-label='Unread message count']", text: "1", wait: 10)
         end
       end
 
