@@ -16,6 +16,7 @@ export const NavLink = ({
   badge,
   href,
   exactHrefMatch,
+  dataTurbo = true,
   additionalPatterns = [],
   onClick,
 }: {
@@ -24,6 +25,7 @@ export const NavLink = ({
   badge?: React.ReactNode;
   href: string;
   exactHrefMatch?: boolean;
+  dataTurbo?: boolean;
   additionalPatterns?: string[];
   onClick?: (ev: React.MouseEvent<HTMLAnchorElement>) => void;
 }) => {
@@ -36,7 +38,7 @@ export const NavLink = ({
     : undefined;
 
   return (
-    <a aria-current={ariaCurrent} href={href} title={text} onClick={onClick} className="flex items-center">
+    <a aria-current={ariaCurrent} href={href} title={text} onClick={onClick} className="flex items-center" data-turbo={dataTurbo}>
       {icon ? <Icon name={icon} /> : null}
       {text}
       {badge ? (

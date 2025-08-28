@@ -1,3 +1,5 @@
+import "@hotwired/turbo-rails";
+
 import Clipboard from "clipboard";
 import ReactOnRails from "react-on-rails";
 
