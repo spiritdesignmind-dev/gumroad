@@ -147,6 +147,8 @@ describe "Admin Pages Scenario", type: :system, js: true do
 
       visit admin_user_path(creator)
 
+      click_on "Products"
+
       expect(page).to have_text(product.name)
       expect(page).to have_text("2 views")
       expect(page).to have_text("4 sales")
