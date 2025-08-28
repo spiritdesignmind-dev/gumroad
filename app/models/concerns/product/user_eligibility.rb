@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
-module User::Eligibility
+module Product::UserEligibility
   extend ActiveSupport::Concern
+
+  included do
+    validate :user_is_eligible_for_service_products, on: :create, if: :is_service?
+    validate :user_is_eligible_for_bundle_products, on: :create, if: :is_bundle?
+  end
 
   private
     def user_is_eligible_for_service_products
