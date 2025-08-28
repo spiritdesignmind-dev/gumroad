@@ -65,6 +65,12 @@ module Product::Validations
       errors.add(:base, "Service products are disabled until your account is 30 days old.")
     end
 
+    def user_is_eligible_for_bundle_products
+      return if user.eligible_for_bundle_products?
+
+      errors.add(:base, "Create at least two products to unlock Bundles.")
+    end
+
     def commission_price_is_valid
       double_min_price = currency["min_price"] * 2
       return if price_cents == 0 || price_cents >= double_min_price

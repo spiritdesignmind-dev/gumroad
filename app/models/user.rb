@@ -847,6 +847,10 @@ class User < ApplicationRecord
     Time.current - created_at > MIN_AGE_FOR_SERVICE_PRODUCTS
   end
 
+  def eligible_for_bundle_products?
+    products.visible.count >= 2
+  end
+
   def gumroad_day_saved_fee_cents
     return 0 if gumroad_day_timezone.blank?
 

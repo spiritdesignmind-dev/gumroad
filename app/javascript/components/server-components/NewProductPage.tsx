@@ -36,6 +36,7 @@ const NewProductPage = ({
   release_at_date,
   show_orientation_text,
   eligible_for_service_products,
+  eligible_for_bundle_products,
   ai_generation_enabled,
   ai_promo_dismissed,
 }: {
@@ -45,6 +46,7 @@ const NewProductPage = ({
   release_at_date: string;
   show_orientation_text: boolean;
   eligible_for_service_products: boolean;
+  eligible_for_bundle_products: boolean;
   ai_generation_enabled: boolean;
   ai_promo_dismissed: boolean;
 }) => {
@@ -333,6 +335,7 @@ const NewProductPage = ({
                   selectedType={productType}
                   types={native_product_types}
                   onChange={setProductType}
+                  bundleDisabled={!eligible_for_bundle_products}
                 />
               </fieldset>
               {service_product_types.length > 0 ? (
@@ -468,11 +471,13 @@ const ProductTypeSelector = ({
   types,
   onChange,
   disabled,
+  bundleDisabled,
 }: {
   selectedType: ProductNativeType;
   types: ProductNativeType[];
   onChange: (type: ProductNativeType) => void;
   disabled?: boolean;
+  bundleDisabled?: boolean;
 }) => (
   <div
     className="radio-buttons"
@@ -480,6 +485,8 @@ const ProductTypeSelector = ({
     style={{ gridTemplateColumns: "repeat(auto-fit, minmax(13rem, 1fr)" }}
   >
     {types.map((type) => {
+      const isBundleType = type === "bundle";
+      const isDisabled = disabled || (isBundleType && bundleDisabled);
       const typeButton = (
         <Button
           key={type}
@@ -488,7 +495,7 @@ const ProductTypeSelector = ({
           aria-checked={type === selectedType}
           data-type={type}
           onClick={() => onChange(type)}
-          disabled={disabled}
+          disabled={isDisabled}
         >
           <img
             src={cast<string>(nativeTypeIcons(`./${type}.png`))}
@@ -502,13 +509,17 @@ const ProductTypeSelector = ({
           </div>
         </Button>
       );
-      return disabled ? (
-        <WithTooltip tip="Service products are disabled until your account is 30 days old." key={type}>
-          {typeButton}
-        </WithTooltip>
-      ) : (
-        typeButton
-      );
+      if (isDisabled) {
+        const tooltipMessage = isBundleType && bundleDisabled 
+          ? "Create at least two products to unlock Bundles."
+          : "Service products are disabled until your account is 30 days old.";
+        return (
+          <WithTooltip tip={tooltipMessage} key={type}>
+            {typeButton}
+          </WithTooltip>
+        );
+      }
+      return typeButton;
     })}
     {types.length < 2 ? <div /> : null}
     {types.length < 3 ? <div /> : null}

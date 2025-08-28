@@ -25,6 +25,7 @@ class ProductPresenter
   def self.new_page_props(current_seller:)
     native_product_types = Link::NATIVE_TYPES - Link::LEGACY_TYPES - Link::SERVICE_TYPES
     native_product_types -= [Link::NATIVE_TYPE_PHYSICAL] unless current_seller.can_create_physical_products?
+    native_product_types -= [Link::NATIVE_TYPE_BUNDLE] unless current_seller.eligible_for_bundle_products?
     service_product_types = Link::SERVICE_TYPES
     service_product_types -= [Link::NATIVE_TYPE_COMMISSION] unless Feature.active?(:commissions, current_seller)
     release_at_date = displayable_release_at_date(1.month.from_now, current_seller.timezone)
@@ -36,6 +37,7 @@ class ProductPresenter
       release_at_date:,
       show_orientation_text: current_seller.products.visible.none?,
       eligible_for_service_products: current_seller.eligible_for_service_products?,
+      eligible_for_bundle_products: current_seller.eligible_for_bundle_products?,
       ai_generation_enabled: current_seller.eligible_for_ai_product_generation?,
       ai_promo_dismissed: current_seller.dismissed_create_products_with_ai_promo_alert?,
     }

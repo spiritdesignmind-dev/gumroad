@@ -200,6 +200,7 @@ class Link < ApplicationRecord
   validate :bundle_is_not_in_bundle, if: :is_bundle_changed?
   validate :published_bundle_must_have_at_least_one_product, on: :update
   validate :user_is_eligible_for_service_products, on: :create, if: :is_service?
+  validate :user_is_eligible_for_bundle_products, on: :create, if: :is_bundle?
   validate :commission_price_is_valid, if: -> { native_type == Link::NATIVE_TYPE_COMMISSION }
   validate :one_coffee_per_user, on: :create, if: -> { native_type == Link::NATIVE_TYPE_COFFEE }
   validate :quantity_enabled_state_is_allowed
