@@ -1,18 +1,21 @@
 import { ConversationDetails, Message } from "@helperai/client";
-import { useChat } from "@helperai/react";
+import { MessageContent, useChat } from "@helperai/react";
 import cx from "classnames";
 import pinkIcon from "images/pink-icon.png";
 import React from "react";
 
 import FileUtils from "$app/utils/file";
+import { readFileAsDataURL } from "$app/utils/image";
 
 import { Button } from "$app/components/Button";
 import { FileRowContent } from "$app/components/FileRowContent";
 import { Icon } from "$app/components/Icons";
 import { Modal } from "$app/components/Modal";
+import { useRunOnce } from "$app/components/useRunOnce";
 
 function ChatMessageItem({ message }: { message: Message }) {
   const isUser = message.role === "user";
+  const attachments = [...message.publicAttachments, ...message.privateAttachments];
 
   return (
     <div
@@ -34,7 +37,39 @@ function ChatMessageItem({ message }: { message: Message }) {
           "bg-gray-100 text-gray-900": !isUser,
         })}
       >
-        <div className="whitespace-pre-wrap text-sm">{message.content}</div>
+        <MessageContent className="prose prose-sm" message={message} />
+        {attachments.length > 0 && (
+          <div role="list" className="mt-3 w-full max-w-[500px]" aria-label="Attachments">
+            {attachments.map((attachment, index) => (
+              <div
+                role="listitem"
+                className={cx("mb-2 last:mb-0", {
+                  "p-0": attachment.contentType?.startsWith("image/"),
+                })}
+                key={`${attachment.url}-${index}`}
+              >
+                {attachment.contentType?.startsWith("image/") ? (
+                  <img src={attachment.url} alt={attachment.name ?? "Attachment"} className="w-full rounded-sm" />
+                ) : (
+                  <div
+                    className={cx("rounded border p-2", {
+                      "border-blue-300 bg-blue-400": isUser,
+                      "border-gray-200 bg-white": !isUser,
+                    })}
+                  >
+                    <FileRowContent
+                      name={FileUtils.getFileNameWithoutExtension(attachment.name ?? "Attachment")}
+                      extension={FileUtils.getFileExtension(attachment.name ?? "Attachment").toUpperCase()}
+                      externalLinkUrl={null}
+                      isUploading={false}
+                      details={<li>{attachment.contentType?.split("/")[1]}</li>}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         <div
           className={cx("mt-1 text-xs opacity-70", {
             "text-blue-100": isUser,
@@ -62,30 +97,62 @@ function ChatContent({
   initialMessage: { content: string; attachments: File[] } | undefined;
   onClose: (isEscalated: boolean) => void;
 }) {
-  const { messages, agentTyping, input, handleInputChange, handleSubmit, append } = useChat({ conversation });
+  const { messages, agentTyping, input, handleInputChange, handleSubmit, append, status } = useChat({ conversation });
   const formRef = React.useRef<HTMLFormElement>(null);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const [attachments, setAttachments] = React.useState<File[]>([]);
+  const [feedbackButtonsStatus, setFeedbackButtonsStatus] = React.useState<
+    "hidden" | "initialButtons" | "moreDetailsPrompt" | "talkToHuman" | "dismissed"
+  >("hidden");
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  React.useEffect(() => {
-    if (initialMessage && messages.length === 0) {
-      const attachmentObjects = initialMessage.attachments.map((file) => ({
-        name: file.name,
-        contentType: file.type,
-        url: URL.createObjectURL(file),
-      }));
+  const lastMessage = messages.filter((m) => !!m.content).at(-1);
+  const shouldShowFeedbackButtons =
+    status === "ready" &&
+    lastMessage?.role === "assistant" &&
+    (feedbackButtonsStatus === "initialButtons" || feedbackButtonsStatus === "talkToHuman");
+
+  const handleSolvedIt = () => {
+    onClose(false);
+  };
+
+  const handleDidntHelp = () => {
+    if (feedbackButtonsStatus === "talkToHuman") {
       void append({
         role: "user",
-        content: initialMessage.content,
-        experimental_attachments: attachmentObjects,
-      }).finally(() => attachmentObjects.forEach((attachment) => URL.revokeObjectURL(attachment.url)));
+        content: "I need to talk to a human",
+      });
+      setFeedbackButtonsStatus("dismissed");
+    } else {
+      setFeedbackButtonsStatus("moreDetailsPrompt");
     }
-  }, [initialMessage]);
+  };
+
+  useRunOnce(() => {
+    const sendInitialMessage = async () => {
+      if (initialMessage && messages.length === 0) {
+        const attachmentObjects = await Promise.all(
+          initialMessage.attachments.map(async (file) => ({
+            name: file.name,
+            contentType: file.type,
+            url: await readFileAsDataURL(file),
+          })),
+        );
+        void append({
+          role: "user",
+          content: initialMessage.content,
+          experimental_attachments: attachmentObjects,
+        }).then(() => {
+          setFeedbackButtonsStatus("initialButtons");
+        });
+      }
+    };
+    void sendInitialMessage();
+  });
 
   React.useEffect(() => {
     scrollToBottom();
@@ -93,18 +160,20 @@ function ChatContent({
 
   React.useEffect(() => {
     if (conversation.isEscalated) {
-      onClose(true);
+      // onClose(true);
     }
   }, [conversation.isEscalated]);
 
   return (
     <>
       <div className="bg-gray-50 flex-1 overflow-y-auto rounded-t-lg p-4">
-        {messages.map((msg) => (
-          <ChatMessageItem key={msg.id} message={msg} />
-        ))}
+        {messages
+          .filter((message) => !!message.content)
+          .map((msg) => (
+            <ChatMessageItem key={msg.id} message={msg} />
+          ))}
 
-        {agentTyping ? (
+        {agentTyping || status === "submitted" ? (
           <div className="mb-4 flex gap-3">
             <img
               className="border-gray-200 mt-1 h-8 w-8 flex-shrink-0 rounded-full border"
@@ -113,15 +182,9 @@ function ChatContent({
             />
             <div className="bg-gray-100 rounded-lg px-4 py-2">
               <div className="flex space-x-1">
-                <div className="bg-gray-400 h-2 w-2 animate-bounce rounded-full"></div>
-                <div
-                  className="bg-gray-400 h-2 w-2 animate-bounce rounded-full"
-                  style={{ animationDelay: "0.1s" }}
-                ></div>
-                <div
-                  className="bg-gray-400 h-2 w-2 animate-bounce rounded-full"
-                  style={{ animationDelay: "0.2s" }}
-                ></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-white"></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-white" style={{ animationDelay: "0.1s" }}></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-white" style={{ animationDelay: "0.2s" }}></div>
               </div>
             </div>
           </div>
@@ -130,12 +193,32 @@ function ChatContent({
         <div ref={messagesEndRef} />
       </div>
 
+      {shouldShowFeedbackButtons ? (
+        <div className="border-gray-200 border-t px-4 py-3">
+          <div className="flex justify-center gap-2">
+            <Button type="button" color="success" onClick={handleSolvedIt} className="text-sm">
+              That solved it!
+            </Button>
+            <Button type="button" outline onClick={handleDidntHelp} className="text-sm">
+              {feedbackButtonsStatus === "talkToHuman" ? "Talk to a human" : "This didn't help"}
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {feedbackButtonsStatus === "moreDetailsPrompt" ? (
+        <div className="border-gray-200 border-t px-4 py-3">
+          <div className="text-gray-600 text-center text-sm">Why didn't this help? Be as specific as you can.</div>
+        </div>
+      ) : null}
+
       <form
         onSubmit={(e) => {
           const dataTransfer = new DataTransfer();
           attachments.forEach((attachment) => dataTransfer.items.add(attachment));
           handleSubmit(e, { experimental_attachments: dataTransfer.files });
           setAttachments([]);
+          setFeedbackButtonsStatus((status) => (status === "moreDetailsPrompt" ? "talkToHuman" : "initialButtons"));
         }}
         ref={formRef}
       >
@@ -220,7 +303,7 @@ export function ChatModal({
   onClose: (isEscalated: boolean) => void;
 }) {
   return (
-    <Modal open={open} onClose={() => onClose(false)} title="Chat with AI Assistant" footer={null}>
+    <Modal open={open} onClose={() => onClose(false)} title={conversation?.subject ?? ""} footer={null}>
       <div className="flex h-[600px] flex-col md:w-[700px]">
         {conversation ? (
           <ChatContent conversation={conversation} initialMessage={initialMessage} onClose={onClose} />

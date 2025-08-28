@@ -8,7 +8,7 @@ export function ConversationList({
   onSelect,
   onOpenNewTicket,
 }: {
-  onSelect: (slug: string) => void;
+  onSelect: (slug: string, isEscalated: boolean) => void;
   onOpenNewTicket: () => void;
 }) {
   const { data, isLoading, error } = useConversations();
@@ -49,7 +49,7 @@ export function ConversationList({
         </thead>
         <tbody>
           {conversations.map((c) => (
-            <tr key={c.slug} aria-selected={false} onClick={() => onSelect(c.slug)}>
+            <tr key={c.slug} aria-selected={false} onClick={() => onSelect(c.slug, c.isEscalated)}>
               <td className={c.isUnread ? "w-full font-bold" : "w-full"}>{c.subject}</td>
               <td className="whitespace-nowrap">
                 {c.latestMessageAt

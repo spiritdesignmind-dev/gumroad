@@ -68,7 +68,12 @@ export default function SupportPortal() {
         <header>
           <SupportHeader onOpenNewTicket={() => setIsNewTicketOpen(true)} />
         </header>
-        <ConversationList onSelect={setSelectedConversationSlug} onOpenNewTicket={() => setIsNewTicketOpen(true)} />
+        <ConversationList
+          onSelect={(slug, isEscalated) =>
+            isEscalated ? setSelectedConversationSlug(slug) : setChatConversationState({ slug })
+          }
+          onOpenNewTicket={() => setIsNewTicketOpen(true)}
+        />
       </main>
       <NewTicketModal
         open={isNewTicketOpen}
