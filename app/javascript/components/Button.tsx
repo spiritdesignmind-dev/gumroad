@@ -42,7 +42,9 @@ export const NavigationButton = React.forwardRef<HTMLAnchorElement, NavigationBu
 
         props.onClick(evt);
 
-        evt.stopPropagation();
+        if (props.href == null || props.href === "#") {
+          evt.stopPropagation();
+        }
       }}
     />
   );
