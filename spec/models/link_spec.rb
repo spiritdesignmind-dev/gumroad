@@ -2528,7 +2528,7 @@ describe Link, :vcr do
     end
 
     describe "bundle product" do
-      let(:bundle) { create(:product, :bundle, user: create(:user, :eligible_for_bundle_products), max_purchase_count: 3) }
+      let(:bundle) { create(:product, :bundle, max_purchase_count: 3) }
 
       it "returns the minimum quantity remaining out of the bundle and the bundle products" do
         expect(bundle.remaining_for_sale_count).to eq(3)
