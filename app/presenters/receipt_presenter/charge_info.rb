@@ -26,12 +26,8 @@ class ReceiptPresenter::ChargeInfo
 
     question = "Questions about your #{"product".pluralize(order_items_count)}?"
 
-    action = \
-      if for_email
-        "Contact #{h(seller.display_name)} by replying to this email."
-      else
-        "Contact #{h(seller.display_name)} at #{mail_to(chargeable.support_email)}."
-      end
+    action = "Contact #{h(seller.display_name)} at #{mail_to(chargeable.support_email)}."
+
     "#{question} #{action}".html_safe
   rescue NotImplementedError
     nil
