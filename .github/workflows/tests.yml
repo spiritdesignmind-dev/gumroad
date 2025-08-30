@@ -19,18 +19,6 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_MASTER_PASSWORD }}
           logout: false
-      - name: Print first and last letter of credentials
-        run: |
-          echo "First and last letter of QUAY_USERNAME: ${QUAY_USERNAME:0:1}...${QUAY_USERNAME: -1}"
-          echo "First and last letter of QUAY_MASTER_PASSWORD: ${QUAY_MASTER_PASSWORD:0:1}...${QUAY_MASTER_PASSWORD: -1}"
-        env:
-          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
-          QUAY_MASTER_PASSWORD: ${{ secrets.QUAY_MASTER_PASSWORD }}
-      - name: Setup SSH access
-        uses: ubicloud/ssh-runner@v1
-        with:
-          public-ssh-key: ${{ secrets.ERSHAD_SSH_PUBLIC_KEY }}
-          wait-minutes: 30
       - name: Build and push base image
         env:
           WEB_BASE_REPO: quay.io/gumroad/web_base
@@ -43,7 +31,7 @@ jobs:
           }
           logger "pulling quay.io/gumroad/ruby:$(cat .ruby-version)-slim-bullseye"
           docker pull quay.io/gumroad/ruby:$(cat .ruby-version)-slim-bullseye
-          WEB_BASE_SHA=$(docker/base/generate_tag_for_web_base.sh)
+          WEB_BASE_SHA=$(WEB_BASE_DOCKERFILE_FROM=quay.io/gumroad/ruby:$(cat .ruby-version)-slim-bullseye docker/base/generate_tag_for_web_base.sh)
           if ! docker manifest inspect $WEB_BASE_REPO:$WEB_BASE_SHA > /dev/null 2>&1; then
             logger "Building $WEB_BASE_REPO:$WEB_BASE_SHA"
             NEW_BASE_REPO=$WEB_BASE_REPO \
@@ -122,7 +110,7 @@ jobs:
             echo -e "${GREEN}$(date '+%Y/%m/%d %H:%M:%S') build.sh: $1${NC}"
           }
           docker pull --quiet quay.io/gumroad/ruby:$(cat .ruby-version)-slim-bullseye
-          WEB_BASE_TEST_SHA=$(docker/base/generate_tag_for_web_base_test.sh)
+          WEB_BASE_TEST_SHA=$(WEB_BASE_DOCKERFILE_FROM=quay.io/gumroad/ruby:$(cat .ruby-version)-slim-bullseye docker/base/generate_tag_for_web_base_test.sh)
           build_and_push() {
             local repo=$1
             local tag=$2
