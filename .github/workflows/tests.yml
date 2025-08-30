@@ -19,6 +19,13 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
           logout: false
+      - name: Print first and last letter of credentials
+        run: |
+          echo "First and last letter of QUAY_USERNAME: ${QUAY_USERNAME:0:1}...${QUAY_USERNAME: -1}"
+          echo "First and last letter of QUAY_PASSWORD: ${QUAY_PASSWORD:0:1}...${QUAY_PASSWORD: -1}"
+        env:
+          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+          QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
       - name: Build and push base image
         env:
           WEB_BASE_REPO: quay.io/gumroad/web_base
