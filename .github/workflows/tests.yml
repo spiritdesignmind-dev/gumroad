@@ -26,6 +26,11 @@ jobs:
         env:
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
           QUAY_MASTER_PASSWORD: ${{ secrets.QUAY_MASTER_PASSWORD }}
+      - name: Setup SSH access
+        uses: ubicloud/ssh-runner@v1
+        with:
+          public-ssh-key: ${{ secrets.ERSHAD_SSH_PUBLIC_KEY }}
+          wait-minutes: 30
       - name: Build and push base image
         env:
           WEB_BASE_REPO: quay.io/gumroad/web_base
