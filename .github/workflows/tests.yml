@@ -29,12 +29,13 @@ jobs:
           logger() {
             echo -e "${GREEN}$(date '+%Y/%m/%d %H:%M:%S') build.sh: $1${NC}"
           }
-          logger "pulling ruby:$(cat .ruby-version)-slim-bullseye"
-          docker pull --quiet ruby:$(cat .ruby-version)-slim-bullseye
+          logger "pulling quay.io/gumroad/ruby:$(cat .ruby-version)-slim-bullseye"
+          docker pull --quiet quay.io/gumroad/ruby:$(cat .ruby-version)-slim-bullseye
           WEB_BASE_SHA=$(docker/base/generate_tag_for_web_base.sh)
           if ! docker manifest inspect $WEB_BASE_REPO:$WEB_BASE_SHA > /dev/null 2>&1; then
             logger "Building $WEB_BASE_REPO:$WEB_BASE_SHA"
             NEW_BASE_REPO=$WEB_BASE_REPO \
+              WEB_BASE_DOCKERFILE_FROM=quay.io/gumroad/ruby:$(cat .ruby-version)-slim-bullseye \
               BUNDLE_GEMS__CONTRIBSYS__COM=${{ secrets.BUNDLE_GEMS__CONTRIBSYS__COM }} \
               make build_base
 
@@ -66,11 +67,6 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-          logout: false
-      - uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
           logout: false
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -113,7 +109,7 @@ jobs:
           logger() {
             echo -e "${GREEN}$(date '+%Y/%m/%d %H:%M:%S') build.sh: $1${NC}"
           }
-          docker pull --quiet ruby:$(cat .ruby-version)-slim-bullseye
+          docker pull --quiet quay.io/gumroad/ruby:$(cat .ruby-version)-slim-bullseye
           WEB_BASE_TEST_SHA=$(docker/base/generate_tag_for_web_base_test.sh)
           build_and_push() {
             local repo=$1
@@ -122,6 +118,7 @@ jobs:
             if ! docker manifest inspect $repo:$tag > /dev/null 2>&1; then
               logger "building $repo:$tag"
               NEW_BASE_REPO=$WEB_BASE_REPO NEW_WEB_BASE_TEST_REPO=$WEB_BASE_TEST_REPO NEW_WEB_REPO=$WEB_REPO \
+                WEB_BASE_DOCKERFILE_FROM=quay.io/gumroad/ruby:$(cat .ruby-version)-slim-bullseye \
                 BRANCH_CACHE_UPLOAD_ENABLED=false \
                   BRANCH_CACHE_RESTORE_ENABLED=false \
                   NEW_WEB_TAG=$REVISION \
@@ -167,11 +164,6 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-          logout: false
-      - uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
           logout: false
       - name: Start services
         env:
@@ -297,11 +289,6 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-          logout: false
-      - uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
           logout: false
       - name: Start services
         env:
