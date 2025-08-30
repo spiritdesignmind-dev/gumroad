@@ -17,15 +17,15 @@ jobs:
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
+          password: ${{ secrets.QUAY_MASTER_PASSWORD }}
           logout: false
       - name: Print first and last letter of credentials
         run: |
           echo "First and last letter of QUAY_USERNAME: ${QUAY_USERNAME:0:1}...${QUAY_USERNAME: -1}"
-          echo "First and last letter of QUAY_PASSWORD: ${QUAY_PASSWORD:0:1}...${QUAY_PASSWORD: -1}"
+          echo "First and last letter of QUAY_MASTER_PASSWORD: ${QUAY_MASTER_PASSWORD:0:1}...${QUAY_MASTER_PASSWORD: -1}"
         env:
           QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
-          QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
+          QUAY_MASTER_PASSWORD: ${{ secrets.QUAY_MASTER_PASSWORD }}
       - name: Build and push base image
         env:
           WEB_BASE_REPO: quay.io/gumroad/web_base
@@ -73,7 +73,7 @@ jobs:
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
+          password: ${{ secrets.QUAY_MASTER_PASSWORD }}
           logout: false
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -170,7 +170,7 @@ jobs:
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
+          password: ${{ secrets.QUAY_MASTER_PASSWORD }}
           logout: false
       - name: Start services
         env:
@@ -295,7 +295,7 @@ jobs:
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
+          password: ${{ secrets.QUAY_MASTER_PASSWORD }}
           logout: false
       - name: Start services
         env:
