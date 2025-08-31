@@ -30,7 +30,7 @@ jobs:
             echo -e "${GREEN}$(date '+%Y/%m/%d %H:%M:%S') build.sh: $1${NC}"
           }
           logger "pulling quay.io/gumroad/ruby:$(cat .ruby-version)-slim-bullseye"
-          docker pull quay.io/gumroad/ruby:$(cat .ruby-version)-slim-bullseye
+          docker pull --quiet quay.io/gumroad/ruby:$(cat .ruby-version)-slim-bullseye
           WEB_BASE_SHA=$(WEB_BASE_DOCKERFILE_FROM=quay.io/gumroad/ruby:$(cat .ruby-version)-slim-bullseye docker/base/generate_tag_for_web_base.sh)
           if ! docker manifest inspect $WEB_BASE_REPO:$WEB_BASE_SHA > /dev/null 2>&1; then
             logger "Building $WEB_BASE_REPO:$WEB_BASE_SHA"
