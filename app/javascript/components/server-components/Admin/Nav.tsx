@@ -55,22 +55,38 @@ export const Nav = ({ title, current_user }: Props) => {
       }
     >
       <section>
-        <NavLink text="Suspend users" icon="shield-exclamation" href={Routes.admin_suspend_users_url(routeParams)} />
-        <NavLink text="Block emails" icon="envelope-fill" href={Routes.admin_block_email_domains_url(routeParams)} />
+        <NavLink
+          text="Suspend users"
+          icon="shield-exclamation"
+          href={Routes.admin_suspend_users_url(routeParams)}
+          dataTurbo
+        />
+        <NavLink
+          text="Block emails"
+          icon="envelope-fill"
+          href={Routes.admin_block_email_domains_url(routeParams)}
+          dataTurbo
+        />
         <NavLink
           text="Unblock emails"
           icon="envelope-open-fill"
           href={Routes.admin_unblock_email_domains_url(routeParams)}
+          dataTurbo
+        />
+        <NavLink text="Sidekiq" icon="lighting-fill" href={Routes.admin_sidekiq_web_url(routeParams)} />
+        <NavLink text="Features" icon="solid-flag" href={Routes.admin_flipper_ui_url(routeParams)} />
+        <NavLink
+          text="Refund queue"
+          icon="solid-currency-dollar"
+          href={Routes.admin_refund_queue_url(routeParams)}
+          dataTurbo
         />
         <NavLink
-          text="Sidekiq"
-          icon="lighting-fill"
-          href={Routes.admin_sidekiq_web_url(routeParams)}
-          dataTurbo={false}
+          text="Sales reports"
+          icon="bar-chart-fill"
+          href={Routes.admin_sales_reports_url(routeParams)}
+          dataTurbo
         />
-        <NavLink text="Features" icon="solid-flag" href={Routes.admin_flipper_ui_url(routeParams)} dataTurbo={false} />
-        <NavLink text="Refund queue" icon="solid-currency-dollar" href={Routes.admin_refund_queue_url(routeParams)} />
-        <NavLink text="Sales reports" icon="bar-chart-fill" href={Routes.admin_sales_reports_url(routeParams)} />
       </section>
     </NavFramework>
   );

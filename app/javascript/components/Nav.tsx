@@ -16,7 +16,7 @@ export const NavLink = ({
   badge,
   href,
   exactHrefMatch,
-  dataTurbo = true,
+  dataTurbo = false,
   additionalPatterns = [],
   onClick,
 }: {
