@@ -68,6 +68,10 @@ export default {
         violet: "#b23386",
         gray: "#f4f4f0",
         "dark-gray": "#242423",
+
+        background: "rgb(var(--filled))",
+        foreground: "rgb(var(--color))",
+        border: "rgb(var(--color) / var(--border-alpha))",
       },
       boxShadow: {
         DEFAULT: "0.25rem 0.25rem 0 currentColor",

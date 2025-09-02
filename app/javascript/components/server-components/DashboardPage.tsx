@@ -21,6 +21,7 @@ import { SmallBetsIcon } from "$app/components/icons/getting-started/SmallBetsIc
 import { useLoggedInUser } from "$app/components/LoggedInUser";
 import { DownloadTaxFormsPopover } from "$app/components/server-components/DashboardPage/DownloadTaxFormsPopover";
 import { Stats } from "$app/components/Stats";
+import { PageHeader } from "$app/components/ui/PageHeader";
 import { useUserAgentInfo } from "$app/components/UserAgent";
 import { useRunOnce } from "$app/components/useRunOnce";
 import { useClientSortingTableDriver } from "$app/components/useSortingTableDriver";
@@ -314,12 +315,10 @@ export const DashboardPage = ({
 
   return (
     <main>
-      <header className="border-gray-200 border-b p-8">
-        <h1 className="text-2xl">Dashboard</h1>
-        <div className="actions flex gap-2">
-          {Object.keys(tax_forms).length > 0 && <DownloadTaxFormsPopover taxForms={tax_forms} />}
-        </div>
-      </header>
+      <PageHeader
+        title="Dashboard"
+        actions={Object.keys(tax_forms).length > 0 && <DownloadTaxFormsPopover taxForms={tax_forms} />}
+      />
       {stripe_verification_message ? (
         <div role="alert" className="warning">
           <div>
@@ -376,9 +375,11 @@ export const DashboardPage = ({
 
       {!getting_started_stats.first_product && loggedInUser?.policies.product.create ? <Greeter /> : null}
 
-      <ProductsTable sales={sales} />
+      <div className="p-8">
+        <ProductsTable sales={sales} />
+      </div>
 
-      <div className="grid gap-4 p-8">
+      <div className="override grid gap-4 p-8">
         <h2>Activity</h2>
 
         <div className="stats-grid">
