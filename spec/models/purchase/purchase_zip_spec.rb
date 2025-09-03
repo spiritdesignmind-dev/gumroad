@@ -38,17 +38,17 @@ describe "Purchase Zip Scenarios", :vcr do
 
   describe "zip_code" do
     it "is set on successful if ip_address is present" do
-        allow(GeoIp).to receive(:lookup).with("199.21.86.138").and_return(
-          GeoIp::Result.new(
-            country_name: "United States",
-            country_code: "US",
-            region_name: "CA",
-            city_name: "San Francisco",
-            postal_code: "94110",
-            latitude: nil,
-            longitude: nil
-          )
+      allow(GeoIp).to receive(:lookup).with("199.21.86.138").and_return(
+        GeoIp::Result.new(
+          country_name: "United States",
+          country_code: "US",
+          region_name: "CA",
+          city_name: "San Francisco",
+          postal_code: "94110",
+          latitude: nil,
+          longitude: nil
         )
+      )
       purchase = create(:purchase, ip_address: "199.21.86.138", purchase_state: "in_progress")
       purchase.process!
       purchase.update_balance_and_mark_successful!

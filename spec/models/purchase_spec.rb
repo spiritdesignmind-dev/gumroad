@@ -764,17 +764,17 @@ describe Purchase, :vcr do
     end
 
     it "returns country and state based on ip_address if they don't exist" do
-        allow(GeoIp).to receive(:lookup).with("199.241.200.176").and_return(
-          GeoIp::Result.new(
-            country_name: "United States",
-            country_code: "US",
-            region_name: "CA",
-            city_name: "San Francisco",
-            postal_code: "94110",
-            latitude: nil,
-            longitude: nil
-          )
+      allow(GeoIp).to receive(:lookup).with("199.241.200.176").and_return(
+        GeoIp::Result.new(
+          country_name: "United States",
+          country_code: "US",
+          region_name: "CA",
+          city_name: "San Francisco",
+          postal_code: "94110",
+          latitude: nil,
+          longitude: nil
         )
+      )
       @purchase.update!(ip_address: "199.241.200.176")
       expect(@purchase.country).to eq(nil)
       expect(@purchase.state).to eq(nil)

@@ -2968,17 +2968,17 @@ describe Link, :vcr do
 
     it "blocks ips from 'bad' countries, like Libya" do
       ip = "41.208.70.70" # Tripoly Libya Telecom
-        allow(GeoIp).to receive(:lookup).with("41.208.70.70").and_return(
-          GeoIp::Result.new(
-            country_name: "Libya",
-            country_code: "LY",
-            region_name: nil,
-            city_name: nil,
-            postal_code: nil,
-            latitude: nil,
-            longitude: nil
-          )
+      allow(GeoIp).to receive(:lookup).with("41.208.70.70").and_return(
+        GeoIp::Result.new(
+          country_name: "Libya",
+          country_code: "LY",
+          region_name: nil,
+          city_name: nil,
+          postal_code: nil,
+          latitude: nil,
+          longitude: nil
         )
+      )
       expect(build(:product).compliance_blocked(ip)).to be(true)
     end
 

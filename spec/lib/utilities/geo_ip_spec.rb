@@ -18,17 +18,17 @@ describe GeoIp do
       let(:ip) { "104.193.168.19" }
 
       it "returns a result" do
-          allow(GeoIp).to receive(:lookup).with("104.193.168.19").and_return(
-            GeoIp::Result.new(
-              country_name: "United States",
-              country_code: "US",
-              region_name: "CA",
-              city_name: "San Francisco",
-              postal_code: "94110",
-              latitude: nil,
-              longitude: nil
-            )
+        allow(GeoIp).to receive(:lookup).with("104.193.168.19").and_return(
+          GeoIp::Result.new(
+            country_name: "United States",
+            country_code: "US",
+            region_name: "CA",
+            city_name: "San Francisco",
+            postal_code: "94110",
+            latitude: nil,
+            longitude: nil
           )
+        )
         expect(result.country_name).to eq("United States")
         expect(result.country_code).to eq("US")
         expect(result.region_name).to eq("CA")
@@ -43,17 +43,17 @@ describe GeoIp do
       let(:ip) { "2001:861:5bc0:cb60:500d:3535:e6a7:62a0" }
 
       it "returns a result" do
-          allow(GeoIp).to receive(:lookup).with("2001:861:5bc0:cb60:500d:3535:e6a7:62a0").and_return(
-            GeoIp::Result.new(
-              country_name: "France",
-              country_code: "FR",
-              region_name: nil,
-              city_name: "Belfort",
-              postal_code: "90000",
-              latitude: nil,
-              longitude: nil
-            )
+        allow(GeoIp).to receive(:lookup).with("2001:861:5bc0:cb60:500d:3535:e6a7:62a0").and_return(
+          GeoIp::Result.new(
+            country_name: "France",
+            country_code: "FR",
+            region_name: nil,
+            city_name: "Belfort",
+            postal_code: "90000",
+            latitude: nil,
+            longitude: nil
           )
+        )
         expect(result.country_name).to eq("France")
         expect(result.country_code).to eq("FR")
         expect(result.city_name).to eq("Belfort")

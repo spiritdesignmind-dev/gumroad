@@ -4107,17 +4107,17 @@ describe LinksController, :vcr do
         end
 
         it "sets country and state from custom IP address" do
-            allow(GeoIp).to receive(:lookup).with("54.234.242.13").and_return(
-              GeoIp::Result.new(
-                country_name: "United States",
-                country_code: "US",
-                region_name: "VA",
-                city_name: "Ashburn",
-                postal_code: "20149",
-                latitude: 39.0438,
-                longitude: -77.4874
-              )
+          allow(GeoIp).to receive(:lookup).with("54.234.242.13").and_return(
+            GeoIp::Result.new(
+              country_name: "United States",
+              country_code: "US",
+              region_name: "VA",
+              city_name: "Ashburn",
+              postal_code: "20149",
+              latitude: 39.0438,
+              longitude: -77.4874
             )
+          )
           @request.remote_ip = "54.234.242.13"
           post :increment_views, params: { id: @product.to_param }
           expect(last_page_view_data.with_indifferent_access).to include(
