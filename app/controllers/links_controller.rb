@@ -21,7 +21,6 @@ class LinksController < ApplicationController
 
   before_action :set_affiliate_cookie, only: [:show]
 
-  before_action :set_body_id_as_app
   before_action :hide_layouts, only: %i[show]
   before_action :fetch_product, only: %i[increment_views track_user_action]
   before_action :ensure_seller_is_not_deleted, only: [:show]
@@ -54,6 +53,9 @@ class LinksController < ApplicationController
       products: @products,
       products_pagination: @products_pagination
     ).page_props
+
+    render inertia: "Products/index",
+           props: inertia_props(react_products_page_props: @react_products_page_props)
   end
 
   def memberships_paged
@@ -623,7 +625,10 @@ class LinksController < ApplicationController
     def paginated_products(page:, query: nil)
       products = current_seller
         .products
-        .includes(thumbnail: { file_attachment: { blob: { variant_records: { image_attachment: :blob } } } })
+        .includes([
+                    thumbnail: { file_attachment: { blob: { variant_records: { image_attachment: :blob } } } },
+                    thumbnail_alive: { file_attachment: { blob: { variant_records: { image_attachment: :blob } } } },
+                  ])
         .non_membership
         .visible_and_not_archived
       products = products.where("links.name like ?", "%#{query}%") if query.present?

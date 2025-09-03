@@ -982,6 +982,7 @@ describe Link, :vcr do
       context "when new account and no valid merchant account connected" do
         before do
           @user.check_merchant_account_is_linked = true
+          @user.payment_address = nil
           @user.save!
           @merchant_account.mark_deleted!
         end
@@ -5130,6 +5131,45 @@ describe Link, :vcr do
 
       it "does not add an error" do
         expect(call).to be_valid
+      end
+    end
+  end
+
+  describe "support email validations" do
+    let(:product) { build(:product) }
+
+    context "when support_email is nil" do
+      it "is valid" do
+        product.support_email = nil
+        expect(product).to be_valid
+      end
+    end
+
+    context "when support_email is blank" do
+      it "is invalid" do
+        product.support_email = ""
+        expect(product).not_to be_valid
+      end
+    end
+
+    context "when support_email has a valid email format" do
+      it "is valid" do
+        product.support_email = "support@example.com"
+        expect(product).to be_valid
+      end
+    end
+
+    context "when support_email has an invalid email format" do
+      it "is invalid without @ symbol" do
+        product.support_email = "invalidemail"
+        expect(product).not_to be_valid
+        expect(product.errors[:support_email]).to include("is invalid")
+      end
+
+      it "is invalid without domain" do
+        product.support_email = "user@"
+        expect(product).not_to be_valid
+        expect(product.errors[:support_email]).to include("is invalid")
       end
     end
   end
