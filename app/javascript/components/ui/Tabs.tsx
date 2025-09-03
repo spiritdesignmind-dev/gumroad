@@ -9,7 +9,7 @@ export const Tab = ({
   ...props
 }: { children: React.ReactNode; isSelected: boolean } & React.HTMLProps<HTMLAnchorElement>) => (
   <a
-    className={cx("shrink-0 rounded-full px-3 py-2 no-underline", isSelected && "bg-background border-border border")}
+    className={cx("shrink-0 rounded-full px-3 py-2 no-underline", isSelected && "border border-border bg-background")}
     aria-selected={isSelected}
     {...props}
   >
