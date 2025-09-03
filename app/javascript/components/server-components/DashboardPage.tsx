@@ -1,9 +1,7 @@
 import cx from "classnames";
 import * as React from "react";
-import { createCast } from "ts-safe-cast";
 
 import { formatPriceCentsWithCurrencySymbol } from "$app/utils/currency";
-import { register } from "$app/utils/serverComponentUtil";
 
 import { ActivityFeed, ActivityItem } from "$app/components/ActivityFeed";
 import { NavigationButton } from "$app/components/Button";
@@ -40,7 +38,7 @@ type ProductRow = {
   last_30: number;
 };
 
-type Props = {
+export type DashboardPageProps = {
   name: string;
   has_sale: boolean;
   getting_started_stats: {
@@ -68,7 +66,7 @@ type TableProps = { sales: ProductRow[] };
 
 type GettingStartedItemType = {
   name: string;
-  getCompleted: (stats: Props["getting_started_stats"]) => boolean;
+  getCompleted: (stats: DashboardPageProps["getting_started_stats"]) => boolean;
   link: string;
   IconComponent: React.ComponentType<GettingStartedIconProps>;
   description: string;
@@ -299,7 +297,7 @@ export const DashboardPage = ({
   stripe_verification_message,
   tax_forms,
   show_1099_download_notice,
-}: Props) => {
+}: DashboardPageProps) => {
   const loggedInUser = useLoggedInUser();
   const [gettingStartedMinimized, setGettingStartedMinimized] = React.useState<boolean>(false);
 
@@ -407,4 +405,4 @@ export const DashboardPage = ({
   );
 };
 
-export default register({ component: DashboardPage, propParser: createCast() });
+export default DashboardPage;
