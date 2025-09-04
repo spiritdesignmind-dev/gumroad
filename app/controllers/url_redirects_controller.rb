@@ -90,7 +90,12 @@ class UrlRedirectsController < ApplicationController
 
       if @product_file.must_be_pdf_stamped? && @url_redirect.missing_stamped_pdf?(@product_file)
         flash[:alert] = "We are preparing the files for download. You will receive an email when they are ready."
-        StampPdfForPurchaseJob.perform_async(@url_redirect.purchase_id, true)
+
+        # Do not enqueue the job more than once in 2 hours
+        Rails.cache.fetch("stamp_pdf_for_purchase_job_#{@url_redirect.purchase_id}", expires_in: 2.hours) do
+          StampPdfForPurchaseJob.set(queue: :critical).perform_async(@url_redirect.purchase_id, true) # Stamp and notify the buyer
+        end
+
         return redirect_to(@url_redirect.download_page_url)
       end
 
