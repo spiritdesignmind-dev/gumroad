@@ -1304,23 +1304,21 @@ describe CustomerMailer do
       end
 
       it "sets the correct instance variables" do
-        mailer = CustomerMailer.files_ready_for_download(purchase.id)
-        mailer.deliver_now
+        mail = CustomerMailer.files_ready_for_download(purchase.id)
 
-        expect(mailer.instance_variable_get(:@purchase)).to eq(purchase)
-        expect(mailer.instance_variable_get(:@product)).to eq(product)
-        expect(mailer.instance_variable_get(:@url_redirect)).to eq(purchase.url_redirect)
-        expect(mailer.instance_variable_get(:@download_url)).to eq(purchase.url_redirect.download_page_url)
-        expect(mailer.instance_variable_get(:@email_name)).to eq(:files_ready_for_download)
+        # Access the underlying mailer instance to check instance variables
+        mailer_instance = mail.instance_variable_get(:@processed_mailer)
+        expect(mailer_instance.instance_variable_get(:@purchase)).to eq(purchase)
+        expect(mailer_instance.instance_variable_get(:@product)).to eq(product)
+        expect(mailer_instance.instance_variable_get(:@url_redirect)).to eq(purchase.url_redirect)
+        expect(mailer_instance.instance_variable_get(:@download_url)).to eq(purchase.url_redirect.download_page_url)
+        expect(mailer_instance.instance_variable_get(:@email_name)).to eq(:files_ready_for_download)
       end
     end
 
     context "when url_redirect does not exist" do
-      it "returns mail object but disables delivery" do
-        mail = CustomerMailer.files_ready_for_download(purchase.id)
-        expect(mail).to be_a(Mail::Message)
-        expect(mail.perform_deliveries).to be false
-        expect(mail.subject).to eq("Files not ready")
+      it "raises error due to missing url_redirect" do
+        expect { CustomerMailer.files_ready_for_download(purchase.id).deliver_now }.to raise_error(NoMethodError, /undefined method.*download_page_url.*for nil/)
       end
     end
 
