@@ -75,13 +75,36 @@ class UrlRedirectsController < ApplicationController
     @show_user_favicon = true
     @title = @url_redirect.with_product_files.name == "Untitled" ? @url_redirect.referenced_link.name : @url_redirect.with_product_files.name
     @react_component_props = UrlRedirectPresenter.new(url_redirect: @url_redirect, logged_in_user:).download_page_with_content_props(common_props)
-    trigger_files_lifecycle_events
+    # Remove PDF stamping trigger - now handled on-demand when user tries to download
+    trigger_video_lifecycle_events_only
   end
 
   def download_product_files
     product_files = @url_redirect.alive_product_files.by_external_ids(params[:product_file_ids])
     e404 unless product_files.present? && product_files.all? { @url_redirect.is_file_downloadable?(_1) }
 
+        # Check if any requested files need stamping
+    if PdfStampingService.files_need_stamping?(url_redirect: @url_redirect, product_file_ids: params[:product_file_ids])
+      if PdfStampingService.stamping_in_progress?(@url_redirect.purchase_id)
+        # Already in progress
+        message = "Your PDF files are currently being processed. Please check your email or refresh this page in a few minutes."
+      else
+        # Start stamping process
+        PdfStampingService.mark_stamping_in_progress!(@url_redirect.purchase_id)
+        StampPdfForPurchaseJob.perform_async(@url_redirect.purchase_id, true) # true = send notification
+        message = "We're processing your PDF files with your purchase information. You'll receive an email when they're ready for download."
+      end
+
+      if request.format.json?
+        render json: { success: false, processing: true, message: message }
+      else
+        flash[:info] = message
+        redirect_to @url_redirect.download_page_url
+      end
+      return
+    end
+
+    # Proceed with normal download if no stamping needed
     if request.format.json?
       render(json: { files: product_files.map { { url: @url_redirect.signed_location_for_file(_1), filename: _1.s3_filename } } })
     else
@@ -270,6 +293,11 @@ class UrlRedirectsController < ApplicationController
   private
     def trigger_files_lifecycle_events
       @url_redirect.enqueue_job_to_regenerate_deleted_stamped_pdfs
+      @url_redirect.update_transcoded_videos_last_accessed_at
+      @url_redirect.enqueue_job_to_regenerate_deleted_transcoded_videos
+    end
+
+    def trigger_video_lifecycle_events_only
       @url_redirect.update_transcoded_videos_last_accessed_at
       @url_redirect.enqueue_job_to_regenerate_deleted_transcoded_videos
     end

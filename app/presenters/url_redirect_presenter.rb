@@ -228,7 +228,7 @@ class UrlRedirectPresenter
           }
         end,
         pdf_stamp_enabled: file.pdf_stamp_enabled?,
-        processing: file.pdf_stamp_enabled? && url_redirect.alive_stamped_pdfs.find_by(product_file_id: file.id).blank?,
+        processing: false, # Always show as ready - stamping happens on-demand
         thumbnail_url: file.thumbnail_url
       }
     end

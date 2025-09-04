@@ -1020,8 +1020,8 @@ class Purchase < ApplicationRecord
   def has_content?
     return false if url_redirect.nil?
     return false if webhook_failed
-    return false if link.has_stampable_pdfs? && !url_redirect.is_done_pdf_stamping
-
+    # With the new on-demand stamping approach, always show content as available
+    # Files will be stamped when user tries to download them
     true
   end
 

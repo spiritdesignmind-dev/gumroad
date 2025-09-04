@@ -16,14 +16,35 @@ describe SendPurchaseReceiptJob do
     before do
       allow(PdfStampingService).to receive(:stamp_for_purchase!)
       allow_any_instance_of(Link).to receive(:has_stampable_pdfs?).and_return(true)
+      purchase.create_url_redirect!
     end
 
-    it "stamps the PDFs and delivers the email" do
-      expect(CustomerMailer).to receive(:receipt).with(purchase.id).and_return(mail_double)
-      described_class.new.perform(purchase.id)
+    context "when PDFs haven't been stamped yet" do
+      before do
+        purchase.url_redirect.update!(is_done_pdf_stamping: false)
+      end
 
-      expect(PdfStampingService).to have_received(:stamp_for_purchase!).with(purchase)
-      expect(mail_double).to have_received(:deliver_now)
+      it "stamps the PDFs and delivers the email" do
+        expect(CustomerMailer).to receive(:receipt).with(purchase.id).and_return(mail_double)
+        described_class.new.perform(purchase.id)
+
+        expect(PdfStampingService).to have_received(:stamp_for_purchase!).with(purchase)
+        expect(mail_double).to have_received(:deliver_now)
+      end
+    end
+
+    context "when PDFs have already been stamped" do
+      before do
+        purchase.url_redirect.update!(is_done_pdf_stamping: true)
+      end
+
+      it "skips stamping and delivers the email" do
+        expect(CustomerMailer).to receive(:receipt).with(purchase.id).and_return(mail_double)
+        described_class.new.perform(purchase.id)
+
+        expect(PdfStampingService).not_to have_received(:stamp_for_purchase!)
+        expect(mail_double).to have_received(:deliver_now)
+      end
     end
 
     context "when stamping the PDF fails" do
