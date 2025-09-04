@@ -5,7 +5,7 @@ class StampPdfForPurchaseJob
   include Sidekiq::Job
   sidekiq_options queue: :default, retry: 5, lock: :until_executed
 
-  def perform(purchase_id)
+  def perform(purchase_id, notify_buyer = false)
     purchase = Purchase.find(purchase_id)
     PdfStampingService.stamp_for_purchase!(purchase)
   rescue PdfStampingService::Error => e

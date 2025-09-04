@@ -90,6 +90,7 @@ class UrlRedirectsController < ApplicationController
 
       if @product_file.must_be_pdf_stamped? && @url_redirect.missing_stamped_pdf?(@product_file)
         flash[:alert] = "We are preparing the files for download. You will receive an email when they are ready."
+        StampPdfForPurchaseJob.perform_async(@url_redirect.purchase_id, true)
         return redirect_to(@url_redirect.download_page_url)
       end
 
