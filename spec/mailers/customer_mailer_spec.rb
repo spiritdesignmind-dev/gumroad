@@ -1282,4 +1282,59 @@ describe CustomerMailer do
       expect(mail.attachments.first.filename).to eq(product_file.s3_filename)
     end
   end
+
+  describe "#files_ready_for_download" do
+    let(:seller) { create(:named_seller) }
+    let(:product) { create(:product, user: seller) }
+    let(:purchase) { create(:purchase, link: product, seller:, email: "customer@example.com") }
+
+    context "when url_redirect exists" do
+      before do
+        purchase.create_url_redirect!
+      end
+
+      it "sends files ready email with correct details" do
+        mail = CustomerMailer.files_ready_for_download(purchase.id)
+
+        expect(mail.to).to eq(["customer@example.com"])
+        expect(mail.subject).to eq("Your files are ready for download!")
+        expect(mail[:from].value).to eq("#{seller.name} <noreply@#{CUSTOMERS_MAIL_DOMAIN}>")
+        expect(mail[:reply_to].value).to eq(product.support_email_or_default)
+        expect(mail.body.encoded).to include(purchase.url_redirect.download_page_url)
+      end
+
+      it "sets the correct instance variables" do
+        mailer = CustomerMailer.files_ready_for_download(purchase.id)
+        mailer.deliver_now
+
+        expect(mailer.instance_variable_get(:@purchase)).to eq(purchase)
+        expect(mailer.instance_variable_get(:@product)).to eq(product)
+        expect(mailer.instance_variable_get(:@url_redirect)).to eq(purchase.url_redirect)
+        expect(mailer.instance_variable_get(:@download_url)).to eq(purchase.url_redirect.download_page_url)
+        expect(mailer.instance_variable_get(:@email_name)).to eq(:files_ready_for_download)
+      end
+    end
+
+    context "when url_redirect does not exist" do
+      it "returns mail object but disables delivery" do
+        mail = CustomerMailer.files_ready_for_download(purchase.id)
+        expect(mail).to be_a(Mail::Message)
+        expect(mail.perform_deliveries).to be false
+        expect(mail.subject).to eq("Files not ready")
+      end
+    end
+
+    context "when product has support email" do
+      let(:product) { create(:product, user: seller, support_email: "support@seller.com") }
+
+      before do
+        purchase.create_url_redirect!
+      end
+
+      it "uses product support email for reply_to" do
+        mail = CustomerMailer.files_ready_for_download(purchase.id)
+        expect(mail[:reply_to].value).to eq("support@seller.com")
+      end
+    end
+  end
 end

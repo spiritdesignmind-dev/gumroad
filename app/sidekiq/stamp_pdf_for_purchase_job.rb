@@ -8,6 +8,7 @@ class StampPdfForPurchaseJob
   def perform(purchase_id, notify_buyer = false)
     purchase = Purchase.find(purchase_id)
     PdfStampingService.stamp_for_purchase!(purchase)
+
   rescue PdfStampingService::Error => e
     Rails.logger.error("[#{self.class.name}.#{__method__}] Failed stamping for purchase #{purchase.id}: #{e.message}")
   end
