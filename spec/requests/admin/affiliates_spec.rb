@@ -7,23 +7,14 @@ describe "Admin::AffiliatesController Scenario", type: :system, js: true do
   let(:affiliate_user) { create(:affiliate_user) }
 
   before do
-    # Set up required configuration values for tests using environment variables
-    ENV["IFFY_TOKEN"] = "test_iffy_token"
-    ENV["OBFUSCATE_IDS_CIPHER_KEY"] = "test_cipher_key_32_characters_long"
-    ENV["OBFUSCATE_IDS_NUMERIC_CIPHER_KEY"] = "123456789"
+    # Mock the request_from_iffy? method to return false
+    allow_any_instance_of(Admin::BaseController).to receive(:request_from_iffy?).and_return(false)
 
-    # Stub the ObfuscateIds module constants directly since they're loaded at class definition time
+    # Stub the ObfuscateIds module constants since the view uses obfuscated IDs
     stub_const("ObfuscateIds::CIPHER_KEY", "test_cipher_key_32_characters_long")
     stub_const("ObfuscateIds::NUMERIC_CIPHER_KEY", 123456789)
 
     login_as(admin)
-  end
-
-  after do
-    # Clean up environment variables to avoid side effects
-    ENV.delete("IFFY_TOKEN")
-    ENV.delete("OBFUSCATE_IDS_CIPHER_KEY")
-    ENV.delete("OBFUSCATE_IDS_NUMERIC_CIPHER_KEY")
   end
 
   context "when user has no affiliated products" do
