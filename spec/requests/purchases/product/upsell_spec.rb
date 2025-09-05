@@ -101,13 +101,13 @@ describe("Product checkout with upsells", type: :system, js: true) do
 
       it "allows the buyer to accept the cross-sell at checkout" do
         visit selected_product.long_url
-        add_to_cart(selected_product)
+        add_to_cart(selected_product, cart: true)
         fill_checkout_form(selected_product)
         choose "20%"
 
         click_on "Pay"
 
-        expect(page).to have_selector('[role="dialog"]', text: "Cross-sell", wait: 10)
+        expect(page).to have_selector('dialog', text: "Cross-sell", wait: 10)
         within_modal "Cross-sell" do
           click_on "Add to cart"
         end
