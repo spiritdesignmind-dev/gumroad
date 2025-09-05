@@ -321,7 +321,7 @@ jobs:
           KNAPSACK_PRO_CI_NODE_INDEX: ${{ matrix.ci_node_index }}
           KNAPSACK_PRO_LOG_LEVEL: info
           KNAPSACK_PRO_RSPEC_SPLIT_BY_TEST_EXAMPLES: true
-          KNAPSACK_PRO_TEST_FILE_PATTERN: 'spec/requests/**/*_spec.rb'
+          KNAPSACK_PRO_TEST_FILE_PATTERN: "spec/requests/**/*_spec.rb"
           KNAPSACK_PRO_COMMIT_HASH: ${{ github.sha }}
           KNAPSACK_PRO_BRANCH: ${{ github.ref_name }}
           KNAPSACK_PRO_CI_NODE_BUILD_ID: ${{ github.run_id }}
@@ -358,31 +358,12 @@ jobs:
             $WEB_REPO:test-${{ github.sha }} \
             /usr/local/bin/gosu app bundle exec rake "knapsack_pro:queue:rspec[--format RSpec::Github::Formatter --tag ~skip --format progress]"
         timeout-minutes: 20
-      - name: Sanitize capybara artifact filenames
-        if: always()
-        run: |
-          # Rename files with invalid characters for GitHub Actions artifacts
-          # Replace colons, quotes, and other invalid characters with underscores
-          find ./capybara-artifacts -type f -name '*:*' -o -name '*"*' -o -name '*<*' -o -name '*>*' -o -name '*|*' -o -name '*\**' -o -name '*\?*' | while read -r file; do
-            # Get directory and filename
-            dir=$(dirname "$file")
-            filename=$(basename "$file")
-
-            # Replace invalid characters with underscores
-            new_filename=$(echo "$filename" | sed 's/[:"<>|*?]/_/g' | sed 's/\r//g' | sed 's/\n//g')
-
-            # Only rename if the filename actually changed
-            if [ "$filename" != "$new_filename" ]; then
-              mv "$file" "$dir/$new_filename"
-              echo "Renamed: $filename -> $new_filename"
-            fi
-          done
-      - name: Upload capybara artifacts
-        if: always()
+      - name: Archive capybara artifacts
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: capybara-artifacts-${{ matrix.ci_node_index }}
-          path: ./capybara-artifacts/
+          name: capybara-screenshots-slow-${{ matrix.ci_node_index }}-attempt-${{ github.run_attempt }}
+          path: ./capybara-artifacts/*.png
           retention-days: 7
           if-no-files-found: ignore
       - name: Clean up
