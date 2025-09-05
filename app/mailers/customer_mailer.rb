@@ -241,7 +241,6 @@ class CustomerMailer < ApplicationMailer
     @product = @purchase.link
     @url_redirect = @purchase.url_redirect
     @download_url = @url_redirect.download_page_url
-    @email_name = __method__
 
     mail(
       to: @purchase.email,
