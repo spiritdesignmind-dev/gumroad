@@ -358,6 +358,25 @@ jobs:
             $WEB_REPO:test-${{ github.sha }} \
             /usr/local/bin/gosu app bundle exec rake "knapsack_pro:queue:rspec[--format RSpec::Github::Formatter --tag ~skip --format progress]"
         timeout-minutes: 20
+      - name: Sanitize capybara artifact filenames
+        if: always()
+        run: |
+          # Rename files with invalid characters for GitHub Actions artifacts
+          # Replace colons, quotes, and other invalid characters with underscores
+          find ./capybara-artifacts -type f -name '*:*' -o -name '*"*' -o -name '*<*' -o -name '*>*' -o -name '*|*' -o -name '*\**' -o -name '*\?*' | while read -r file; do
+            # Get directory and filename
+            dir=$(dirname "$file")
+            filename=$(basename "$file")
+
+            # Replace invalid characters with underscores
+            new_filename=$(echo "$filename" | sed 's/[:"<>|*?]/_/g' | sed 's/\r//g' | sed 's/\n//g')
+
+            # Only rename if the filename actually changed
+            if [ "$filename" != "$new_filename" ]; then
+              mv "$file" "$dir/$new_filename"
+              echo "Renamed: $filename -> $new_filename"
+            fi
+          done
       - name: Upload capybara artifacts
         if: always()
         uses: actions/upload-artifact@v4
