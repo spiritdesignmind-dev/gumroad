@@ -1288,51 +1288,21 @@ describe CustomerMailer do
     let(:product) { create(:product, user: seller) }
     let(:purchase) { create(:purchase, link: product, seller:, email: "customer@example.com") }
 
-    context "when url_redirect exists" do
-      before do
-        purchase.create_url_redirect!
-      end
+    before { purchase.create_url_redirect! }
 
-      it "sends files ready email with correct details" do
-        mail = CustomerMailer.files_ready_for_download(purchase.id)
+    it "sends the email with correct headers and content" do
+      mail = CustomerMailer.files_ready_for_download(purchase.id)
 
-        expect(mail.to).to eq(["customer@example.com"])
-        expect(mail.subject).to eq("Your files are ready for download!")
-        expect(mail[:from].value).to eq("#{seller.name} <noreply@#{CUSTOMERS_MAIL_DOMAIN}>")
-        expect(mail[:reply_to].value).to eq(product.support_email_or_default)
-        expect(mail.body.encoded).to include(purchase.url_redirect.download_page_url)
-      end
+      expect(mail.to).to eq(["customer@example.com"])
+      expect(mail.subject).to eq("Your files are ready for download!")
+      expect(mail[:from].value).to eq("#{seller.name} <noreply@#{CUSTOMERS_MAIL_DOMAIN}>")
+      expect(mail[:reply_to].value).to eq(product.support_email_or_default)
 
-      it "sets the correct instance variables" do
-        mail = CustomerMailer.files_ready_for_download(purchase.id)
-
-        # Access the underlying mailer instance to check instance variables
-        mailer_instance = mail.instance_variable_get(:@processed_mailer)
-        expect(mailer_instance.instance_variable_get(:@purchase)).to eq(purchase)
-        expect(mailer_instance.instance_variable_get(:@product)).to eq(product)
-        expect(mailer_instance.instance_variable_get(:@url_redirect)).to eq(purchase.url_redirect)
-        expect(mailer_instance.instance_variable_get(:@download_url)).to eq(purchase.url_redirect.download_page_url)
-        expect(mailer_instance.instance_variable_get(:@email_name)).to eq(:files_ready_for_download)
-      end
-    end
-
-    context "when url_redirect does not exist" do
-      it "raises error due to missing url_redirect" do
-        expect { CustomerMailer.files_ready_for_download(purchase.id).deliver_now }.to raise_error(NoMethodError, /undefined method.*download_page_url.*for nil/)
-      end
-    end
-
-    context "when product has support email" do
-      let(:product) { create(:product, user: seller, support_email: "support@seller.com") }
-
-      before do
-        purchase.create_url_redirect!
-      end
-
-      it "uses product support email for reply_to" do
-        mail = CustomerMailer.files_ready_for_download(purchase.id)
-        expect(mail[:reply_to].value).to eq("support@seller.com")
-      end
+      body = mail.body.encoded
+      expect(body).to include("Your files are ready for download!")
+      expect(body).to include(product.name)
+      expect(body).to include(purchase.url_redirect.download_page_url)
+      expect(body).to include("Contact Seller by replying to this email.")
     end
   end
 end

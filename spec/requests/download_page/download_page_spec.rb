@@ -973,3 +973,18 @@ describe("Download Page", type: :system, js: true) do
     end
   end
 end
+
+describe "stamped PDF" do
+  it "shows a flash when a stamped PDF is missing" do
+    product = create(:product)
+    file = create(:readable_document, link: product, pdf_stamp_enabled: true)
+    purchase = create(:purchase, link: product)
+    url_redirect = create(:url_redirect, purchase: purchase)
+
+    visit url_redirect.download_page_url
+    click_on "Download"
+
+    expect(page).to have_current_path(url_redirect.download_page_url)
+    expect(page).to have_alert(text: "We are preparing the file for download. You will receive an email when it is ready.")
+  end
+end
