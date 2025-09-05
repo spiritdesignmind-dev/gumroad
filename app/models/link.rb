@@ -1294,7 +1294,6 @@ class Link < ApplicationRecord
 
     def enforce_merchant_account_exits_for_new_users!
       return if publishable?
-      return # TODO (ershad): remove this after testing
 
       errors.add(:base, "You must connect at least one payment method before you can publish this product for sale.")
       raise LinkInvalid, "You must connect at least one payment method before you can publish this product for sale."

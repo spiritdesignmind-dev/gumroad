@@ -240,7 +240,6 @@ class CustomerMailer < ApplicationMailer
     @purchase = Purchase.find(purchase_id)
     @product = @purchase.link
     @url_redirect = @purchase.url_redirect
-    @download_url = @url_redirect.download_page_url
 
     mail(
       to: @purchase.email,
