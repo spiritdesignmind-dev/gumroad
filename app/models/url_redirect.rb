@@ -168,7 +168,7 @@ class UrlRedirect < ApplicationRecord
   end
 
   def missing_stamped_pdf?(product_file)
-    alive_stamped_pdfs.where(product_file_id: product_file.id).first.blank?
+    !alive_stamped_pdfs.where(product_file_id: product_file.id).exists?
   end
 
   def url
