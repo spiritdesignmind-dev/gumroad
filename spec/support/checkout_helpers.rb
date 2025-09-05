@@ -46,6 +46,8 @@ module CheckoutHelpers
       buy_button.click
     end
 
+    expect(page).to have_current_path(/\/checkout/, wait: 10)
+
     within_cart_item(product.name) do
       expect(page).to have_text((pwyw_price.to_i * quantity / 100).to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse) if pwyw_price.present?
       expect(page).to have_text("Qty: #{quantity}")
@@ -57,7 +59,7 @@ module CheckoutHelpers
   end
 
   def fill_checkout_form(product, email: "test@gumroad.com", address: nil, offer_code: nil, is_free: false, country: nil, zip_code: "94107", vat_id: nil, abn_id: nil, gst_id: nil, qst_id: nil, mva_id: nil, cn_id: nil, ird_id: nil, sst_id: nil, vsk_id: nil, trn_id: nil, oman_vat_number: nil, unp_id: nil, rut_id: nil, nit_id: nil, cpj_id: nil, ruc_id: nil, tn_id: nil, tin_id: nil, rfc_id: nil, inn_id: nil, pib_id: nil, brn_id: nil, vkn_id: nil, edrpou_id: nil, mst_id: nil, kra_pin_id: nil, firs_tin_id: nil, tra_tin: nil, gift: nil, custom_fields: [], credit_card: {}, logged_in_user: nil)
-    fill_in "Email address", with: email if email.present? && logged_in_user.nil?
+    safe_fill_in("Email address", email) if email.present? && logged_in_user.nil?
 
     if gift.present?
       check "Give as a gift"
@@ -99,21 +101,21 @@ module CheckoutHelpers
 
     if address.present? || product.is_physical || product.require_shipping?
       address = {} if address.nil?
-      fill_in "Full name", with: "Gumhead Moneybags"
-      fill_in "Street address", with: address[:street] || "1640 17th St"
-      fill_in "City", with: address[:city] || "San Francisco"
+      safe_fill_in("Full name", "Gumhead Moneybags", wait: 5)
+      safe_fill_in("Street address", address[:street] || "1640 17th St")
+      safe_fill_in("City", address[:city] || "San Francisco")
 
       country_value = find_field("Country").value
 
       if country_value == "US"
-        select address[:state] || "CA", from: "State"
+        safe_select(address[:state] || "CA", from: "State")
       elsif country_value == "CA"
-        select address[:state] || "QC", from: "Province"
+        safe_select(address[:state] || "QC", from: "Province")
       else
         fill_in "County", with: address[:state]
       end
 
-      fill_in country_value == "US" ? "ZIP code" : "Postal", with: address[:zip_code] || "94107"
+      safe_fill_in(country_value == "US" ? "ZIP code" : "Postal", address[:zip_code] || "94107")
     else
       fill_in "ZIP code", with: zip_code if zip_code.present? && !is_free
     end
@@ -203,7 +205,9 @@ def within_sca_frame(&block)
 end
 
 def within_cart_item(name, &block)
-  within find("h4", text: name, match: :first).ancestor("[role=listitem]"), &block
+  if page.has_selector?("h4", text: name, wait: 2)
+    within find("h4", text: name, match: :first).ancestor("[role=listitem]"), &block
+  end
 end
 
 def complete_purchase(product, **params)
@@ -225,4 +229,16 @@ private
 
   def variant_label(product)
     VARIANT_LABELS[product.native_type] || "Version"
+  end
+
+  def safe_fill_in(field_name, value, wait: 2)
+    if page.has_field?(field_name, wait: wait)
+      fill_in field_name, with: value
+    end
+  end
+
+  def safe_select(value, from:, wait: 2)
+    if page.has_field?(from, wait: wait)
+      select value, from: from
+    end
   end

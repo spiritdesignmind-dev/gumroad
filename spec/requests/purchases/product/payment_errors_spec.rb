@@ -102,9 +102,11 @@ describe("Purchase from a product page", type: :system, js: true) do
     end
 
     visit product.long_url
-    add_to_cart(product)
+    click_on "I want this!"
+    expect(page).to have_current_path(/\/checkout/, wait: 10)
 
-    click_on "Pay"
+    fill_checkout_form(product)
+    click_on ["Pay", "Get"].find { |text| page.has_button?(text, wait: 2) } || "Pay"
     within_fieldset "Card information" do
       within_frame { expect_focused find_field("Card number") }
     end
