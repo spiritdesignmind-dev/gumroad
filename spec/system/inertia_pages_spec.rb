@@ -52,8 +52,12 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
       ")
 
       # Wait for the async operation to complete
-      expect(page).to have_content("Welcome to Gumroad", wait: 5)
-      sleep(2)
+      expect(page).to have_content("Welcome to Gumroad", wait: 10)
+      
+      # Wait for the AJAX request to complete using Capybara's wait mechanism
+      Timeout.timeout(Capybara.default_max_wait_time) do
+        loop until page.evaluate_script("window.customersCount !== null")
+      end
 
       customers_count = page.evaluate_script("window.customersCount")
       expect(customers_count).not_to be_nil
@@ -98,8 +102,10 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
           .catch(error => window.paginationData = { entries: [] })
       ")
 
-      # Wait for async operation
-      sleep(2)
+      # Wait for async operation using Capybara's wait mechanism
+      Timeout.timeout(Capybara.default_max_wait_time) do
+        loop until page.evaluate_script("window.paginationData !== null")
+      end
 
       pagination_data = page.evaluate_script("window.paginationData")
       expect(pagination_data).not_to be_nil
@@ -117,8 +123,10 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
           .catch(error => window.searchResults = { entries: [] })
       ")
 
-      # Wait for async operation
-      sleep(2)
+      # Wait for async operation using Capybara's wait mechanism
+      Timeout.timeout(Capybara.default_max_wait_time) do
+        loop until page.evaluate_script("window.searchResults !== null")
+      end
 
       search_results = page.evaluate_script("window.searchResults")
       expect(search_results).not_to be_nil
@@ -156,8 +164,10 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
           .catch(error => window.analyticsData = { revenue_data: [] })
       ")
 
-      # Wait for async operation
-      sleep(2)
+      # Wait for async operation using Capybara's wait mechanism
+      Timeout.timeout(Capybara.default_max_wait_time) do
+        loop until page.evaluate_script("window.analyticsData !== null")
+      end
 
       analytics_data = page.evaluate_script("window.analyticsData")
       expect(analytics_data).not_to be_nil
@@ -184,8 +194,10 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
           .catch(error => window.referralData = { referral_data: [] })
       ")
 
-      # Wait for async operations
-      sleep(2)
+      # Wait for async operations using Capybara's wait mechanism
+      Timeout.timeout(Capybara.default_max_wait_time) do
+        loop until page.evaluate_script("window.stateData !== null && window.referralData !== null")
+      end
 
       state_data = page.evaluate_script("window.stateData")
       referral_data = page.evaluate_script("window.referralData")
@@ -238,8 +250,10 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
           .catch(error => window.customersData = { customers: [] })
       ")
 
-      # Wait for async operation
-      sleep(2)
+      # Wait for async operation using Capybara's wait mechanism
+      Timeout.timeout(Capybara.default_max_wait_time) do
+        loop until page.evaluate_script("window.customersData !== null")
+      end
 
       customers_data = page.evaluate_script("window.customersData")
       expect(customers_data).not_to be_nil
@@ -257,8 +271,10 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
           .catch(error => window.searchResults = { customers: [] })
       ")
 
-      # Wait for async operation
-      sleep(2)
+      # Wait for async operation using Capybara's wait mechanism
+      Timeout.timeout(Capybara.default_max_wait_time) do
+        loop until page.evaluate_script("window.searchResults !== null")
+      end
 
       search_results = page.evaluate_script("window.searchResults")
       expect(search_results).not_to be_nil
@@ -276,8 +292,10 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
           .catch(error => window.customerCharges = [])
       ")
 
-      # Wait for async operation
-      sleep(2)
+      # Wait for async operation using Capybara's wait mechanism
+      Timeout.timeout(Capybara.default_max_wait_time) do
+        loop until page.evaluate_script("window.customerCharges !== null")
+      end
 
       customer_charges = page.evaluate_script("window.customerCharges")
       expect(customer_charges).not_to be_nil
@@ -322,8 +340,10 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
           .catch(error => window.paymentsData = { payouts: [] })
       ")
 
-      # Wait for async operation
-      sleep(2)
+      # Wait for async operation using Capybara's wait mechanism
+      Timeout.timeout(Capybara.default_max_wait_time) do
+        loop until page.evaluate_script("window.paymentsData !== null")
+      end
 
       payments_data = page.evaluate_script("window.paymentsData")
       expect(payments_data).not_to be_nil
