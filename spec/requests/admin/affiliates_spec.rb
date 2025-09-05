@@ -7,7 +7,23 @@ describe "Admin::AffiliatesController Scenario", type: :system, js: true do
   let(:affiliate_user) { create(:affiliate_user) }
 
   before do
+    # Set up required configuration values for tests using environment variables
+    ENV["IFFY_TOKEN"] = "test_iffy_token"
+    ENV["OBFUSCATE_IDS_CIPHER_KEY"] = "test_cipher_key_32_characters_long"
+    ENV["OBFUSCATE_IDS_NUMERIC_CIPHER_KEY"] = "123456789"
+
+    # Stub the ObfuscateIds module constants directly since they're loaded at class definition time
+    stub_const("ObfuscateIds::CIPHER_KEY", "test_cipher_key_32_characters_long")
+    stub_const("ObfuscateIds::NUMERIC_CIPHER_KEY", 123456789)
+
     login_as(admin)
+  end
+
+  after do
+    # Clean up environment variables to avoid side effects
+    ENV.delete("IFFY_TOKEN")
+    ENV.delete("OBFUSCATE_IDS_CIPHER_KEY")
+    ENV.delete("OBFUSCATE_IDS_NUMERIC_CIPHER_KEY")
   end
 
   context "when user has no affiliated products" do
@@ -18,6 +34,7 @@ describe "Admin::AffiliatesController Scenario", type: :system, js: true do
     it "shows no products alert" do
       visit admin_affiliate_path(affiliate_user)
 
+      # Click on the Products tab to make the content visible
       click_on "Products"
 
       expect(page).to have_text("No affiliated products.")
@@ -38,6 +55,7 @@ describe "Admin::AffiliatesController Scenario", type: :system, js: true do
     it "shows products" do
       visit admin_affiliate_path(affiliate_user)
 
+      # Click on the Products tab to make the content visible
       click_on "Products"
 
       expect(page).to have_text("Product a")
