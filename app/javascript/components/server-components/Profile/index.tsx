@@ -10,6 +10,7 @@ import { EditProfile, Props as EditProps } from "$app/components/Profile/EditPag
 import { FollowFormBlock } from "$app/components/Profile/FollowForm";
 import { Layout } from "$app/components/Profile/Layout";
 import { PageProps as SectionsProps, Section } from "$app/components/Profile/Sections";
+import { Tabs as UITabs, Tab as UITab } from "$app/components/ui/Tabs";
 import { useOriginalLocation } from "$app/components/useOriginalLocation";
 import { useRefToLatest } from "$app/components/useRefToLatest";
 
@@ -69,13 +70,13 @@ const PublicProfile = (props: Props) => {
             </h1>
           ) : null}
           {props.tabs.length > 1 ? (
-            <Tabs aria-label="Profile Tabs">
+            <UITabs aria-label="Profile Tabs">
               {tabs.map((tab, i) => (
-                <Tab key={i} isSelected={tab === selectedTab} onClick={() => setSelectedTab(tab)}>
+                <UITab key={i} isSelected={tab === selectedTab} onClick={() => setSelectedTab(tab)}>
                   {tab.name}
-                </Tab>
+                </UITab>
               ))}
-            </Tabs>
+            </UITabs>
           ) : null}
         </header>
       ) : null}

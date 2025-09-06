@@ -7,7 +7,6 @@ import { AssetPreview } from "$app/parsers/product";
 import { useElementDimensions } from "$app/components/useElementDimensions";
 import { useOnChange } from "$app/components/useOnChange";
 import { useScrollableCarousel } from "$app/components/useScrollableCarousel";
-import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 import { Embed } from "./Embed";
 import { Image } from "./Image";
@@ -68,22 +67,20 @@ export const Covers = ({
         ))}
       </div>
       {covers.length > 1 && activeCover?.type !== "oembed" && activeCover?.type !== "video" ? (
-        <Tabs aria-label="Select a cover">
+        <div role="tablist" aria-label="Select a cover">
           {covers.map((cover, i) => (
-            <Tab
+            <div
               key={i}
               aria-label={`Show cover ${i + 1}`}
-              isSelected={i === activeCoverIndex}
+              aria-selected={i === activeCoverIndex}
               aria-controls={cover.id}
               onClick={(e) => {
                 e.preventDefault();
                 setActiveCoverId(cover.id);
               }}
-            >
-              {/* Empty tab for cover selection */}
-            </Tab>
+            />
           ))}
-        </Tabs>
+        </div>
       ) : null}
     </figure>
   );
