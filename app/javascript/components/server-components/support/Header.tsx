@@ -7,6 +7,7 @@ import { register } from "$app/utils/serverComponentUtil";
 import { Button } from "$app/components/Button";
 import { UnreadTicketsBadge } from "$app/components/support/UnreadTicketsBadge";
 import { useOriginalLocation } from "$app/components/useOriginalLocation";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 export function SupportHeader({
   onOpenNewTicket,
@@ -34,25 +35,23 @@ export function SupportHeader({
         ) : null}
       </div>
       {hasHelperSession ? (
-        <div role="tablist">
-          <a
+        <Tabs>
+          <Tab
             href={Routes.help_center_root_path()}
-            role="tab"
-            aria-selected={pathname.startsWith(Routes.help_center_root_path())}
+            isSelected={pathname.startsWith(Routes.help_center_root_path())}
             className="pb-2"
           >
             Articles
-          </a>
-          <a
+          </Tab>
+          <Tab
             href={Routes.support_index_path()}
-            role="tab"
-            aria-selected={pathname.startsWith(Routes.support_index_path())}
+            isSelected={pathname.startsWith(Routes.support_index_path())}
             className="flex items-center gap-2 border-b-2 pb-2"
           >
             Support tickets
             <UnreadTicketsBadge />
-          </a>
-        </div>
+          </Tab>
+        </Tabs>
       ) : null}
     </>
   );

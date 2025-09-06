@@ -17,6 +17,7 @@ import { ExportSubscribersPopover } from "$app/components/server-components/Foll
 import { useUserAgentInfo } from "$app/components/UserAgent";
 import { WithTooltip } from "$app/components/WithTooltip";
 import { PageHeader } from "$app/components/ui/PageHeader";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 import placeholder from "$assets/images/placeholders/followers.png";
 
@@ -34,24 +35,24 @@ const Layout = ({
   return (
     <main>
       <PageHeader title={title} actions={actions}>
-        <div role="tablist">
-          <a href={`${Routes.emails_path()}/published`} role="tab">
+        <Tabs>
+          <Tab href={`${Routes.emails_path()}/published`} isSelected={false}>
             Published
-          </a>
+          </Tab>
           {loggedInUser?.policies.installment.create ? (
             <>
-              <a href={`${Routes.emails_path()}/scheduled`} role="tab">
+              <Tab href={`${Routes.emails_path()}/scheduled`} isSelected={false}>
                 Scheduled
-              </a>
-              <a href={`${Routes.emails_path()}/drafts`} role="tab">
+              </Tab>
+              <Tab href={`${Routes.emails_path()}/drafts`} isSelected={false}>
                 Drafts
-              </a>
+              </Tab>
             </>
           ) : null}
-          <a href={Routes.followers_path()} role="tab" aria-selected="true">
+          <Tab href={Routes.followers_path()} isSelected={true}>
             Subscribers
-          </a>
-        </div>
+          </Tab>
+        </Tabs>
       </PageHeader>
       {children}
     </main>

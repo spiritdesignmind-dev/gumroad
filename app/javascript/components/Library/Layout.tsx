@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { useOnScrollToBottom } from "$app/components/useOnScrollToBottom";
 import { PageHeader } from "$app/components/ui/PageHeader";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 export const Layout = ({
   selectedTab,
@@ -23,28 +24,27 @@ export const Layout = ({
   return (
     <main className="library" ref={ref}>
       <PageHeader title="Library">
-        <div role="tablist">
-          <a href={Routes.library_path()} role="tab" aria-selected={selectedTab === "purchases"}>
+        <Tabs>
+          <Tab href={Routes.library_path()} isSelected={selectedTab === "purchases"}>
             Purchases
-          </a>
-          <a href={Routes.wishlists_path()} role="tab" aria-selected={selectedTab === "wishlists"}>
+          </Tab>
+          <Tab href={Routes.wishlists_path()} isSelected={selectedTab === "wishlists"}>
             {followingWishlistsEnabled ? "Saved" : "Wishlists"}
-          </a>
+          </Tab>
           {followingWishlistsEnabled ? (
-            <a
+            <Tab
               href={Routes.wishlists_following_index_path()}
-              role="tab"
-              aria-selected={selectedTab === "following_wishlists"}
+              isSelected={selectedTab === "following_wishlists"}
             >
               Following
-            </a>
+            </Tab>
           ) : null}
           {reviewsPageEnabled ? (
-            <a href={Routes.reviews_path()} role="tab" aria-selected={selectedTab === "reviews"}>
+            <Tab href={Routes.reviews_path()} isSelected={selectedTab === "reviews"}>
               Reviews
-            </a>
+            </Tab>
           ) : null}
-        </div>
+        </Tabs>
       </PageHeader>
       {children}
     </main>

@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { PageHeader } from "$app/components/ui/PageHeader";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 const pageNames = {
   widgets: "Widgets",
@@ -17,13 +18,13 @@ export const Layout = ({
 }) => (
   <main>
     <PageHeader title={pageNames[currentPage]}>
-      <div role="tablist">
+      <Tabs>
         {Object.entries(pageNames).map(([page, name]) => (
-          <a role="tab" aria-selected={page === currentPage} href={Routes[`${page}_path`]()} key={page}>
+          <Tab key={page} isSelected={page === currentPage} href={Routes[`${page}_path`]()}>
             {name}
-          </a>
+          </Tab>
         ))}
-      </div>
+      </Tabs>
     </PageHeader>
     {children}
   </main>

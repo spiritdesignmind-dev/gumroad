@@ -4,6 +4,7 @@ import * as React from "react";
 import { SettingPage as Page } from "$app/parsers/settings";
 
 import { Button } from "$app/components/Button";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 const PAGE_TITLES = {
   main: "Settings",
@@ -24,11 +25,6 @@ type Props = {
   hasAside?: boolean;
   canUpdate?: boolean;
 };
-const Tab = ({ page, isCurrent }: { page: Page; isCurrent: boolean }) => (
-  <a role="tab" href={Routes[`settings_${page}_path`]()} aria-selected={isCurrent}>
-    {PAGE_TITLES[page]}
-  </a>
-);
 
 export const Layout = ({ onSave, pages, currentPage, children, hasAside, canUpdate }: Props) => (
   <>
@@ -41,11 +37,13 @@ export const Layout = ({ onSave, pages, currentPage, children, hasAside, canUpda
           </Button>
         </div>
       ) : null}
-      <div role="tablist">
+      <Tabs>
         {pages.map((page) => (
-          <Tab page={page} key={page} isCurrent={currentPage === page} />
+          <Tab key={page} href={Routes[`settings_${page}_path`]()} isSelected={currentPage === page}>
+            {PAGE_TITLES[page]}
+          </Tab>
         ))}
-      </div>
+      </Tabs>
     </header>
     <main className={cx({ squished: hasAside })}>{children}</main>
   </>

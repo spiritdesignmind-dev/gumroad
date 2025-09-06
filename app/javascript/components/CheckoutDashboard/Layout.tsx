@@ -1,6 +1,8 @@
 import cx from "classnames";
 import * as React from "react";
 
+import { Tabs, Tab } from "$app/components/ui/Tabs";
+
 const pageNames = {
   discounts: "Discounts",
   form: "Checkout form",
@@ -47,12 +49,12 @@ const Header = ({
   <header className={cx({ "sticky-top": sticky })}>
     <h1>Checkout</h1>
     {actions ? <div className="actions">{actions}</div> : null}
-    <div role="tablist">
+    <Tabs>
       {pages.map((page) => (
-        <a key={page} role="tab" href={Routes[`checkout_${page}_path`]()} aria-selected={page === currentPage}>
+        <Tab key={page} href={Routes[`checkout_${page}_path`]()} isSelected={page === currentPage}>
           {pageNames[page]}
-        </a>
+        </Tab>
       ))}
-    </div>
+    </Tabs>
   </header>
 );

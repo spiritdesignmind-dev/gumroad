@@ -28,6 +28,7 @@ import { PublishedTab } from "$app/components/server-components/EmailsPage/Publi
 import { ScheduledTab } from "$app/components/server-components/EmailsPage/ScheduledTab";
 import { WithTooltip } from "$app/components/WithTooltip";
 import { PageHeader } from "$app/components/ui/PageHeader";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 const TABS = ["published", "scheduled", "drafts", "subscribers"] as const;
 
@@ -83,19 +84,19 @@ export const Layout = ({
           </div>
         }
       >
-        <div role="tablist">
+        <Tabs>
           {TABS.map((tab) =>
             tab === "subscribers" ? (
-              <a href={Routes.followers_path()} role="tab" key={tab}>
+              <Tab href={Routes.followers_path()} isSelected={false} key={tab}>
                 Subscribers
-              </a>
+              </Tab>
             ) : (
-              <Link to={emailTabPath(tab)} role="tab" aria-selected={selectedTab === tab} key={tab}>
+              <Tab href={emailTabPath(tab)} isSelected={selectedTab === tab} key={tab}>
                 {tab === "published" ? "Published" : tab === "scheduled" ? "Scheduled" : "Drafts"}
-              </Link>
+              </Tab>
             ),
           )}
-        </div>
+        </Tabs>
       </PageHeader>
       {children}
     </main>

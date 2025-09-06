@@ -69,13 +69,13 @@ const PublicProfile = (props: Props) => {
             </h1>
           ) : null}
           {props.tabs.length > 1 ? (
-            <div role="tablist" aria-label="Profile Tabs">
+            <Tabs aria-label="Profile Tabs">
               {tabs.map((tab, i) => (
-                <div role="tab" key={i} aria-selected={tab === selectedTab} onClick={() => setSelectedTab(tab)}>
+                <Tab key={i} isSelected={tab === selectedTab} onClick={() => setSelectedTab(tab)}>
                   {tab.name}
-                </div>
+                </Tab>
               ))}
-            </div>
+            </Tabs>
           ) : null}
         </header>
       ) : null}

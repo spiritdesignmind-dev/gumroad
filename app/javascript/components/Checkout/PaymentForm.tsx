@@ -59,6 +59,7 @@ import { useOnChangeSync } from "$app/components/useOnChange";
 import { RecaptchaCancelledError, useRecaptcha } from "$app/components/useRecaptcha";
 import { useRefToLatest } from "$app/components/useRefToLatest";
 import { useRunOnce } from "$app/components/useRunOnce";
+import { Tabs } from "$app/components/ui/Tabs";
 
 import { Product } from "./cartState";
 
@@ -1231,11 +1232,11 @@ export const PaymentForm = ({
             <div className="paragraphs">
               <h4>Pay with</h4>
               {state.availablePaymentMethods.length > 1 ? (
-                <div role="tablist" className="tab-buttons small">
+                <Tabs>
                   {state.availablePaymentMethods.map((method) => (
                     <React.Fragment key={method.type}>{method.button}</React.Fragment>
                   ))}
-                </div>
+                </Tabs>
               ) : null}
             </div>
           </div>

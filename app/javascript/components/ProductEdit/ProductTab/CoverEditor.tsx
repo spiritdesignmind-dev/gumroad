@@ -18,6 +18,7 @@ import { RemoveButton } from "$app/components/RemoveButton";
 import { showAlert } from "$app/components/server-components/Alert";
 import { useIsAboveBreakpoint } from "$app/components/useIsAboveBreakpoint";
 import { WithTooltip } from "$app/components/WithTooltip";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 const MAX_PREVIEW_COUNT = 8;
 
@@ -154,50 +155,51 @@ const CoverUploader = ({
       <Progress />
     ) : (
       <div style={{ width: "100%" }}>
-        <div className="tab-buttons small" role="tablist">
-          <label className="button" role="tab">
-            <input
-              type="file"
-              multiple
-              accept={ALLOWED_EXTENSIONS.map((ext) => `.${ext}`).join(",")}
-              disabled={isUploading}
-              onChange={asyncVoid(async (event) => {
-                if (!event.target.files?.length) return;
+        <Tabs>
+          <Tab isSelected={uploader?.type !== "url"}>
+            <label className="button">
+              <input
+                type="file"
+                multiple
+                accept={ALLOWED_EXTENSIONS.map((ext) => `.${ext}`).join(",")}
+                disabled={isUploading}
+                onChange={asyncVoid(async (event) => {
+                  if (!event.target.files?.length) return;
 
-                for (const file of event.target.files) {
-                  if (!FileUtils.isFileNameExtensionAllowed(file.name, ALLOWED_EXTENSIONS)) {
-                    showAlert("Invalid file type.", "error");
-                    continue;
-                  }
-                  // TODO change the relevant endpoint(s) to allow uploading multiple files at once
-                  await new Promise<void>((resolve) => {
-                    new DirectUpload(file, "/rails/active_storage/direct_uploads").create((error, blob) => {
-                      if (error) {
-                        showAlert(error.message, "error");
-                      } else {
-                        void saveCover({ type: "file", signedBlobId: blob.signed_id }).finally(resolve);
-                      }
+                  for (const file of event.target.files) {
+                    if (!FileUtils.isFileNameExtensionAllowed(file.name, ALLOWED_EXTENSIONS)) {
+                      showAlert("Invalid file type.", "error");
+                      continue;
+                    }
+                    // TODO change the relevant endpoint(s) to allow uploading multiple files at once
+                    await new Promise<void>((resolve) => {
+                      new DirectUpload(file, "/rails/active_storage/direct_uploads").create((error, blob) => {
+                        if (error) {
+                          showAlert(error.message, "error");
+                        } else {
+                          void saveCover({ type: "file", signedBlobId: blob.signed_id }).finally(resolve);
+                        }
+                      });
                     });
-                  });
-                }
-                setIsSelecting(false);
-              })}
-            />
-            <Icon name="upload-fill" />
-            Computer files
-          </label>
-          <Button
-            role="tab"
+                  }
+                  setIsSelecting(false);
+                })}
+              />
+              <Icon name="upload-fill" />
+              Computer files
+            </label>
+          </Tab>
+          <Tab
+            isSelected={uploader?.type === "url"}
             onClick={() =>
               setUploader((prevUploader) => (prevUploader?.type === "url" ? null : { type: "url", value: "" }))
             }
-            aria-selected={uploader?.type === "url"}
             aria-controls={`${uid}-url`}
           >
             <Icon name="link" />
             External link
-          </Button>
-        </div>
+          </Tab>
+        </Tabs>
         <fieldset role="tabpanel" id={`${uid}-url`} hidden={uploader?.type !== "url"}>
           {uploader?.type === "url" ? (
             <div className="input-with-button">

@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Link } from "react-router-dom";
 
 import { PageHeader } from "$app/components/ui/PageHeader";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 type LayoutProps = {
   title: string;
@@ -21,15 +21,14 @@ export const Layout = ({
   <main>
     <PageHeader title={title} actions={headerActions}>
       {showTabs ? (
-        <div role="tablist">
-          <Link aria-selected={selectedTab === "collaborators"} to={Routes.collaborators_path()} role="tab">
+        <Tabs>
+          <Tab href={Routes.collaborators_path()} isSelected={selectedTab === "collaborators"}>
             Collaborators
-          </Link>
-
-          <Link aria-selected={selectedTab === "collaborations"} to={Routes.collaborators_incomings_path()} role="tab">
+          </Tab>
+          <Tab href={Routes.collaborators_incomings_path()} isSelected={selectedTab === "collaborations"}>
             Collaborations
-          </Link>
-        </div>
+          </Tab>
+        </Tabs>
       ) : null}
     </PageHeader>
     {children}
