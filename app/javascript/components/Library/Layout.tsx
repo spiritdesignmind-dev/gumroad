@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { useOnScrollToBottom } from "$app/components/useOnScrollToBottom";
+import { PageHeader } from "$app/components/ui/PageHeader";
 
 export const Layout = ({
   selectedTab,
@@ -21,8 +22,7 @@ export const Layout = ({
 
   return (
     <main className="library" ref={ref}>
-      <header>
-        <h1>Library</h1>
+      <PageHeader title="Library">
         <div role="tablist">
           <a href={Routes.library_path()} role="tab" aria-selected={selectedTab === "purchases"}>
             Purchases
@@ -45,7 +45,7 @@ export const Layout = ({
             </a>
           ) : null}
         </div>
-      </header>
+      </PageHeader>
       {children}
     </main>
   );

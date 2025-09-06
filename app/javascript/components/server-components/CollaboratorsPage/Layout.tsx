@@ -1,6 +1,8 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
 
+import { PageHeader } from "$app/components/ui/PageHeader";
+
 type LayoutProps = {
   title: string;
   headerActions?: React.ReactNode;
@@ -17,10 +19,7 @@ export const Layout = ({
   showTabs = false,
 }: LayoutProps) => (
   <main>
-    <header>
-      <h1>{title}</h1>
-      <div className="actions">{headerActions}</div>
-
+    <PageHeader title={title} actions={headerActions}>
       {showTabs ? (
         <div role="tablist">
           <Link aria-selected={selectedTab === "collaborators"} to={Routes.collaborators_path()} role="tab">
@@ -32,7 +31,7 @@ export const Layout = ({
           </Link>
         </div>
       ) : null}
-    </header>
+    </PageHeader>
     {children}
   </main>
 );

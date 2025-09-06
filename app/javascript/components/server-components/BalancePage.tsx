@@ -16,6 +16,7 @@ import { showAlert } from "$app/components/server-components/Alert";
 import { ExportPayoutsPopover } from "$app/components/server-components/BalancePage/ExportPayoutsPopover";
 import { useUserAgentInfo } from "$app/components/UserAgent";
 import { WithTooltip } from "$app/components/WithTooltip";
+import { PageHeader } from "$app/components/ui/PageHeader";
 
 import placeholder from "$assets/images/placeholders/payouts.png";
 
@@ -717,15 +718,15 @@ const BalancePage = ({
 
   return (
     <main>
-      <header>
-        <h1>Payouts</h1>
-        {settingsAction || bulkExportAction ? (
-          <div className="actions flex gap-2">
+      <PageHeader 
+        title="Payouts" 
+        actions={settingsAction || bulkExportAction ? (
+          <div className="flex gap-2">
             {settingsAction}
             {bulkExportAction}
           </div>
-        ) : null}
-      </header>
+        ) : undefined}
+      />
       <div style={{ display: "grid", gap: "var(--spacer-7)" }}>
         {!instant_payout ? (
           show_instant_payouts_notice ? (

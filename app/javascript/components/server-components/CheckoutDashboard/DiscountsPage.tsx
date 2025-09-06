@@ -37,6 +37,7 @@ import { useGlobalEventListener } from "$app/components/useGlobalEventListener";
 import { useOriginalLocation } from "$app/components/useOriginalLocation";
 import { useUserAgentInfo } from "$app/components/UserAgent";
 import { useSortingTableDriver, Sort } from "$app/components/useSortingTableDriver";
+import { PageHeader } from "$app/components/ui/PageHeader";
 
 import placeholder from "$assets/images/placeholders/discounts.png";
 
@@ -806,18 +807,20 @@ const Form = ({
 
   return (
     <main>
-      <header>
-        <h1>{title}</h1>
-        <div className="actions">
-          <Button onClick={cancel} disabled={isLoading}>
-            <Icon name="x-square" />
-            Cancel
-          </Button>
-          <Button color="accent" onClick={handleSubmit} disabled={isLoading}>
-            {submitLabel}
-          </Button>
-        </div>
-      </header>
+      <PageHeader 
+        title={title} 
+        actions={
+          <div className="actions">
+            <Button onClick={cancel} disabled={isLoading}>
+              <Icon name="x-square" />
+              Cancel
+            </Button>
+            <Button color="accent" onClick={handleSubmit} disabled={isLoading}>
+              {submitLabel}
+            </Button>
+          </div>
+        }
+      />
       <form>
         <section>
           <header>

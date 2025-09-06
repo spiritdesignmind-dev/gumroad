@@ -3,6 +3,7 @@ import * as React from "react";
 import { assertDefined } from "$app/utils/assert";
 
 import { useLoggedInUser } from "$app/components/LoggedInUser";
+import { PageHeader } from "$app/components/ui/PageHeader";
 
 export const AnalyticsLayout = ({
   selectedTab,
@@ -17,9 +18,7 @@ export const AnalyticsLayout = ({
 
   return (
     <main>
-      <header>
-        <h1>Analytics</h1>
-        {actions ? <div className="actions">{actions}</div> : null}
+      <PageHeader title="Analytics" actions={actions}>
         <div role="tablist">
           <a href={Routes.audience_dashboard_path()} role="tab" aria-selected={selectedTab === "following"}>
             Following
@@ -33,7 +32,7 @@ export const AnalyticsLayout = ({
             </a>
           ) : null}
         </div>
-      </header>
+      </PageHeader>
       {children}
     </main>
   );

@@ -27,6 +27,7 @@ import { EmailForm } from "$app/components/server-components/EmailsPage/EmailFor
 import { PublishedTab } from "$app/components/server-components/EmailsPage/PublishedTab";
 import { ScheduledTab } from "$app/components/server-components/EmailsPage/ScheduledTab";
 import { WithTooltip } from "$app/components/WithTooltip";
+import { PageHeader } from "$app/components/ui/PageHeader";
 
 const TABS = ["published", "scheduled", "drafts", "subscribers"] as const;
 
@@ -50,37 +51,38 @@ export const Layout = ({
 
   return (
     <main>
-      <header>
-        <h1>Emails</h1>
+      <PageHeader 
+        title="Emails" 
+        actions={
+          <div className="actions">
+            <Popover
+              open={isSearchPopoverOpen}
+              onToggle={setIsSearchPopoverOpen}
+              aria-label="Toggle Search"
+              trigger={
+                <WithTooltip tip="Search" position="bottom">
+                  <div className="button">
+                    <Icon name="solid-search" />
+                  </div>
+                </WithTooltip>
+              }
+            >
+              <div className="input">
+                <Icon name="solid-search" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search emails"
+                  value={query}
+                  onChange={(evt) => setQuery(evt.target.value)}
+                />
+              </div>
+            </Popover>
 
-        <div className="actions">
-          <Popover
-            open={isSearchPopoverOpen}
-            onToggle={setIsSearchPopoverOpen}
-            aria-label="Toggle Search"
-            trigger={
-              <WithTooltip tip="Search" position="bottom">
-                <div className="button">
-                  <Icon name="solid-search" />
-                </div>
-              </WithTooltip>
-            }
-          >
-            <div className="input">
-              <Icon name="solid-search" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search emails"
-                value={query}
-                onChange={(evt) => setQuery(evt.target.value)}
-              />
-            </div>
-          </Popover>
-
-          <NewEmailButton />
-        </div>
-
+            <NewEmailButton />
+          </div>
+        }
+      >
         <div role="tablist">
           {TABS.map((tab) =>
             tab === "subscribers" ? (
@@ -94,7 +96,7 @@ export const Layout = ({
             ),
           )}
         </div>
-      </header>
+      </PageHeader>
       {children}
     </main>
   );

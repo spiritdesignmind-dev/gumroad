@@ -47,6 +47,7 @@ import { useConfigureEvaporate } from "$app/components/useConfigureEvaporate";
 import { useDebouncedCallback } from "$app/components/useDebouncedCallback";
 import { useRunOnce } from "$app/components/useRunOnce";
 import { WithTooltip } from "$app/components/WithTooltip";
+import { PageHeader } from "$app/components/ui/PageHeader";
 
 type ProductOrVariantOption = {
   id: string;
@@ -627,119 +628,121 @@ export const EmailForm = () => {
 
   return (
     <main>
-      <header>
-        <h1>{installment?.external_id ? "Edit email" : "New email"}</h1>
-        <div className="actions">
-          {channel.email && channel.profile ? (
+      <PageHeader 
+        title={installment?.external_id ? "Edit email" : "New email"}
+        actions={
+          <div className="actions">
+            {channel.email && channel.profile ? (
+              <Popover
+                trigger={
+                  <Button disabled={isBusy}>
+                    <Icon name="eye-fill" />
+                    Preview
+                    <Icon name="outline-cheveron-down" />
+                  </Button>
+                }
+              >
+                <div style={{ display: "grid", gap: "var(--spacer-3)" }}>
+                  <Button disabled={isBusy} onClick={() => save("save_and_preview_post")}>
+                    <Icon name="file-earmark-medical-fill" />
+                    Preview Post
+                  </Button>
+                  <Button disabled={isBusy} onClick={() => save("save_and_preview_email")}>
+                    <Icon name="envelope-fill" />
+                    Preview Email
+                  </Button>
+                </div>
+              </Popover>
+            ) : (
+              <Button
+                disabled={isBusy}
+                onClick={() => save(channel.profile ? "save_and_preview_post" : "save_and_preview_email")}
+              >
+                <Icon name="eye-fill" />
+                Preview
+              </Button>
+            )}
+            <Link to={cancelPath} className="button" inert={isBusy}>
+              <Icon name="x-square" />
+              Cancel
+            </Link>
             <Popover
               trigger={
                 <Button disabled={isBusy}>
-                  <Icon name="eye-fill" />
-                  Preview
+                  {channel.profile ? "Publish" : "Send"}
                   <Icon name="outline-cheveron-down" />
                 </Button>
               }
             >
               <div style={{ display: "grid", gap: "var(--spacer-3)" }}>
-                <Button disabled={isBusy} onClick={() => save("save_and_preview_post")}>
-                  <Icon name="file-earmark-medical-fill" />
-                  Preview Post
-                </Button>
-                <Button disabled={isBusy} onClick={() => save("save_and_preview_email")}>
-                  <Icon name="envelope-fill" />
-                  Preview Email
+                <div style={{ display: "grid", gridTemplateColumns: "1fr max-content" }}>
+                  {isSaving && secondsLeftToPublish > 0 ? (
+                    <>
+                      <Button color="accent" disabled>
+                        {channel.profile ? "Publishing" : "Sending"} in {secondsLeftToPublish}...
+                      </Button>
+                      <Button
+                        style={{ marginLeft: "var(--spacer-2)" }}
+                        onClick={() => {
+                          if (publishCountdownRef.current) {
+                            publishCountdownRef.current.abort();
+                            publishCountdownRef.current = null;
+                          }
+                          setIsSaving(false);
+                          setSecondsLeftToPublish(0);
+                        }}
+                      >
+                        <Icon name="x" />
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      color="accent"
+                      onClick={() => {
+                        if (!validate("save_and_publish")) return;
+
+                        setIsSaving(true);
+                        publishCountdownRef.current = new Countdown(
+                          DEFAULT_SECONDS_LEFT_TO_PUBLISH,
+                          (secondsLeft) => {
+                            setSecondsLeftToPublish(secondsLeft);
+                          },
+                          () => {
+                            publishCountdownRef.current = null;
+                            save("save_and_publish");
+                          },
+                        );
+                      }}
+                    >
+                      {channel.profile ? "Publish now" : "Send now"}
+                    </Button>
+                  )}
+                </div>
+                <div role="separator">OR</div>
+                <fieldset className={cx({ danger: invalidFields.has("scheduleDate") })}>
+                  <DateInput
+                    withTime
+                    aria-label="Schedule date"
+                    value={scheduleDate}
+                    min={new Date()}
+                    disabled={isPublished}
+                    onChange={(date) => {
+                      if (date) setScheduleDate(date);
+                      markFieldAsValid("scheduleDate");
+                    }}
+                  />
+                </fieldset>
+                <Button disabled={isPublished || isBusy} onClick={() => save("save_and_schedule")}>
+                  Schedule
                 </Button>
               </div>
             </Popover>
-          ) : (
-            <Button
-              disabled={isBusy}
-              onClick={() => save(channel.profile ? "save_and_preview_post" : "save_and_preview_email")}
-            >
-              <Icon name="eye-fill" />
-              Preview
+            <Button color="accent" disabled={isBusy} onClick={() => save()}>
+              Save
             </Button>
-          )}
-          <Link to={cancelPath} className="button" inert={isBusy}>
-            <Icon name="x-square" />
-            Cancel
-          </Link>
-          <Popover
-            trigger={
-              <Button disabled={isBusy}>
-                {channel.profile ? "Publish" : "Send"}
-                <Icon name="outline-cheveron-down" />
-              </Button>
-            }
-          >
-            <div style={{ display: "grid", gap: "var(--spacer-3)" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr max-content" }}>
-                {isSaving && secondsLeftToPublish > 0 ? (
-                  <>
-                    <Button color="accent" disabled>
-                      {channel.profile ? "Publishing" : "Sending"} in {secondsLeftToPublish}...
-                    </Button>
-                    <Button
-                      style={{ marginLeft: "var(--spacer-2)" }}
-                      onClick={() => {
-                        if (publishCountdownRef.current) {
-                          publishCountdownRef.current.abort();
-                          publishCountdownRef.current = null;
-                        }
-                        setIsSaving(false);
-                        setSecondsLeftToPublish(0);
-                      }}
-                    >
-                      <Icon name="x" />
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    color="accent"
-                    onClick={() => {
-                      if (!validate("save_and_publish")) return;
-
-                      setIsSaving(true);
-                      publishCountdownRef.current = new Countdown(
-                        DEFAULT_SECONDS_LEFT_TO_PUBLISH,
-                        (secondsLeft) => {
-                          setSecondsLeftToPublish(secondsLeft);
-                        },
-                        () => {
-                          publishCountdownRef.current = null;
-                          save("save_and_publish");
-                        },
-                      );
-                    }}
-                  >
-                    {channel.profile ? "Publish now" : "Send now"}
-                  </Button>
-                )}
-              </div>
-              <div role="separator">OR</div>
-              <fieldset className={cx({ danger: invalidFields.has("scheduleDate") })}>
-                <DateInput
-                  withTime
-                  aria-label="Schedule date"
-                  value={scheduleDate}
-                  min={new Date()}
-                  disabled={isPublished}
-                  onChange={(date) => {
-                    if (date) setScheduleDate(date);
-                    markFieldAsValid("scheduleDate");
-                  }}
-                />
-              </fieldset>
-              <Button disabled={isPublished || isBusy} onClick={() => save("save_and_schedule")}>
-                Schedule
-              </Button>
-            </div>
-          </Popover>
-          <Button color="accent" disabled={isBusy} onClick={() => save()}>
-            Save
-          </Button>
-        </div>
-      </header>
+          </div>
+        }
+      />
       <section>
         <div className="with-sidebar">
           <div className="stack">

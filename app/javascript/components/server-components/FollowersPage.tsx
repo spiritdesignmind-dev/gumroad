@@ -16,6 +16,7 @@ import { showAlert } from "$app/components/server-components/Alert";
 import { ExportSubscribersPopover } from "$app/components/server-components/FollowersPage/ExportSubscribersPopover";
 import { useUserAgentInfo } from "$app/components/UserAgent";
 import { WithTooltip } from "$app/components/WithTooltip";
+import { PageHeader } from "$app/components/ui/PageHeader";
 
 import placeholder from "$assets/images/placeholders/followers.png";
 
@@ -32,9 +33,7 @@ const Layout = ({
 
   return (
     <main>
-      <header>
-        <h1>{title}</h1>
-        {actions ? <div className="actions">{actions}</div> : null}
+      <PageHeader title={title} actions={actions}>
         <div role="tablist">
           <a href={`${Routes.emails_path()}/published`} role="tab">
             Published
@@ -53,7 +52,7 @@ const Layout = ({
             Subscribers
           </a>
         </div>
-      </header>
+      </PageHeader>
       {children}
     </main>
   );
