@@ -74,13 +74,13 @@ import { ReviewVideoPlayer } from "$app/components/ReviewVideoPlayer";
 import { Select } from "$app/components/Select";
 import { showAlert } from "$app/components/server-components/Alert";
 import { Toggle } from "$app/components/Toggle";
+import { PageHeader } from "$app/components/ui/PageHeader";
 import { useDebouncedCallback } from "$app/components/useDebouncedCallback";
 import { useOnChange } from "$app/components/useOnChange";
 import { useUserAgentInfo } from "$app/components/UserAgent";
 import { useRunOnce } from "$app/components/useRunOnce";
 import { useSortingTableDriver } from "$app/components/useSortingTableDriver";
 import { WithTooltip } from "$app/components/WithTooltip";
-import { PageHeader } from "$app/components/ui/PageHeader";
 
 import placeholder from "$assets/images/placeholders/customers.png";
 
@@ -245,9 +245,9 @@ const CustomersPage = ({
   const timeZoneAbbreviation = format(new Date(), "z", { timeZone: currentSeller.timeZone.name });
 
   return (
-    <main>
-      <PageHeader 
-        title="Sales" 
+    <main className="h-full">
+      <PageHeader
+        title="Sales"
         actions={
           <div className="actions">
             <Popover
@@ -399,33 +399,33 @@ const CustomersPage = ({
                 </WithTooltip>
               }
             >
-            <div className="paragraphs">
-              <h3>Download sales as CSV</h3>
-              <div>
-                {exportNames
-                  ? `This will download sales of '${exportNames}' as a CSV, with each purchase on its own row.`
-                  : "This will download a CSV with each purchase on its own row."}
-              </div>
-              <DateRangePicker from={from} to={to} setFrom={setFrom} setTo={setTo} />
-              <NavigationButton
-                color="primary"
-                href={Routes.export_purchases_path({
-                  format: "csv",
-                  start_time: lightFormat(from, "yyyy-MM-dd"),
-                  end_time: lightFormat(to, "yyyy-MM-dd"),
-                  product_ids: includedProductIds,
-                  variant_ids: includedVariantIds,
-                })}
-              >
-                Download
-              </NavigationButton>
-              {count > 2000 && (
-                <div className="text-gray-600 mt-2 text-sm">
-                  Exports over 2,000 rows will be processed in the background and emailed to you.
+              <div className="paragraphs">
+                <h3>Download sales as CSV</h3>
+                <div>
+                  {exportNames
+                    ? `This will download sales of '${exportNames}' as a CSV, with each purchase on its own row.`
+                    : "This will download a CSV with each purchase on its own row."}
                 </div>
-              )}
-            </div>
-          </Popover>
+                <DateRangePicker from={from} to={to} setFrom={setFrom} setTo={setTo} />
+                <NavigationButton
+                  color="primary"
+                  href={Routes.export_purchases_path({
+                    format: "csv",
+                    start_time: lightFormat(from, "yyyy-MM-dd"),
+                    end_time: lightFormat(to, "yyyy-MM-dd"),
+                    product_ids: includedProductIds,
+                    variant_ids: includedVariantIds,
+                  })}
+                >
+                  Download
+                </NavigationButton>
+                {count > 2000 && (
+                  <div className="text-gray-600 mt-2 text-sm">
+                    Exports over 2,000 rows will be processed in the background and emailed to you.
+                  </div>
+                )}
+              </div>
+            </Popover>
           </div>
         }
       />

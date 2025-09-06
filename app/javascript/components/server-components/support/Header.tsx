@@ -6,8 +6,8 @@ import { register } from "$app/utils/serverComponentUtil";
 
 import { Button } from "$app/components/Button";
 import { UnreadTicketsBadge } from "$app/components/support/UnreadTicketsBadge";
-import { useOriginalLocation } from "$app/components/useOriginalLocation";
 import { Tabs, Tab } from "$app/components/ui/Tabs";
+import { useOriginalLocation } from "$app/components/useOriginalLocation";
 
 export function SupportHeader({
   onOpenNewTicket,
