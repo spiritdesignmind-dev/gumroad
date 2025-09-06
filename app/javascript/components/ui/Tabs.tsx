@@ -1,8 +1,8 @@
 import cx from "classnames";
 import * as React from "react";
 
-export const Tabs = ({ children }: { children: React.ReactNode }) => (
-  <div role="tablist" className="flex gap-3">
+export const Tabs = ({ children, ...props }: { children: React.ReactNode } & React.HTMLProps<HTMLDivElement>) => (
+  <div role="tablist" className="flex gap-3" {...props}>
     {children}
   </div>
 );

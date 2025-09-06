@@ -19,6 +19,7 @@ import { ProfileProps, TabWithId, useTabs } from "$app/components/server-compone
 import PlainTextStarterKit from "$app/components/TiptapExtensions/PlainTextStarterKit";
 import { useRefToLatest } from "$app/components/useRefToLatest";
 import { WithTooltip } from "$app/components/WithTooltip";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 import {
   AddSectionButton,
@@ -226,12 +227,11 @@ export const EditProfile = (props: Props) => {
             <AutoLink text={props.bio} />
           </h1>
         ) : null}
-        <div role="tablist" aria-label="Profile Tabs">
+        <Tabs aria-label="Profile Tabs">
           {tabs.map((tab) => (
-            <div
-              role="tab"
+            <Tab
               key={tab.id}
-              aria-selected={tab === selectedTab}
+              isSelected={tab === selectedTab}
               onClick={() => {
                 if (imageUploadSettings.isUploading) {
                   showAlert("Please wait for all images to finish uploading before switching tabs.", "warning");
@@ -241,9 +241,9 @@ export const EditProfile = (props: Props) => {
               }}
             >
               {tab.name}
-            </div>
+            </Tab>
           ))}
-        </div>
+        </Tabs>
       </header>
       <div
         style={{

@@ -104,14 +104,14 @@ export const AffiliatesNavigation = () => {
   const { pathname } = useLocation();
 
   return (
-    <div role="tablist">
-      <Link to="/affiliates" role="tab" aria-selected={pathname === "/affiliates"}>
+    <Tabs>
+      <Tab href="/affiliates" isSelected={pathname === "/affiliates"}>
         Affiliates
-      </Link>
-      <Link to="/affiliates/onboarding" role="tab" aria-selected={pathname === "/affiliates/onboarding"}>
+      </Tab>
+      <Tab href="/affiliates/onboarding" isSelected={pathname === "/affiliates/onboarding"}>
         Affiliate Signup Form
-      </Link>
-    </div>
+      </Tab>
+    </Tabs>
   );
 };
 

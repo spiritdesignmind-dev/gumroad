@@ -1,8 +1,7 @@
-import cx from "classnames";
 import * as React from "react";
 
-import { Button } from "../Button";
 import { Icon } from "../Icons";
+import { Tabs as UITabs, Tab } from "$app/components/ui/Tabs";
 
 export type Tab = "overlay" | "embed";
 
@@ -17,18 +16,16 @@ export const Tabs = ({
   overlayTabpanelUID?: string;
   embedTabpanelUID?: string;
 }) => {
-  const selectTab = (evt: React.MouseEvent<HTMLButtonElement>, tab: Tab) => {
+  const selectTab = (evt: React.MouseEvent<HTMLAnchorElement>, tab: Tab) => {
     evt.preventDefault();
     setTab(tab);
   };
 
   return (
-    <div className="tab-buttons" role="tablist">
-      <Button
+    <UITabs>
+      <Tab
         onClick={(evt) => selectTab(evt, "overlay")}
-        className={cx(tab === "overlay" ? "selected" : null)}
-        role="tab"
-        aria-selected={tab === "overlay"}
+        isSelected={tab === "overlay"}
         aria-controls={overlayTabpanelUID}
       >
         <Icon name="stickies" />
@@ -36,12 +33,10 @@ export const Tabs = ({
           <h4 className="tab-title">Modal Overlay</h4>
           <small>Pop up product information with a familiar and trusted buying experience.</small>
         </div>
-      </Button>
-      <Button
+      </Tab>
+      <Tab
         onClick={(evt) => selectTab(evt, "embed")}
-        className={cx(tab === "embed" ? "selected" : null)}
-        role="tab"
-        aria-selected={tab === "embed"}
+        isSelected={tab === "embed"}
         aria-controls={embedTabpanelUID}
       >
         <Icon name="code-square" />
@@ -49,7 +44,7 @@ export const Tabs = ({
           <h4 className="tab-title">Embed</h4>
           <small>Embed on your website, blog posts & more.</small>
         </div>
-      </Button>
-    </div>
+      </Tab>
+    </UITabs>
   );
 };

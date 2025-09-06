@@ -1,6 +1,6 @@
 import cx from "classnames";
 import * as React from "react";
-import { Link, useMatches, useNavigate } from "react-router-dom";
+import { useMatches, useNavigate } from "react-router-dom";
 
 import { saveProduct } from "$app/data/product_edit";
 import { setProductPublished } from "$app/data/publish_product";
@@ -19,6 +19,7 @@ import { newEmailPath } from "$app/components/server-components/EmailsPage";
 import { SubtitleFile } from "$app/components/SubtitleList/Row";
 import { useRefToLatest } from "$app/components/useRefToLatest";
 import { WithTooltip } from "$app/components/WithTooltip";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 import { FileEntry, useProductEditContext } from "./state";
 
@@ -255,19 +256,18 @@ export const Layout = ({
             </>
           )}
         </div>
-        <div role="tablist" style={{ gridColumn: 1 }}>
-          <Link to={rootPath} role="tab" aria-selected={tab === "product"} onClick={onTabClick}>
+        <Tabs style={{ gridColumn: 1 }}>
+          <Tab href={rootPath} isSelected={tab === "product"} onClick={onTabClick}>
             Product
-          </Link>
+          </Tab>
           {!isCoffee ? (
-            <Link to={`${rootPath}/content`} role="tab" aria-selected={tab === "content"} onClick={onTabClick}>
+            <Tab href={`${rootPath}/content`} isSelected={tab === "content"} onClick={onTabClick}>
               Content
-            </Link>
+            </Tab>
           ) : null}
-          <Link
-            to={`${rootPath}/share`}
-            role="tab"
-            aria-selected={tab === "share"}
+          <Tab
+            href={`${rootPath}/share`}
+            isSelected={tab === "share"}
             onClick={(evt) => {
               onTabClick(evt, () => {
                 if (!product.is_published) {
@@ -281,8 +281,8 @@ export const Layout = ({
             }}
           >
             Share
-          </Link>
-        </div>
+          </Tab>
+        </Tabs>
         {headerActions}
       </header>
       {children}

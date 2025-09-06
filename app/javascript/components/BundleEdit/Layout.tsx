@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link, useMatches, useNavigate } from "react-router-dom";
+import { useMatches, useNavigate } from "react-router-dom";
 
 import { saveBundle } from "$app/data/bundle";
 import { setProductPublished } from "$app/data/publish_product";
@@ -15,6 +15,7 @@ import { Icon } from "$app/components/Icons";
 import { Preview } from "$app/components/Preview";
 import { showAlert } from "$app/components/server-components/Alert";
 import { WithTooltip } from "$app/components/WithTooltip";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 export const useProductUrl = (params = {}) => {
   const { bundle, uniquePermalink } = useBundleEditContext();
@@ -139,17 +140,16 @@ export const Layout = ({
             </>
           )}
         </div>
-        <div role="tablist">
-          <Link to={`/bundles/${id}`} role="tab" aria-selected={tab === "product"} onClick={onTabClick}>
+        <Tabs>
+          <Tab href={`/bundles/${id}`} isSelected={tab === "product"} onClick={onTabClick}>
             Product
-          </Link>
-          <Link to={`/bundles/${id}/content`} role="tab" aria-selected={tab === "content"} onClick={onTabClick}>
+          </Tab>
+          <Tab href={`/bundles/${id}/content`} isSelected={tab === "content"} onClick={onTabClick}>
             Content
-          </Link>
-          <Link
-            to={`/bundles/${id}/share`}
-            role="tab"
-            aria-selected={tab === "share"}
+          </Tab>
+          <Tab
+            href={`/bundles/${id}/share`}
+            isSelected={tab === "share"}
             onClick={(evt) => {
               onTabClick(evt, () => {
                 if (!bundle.is_published) {
@@ -163,8 +163,8 @@ export const Layout = ({
             }}
           >
             Share
-          </Link>
-        </div>
+          </Tab>
+        </Tabs>
       </header>
       <main className="squished">{children}</main>
       <aside aria-label="Preview">

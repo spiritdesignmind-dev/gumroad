@@ -3,7 +3,6 @@ import {
   RouterProvider,
   createBrowserRouter,
   json,
-  Link,
   RouteObject,
   useLocation,
   useRouteError,
@@ -22,6 +21,7 @@ import WorkflowEmails from "$app/components/server-components/WorkflowsPage/Work
 import WorkflowForm, { WorkflowTrigger } from "$app/components/server-components/WorkflowsPage/WorkflowForm";
 import WorkflowList from "$app/components/server-components/WorkflowsPage/WorkflowList";
 import { Toggle } from "$app/components/Toggle";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 type LayoutProps = {
   title: string;
@@ -123,22 +123,20 @@ export const EditPageNavigation = (props: { workflowExternalId: string }) => {
   const { pathname } = useLocation();
 
   return (
-    <div role="tablist">
-      <Link
-        to={`/workflows/${props.workflowExternalId}/edit`}
-        role="tab"
-        aria-selected={pathname === `/workflows/${props.workflowExternalId}/edit`}
+    <Tabs>
+      <Tab
+        href={`/workflows/${props.workflowExternalId}/edit`}
+        isSelected={pathname === `/workflows/${props.workflowExternalId}/edit`}
       >
         Details
-      </Link>
-      <Link
-        to={`/workflows/${props.workflowExternalId}/emails`}
-        role="tab"
-        aria-selected={pathname === `/workflows/${props.workflowExternalId}/emails`}
+      </Tab>
+      <Tab
+        href={`/workflows/${props.workflowExternalId}/emails`}
+        isSelected={pathname === `/workflows/${props.workflowExternalId}/emails`}
       >
         Emails
-      </Link>
-    </div>
+      </Tab>
+    </Tabs>
   );
 };
 
