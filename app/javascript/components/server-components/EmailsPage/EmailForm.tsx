@@ -43,11 +43,11 @@ import { showAlert } from "$app/components/server-components/Alert";
 import { editEmailPath, emailTabPath, newEmailPath } from "$app/components/server-components/EmailsPage";
 import { TagInput } from "$app/components/TagInput";
 import { UpsellCard } from "$app/components/TiptapExtensions/UpsellCard";
+import { PageHeader } from "$app/components/ui/PageHeader";
 import { useConfigureEvaporate } from "$app/components/useConfigureEvaporate";
 import { useDebouncedCallback } from "$app/components/useDebouncedCallback";
 import { useRunOnce } from "$app/components/useRunOnce";
 import { WithTooltip } from "$app/components/WithTooltip";
-import { PageHeader } from "$app/components/ui/PageHeader";
 
 type ProductOrVariantOption = {
   id: string;
@@ -628,7 +628,7 @@ export const EmailForm = () => {
 
   return (
     <main>
-      <PageHeader 
+      <PageHeader
         title={installment?.external_id ? "Edit email" : "New email"}
         actions={
           <div className="actions">

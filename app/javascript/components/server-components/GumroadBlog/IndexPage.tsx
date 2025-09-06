@@ -4,9 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createCast } from "ts-safe-cast";
 
 import { register } from "$app/utils/serverComponentUtil";
-import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 import { formatPostDate } from "$app/components/server-components/Profile/PostPage";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 import placeholderFeatureImage from "../../../../assets/images/blog/post-placeholder.jpg";
 
@@ -184,7 +184,6 @@ const PostsGrid = ({ posts }: { posts: Post[] }) => (
   </section>
 );
 
-
 const TagSelector = ({
   postsByTags,
   allPostsCount,
@@ -215,7 +214,7 @@ const TagSelector = ({
     <div className="mb-12">
       <Tabs>
         <Tab isSelected={isAllPostsActive} onClick={selectAll}>
-          All Posts {isAllPostsActive && <span className="ml-1.5 text-base opacity-85">({allPostsCount})</span>}
+          All Posts {isAllPostsActive ? <span className="ml-1.5 text-base opacity-85">({allPostsCount})</span> : null}
         </Tab>
         {tags.map((tag) => {
           const isActive = activeTab === tag;
@@ -223,7 +222,7 @@ const TagSelector = ({
 
           return (
             <Tab key={tag} isSelected={isActive} onClick={() => selectTag(tag)}>
-              {tag} {isActive && <span className="ml-1.5 text-base opacity-85">({count})</span>}
+              {tag} {isActive ? <span className="ml-1.5 text-base opacity-85">({count})</span> : null}
             </Tab>
           );
         })}

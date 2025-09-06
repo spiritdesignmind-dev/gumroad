@@ -17,9 +17,9 @@ import { ImageUploadSettingsContext } from "$app/components/RichTextEditor";
 import { showAlert } from "$app/components/server-components/Alert";
 import { ProfileProps, TabWithId, useTabs } from "$app/components/server-components/Profile";
 import PlainTextStarterKit from "$app/components/TiptapExtensions/PlainTextStarterKit";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 import { useRefToLatest } from "$app/components/useRefToLatest";
 import { WithTooltip } from "$app/components/WithTooltip";
-import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 import {
   AddSectionButton,

@@ -55,12 +55,12 @@ import { MoveNode } from "$app/components/TiptapExtensions/MoveNode";
 import { Posts, PostsProvider } from "$app/components/TiptapExtensions/Posts";
 import { ShortAnswer } from "$app/components/TiptapExtensions/ShortAnswer";
 import { UpsellCard } from "$app/components/TiptapExtensions/UpsellCard";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 import { UpsellSelectModal, Product, ProductOption } from "$app/components/UpsellSelectModal";
 import { useConfigureEvaporate } from "$app/components/useConfigureEvaporate";
 import { useIsAboveBreakpoint } from "$app/components/useIsAboveBreakpoint";
 import { useRefToLatest } from "$app/components/useRefToLatest";
 import { WithTooltip } from "$app/components/WithTooltip";
-import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 import { FileEmbed, FileEmbedConfig, getDownloadUrl } from "./FileEmbed";
 import { Page, PageTab, titleWithFallback } from "./PageTab";
@@ -596,7 +596,7 @@ const ContentTabContent = ({ selectedVariantId }: { selectedVariantId: string | 
                 <Modal open={showEmbedModal} onClose={() => setShowEmbedModal(false)} title="Embed media">
                   <p>Paste a video link or upload images or videos.</p>
                   <Tabs>
-                    <Tab isSelected={true} aria-controls={`${uid}-embed-tab`}>
+                    <Tab isSelected aria-controls={`${uid}-embed-tab`}>
                       <Icon name="link" />
                       <h4>Embed link</h4>
                     </Tab>

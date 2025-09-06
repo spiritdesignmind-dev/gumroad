@@ -54,12 +54,12 @@ import { useLoggedInUser } from "$app/components/LoggedInUser";
 import { PriceInput } from "$app/components/PriceInput";
 import { Progress } from "$app/components/Progress";
 import { showAlert } from "$app/components/server-components/Alert";
+import { Tabs } from "$app/components/ui/Tabs";
 import { useIsDarkTheme } from "$app/components/useIsDarkTheme";
 import { useOnChangeSync } from "$app/components/useOnChange";
 import { RecaptchaCancelledError, useRecaptcha } from "$app/components/useRecaptcha";
 import { useRefToLatest } from "$app/components/useRefToLatest";
 import { useRunOnce } from "$app/components/useRunOnce";
-import { Tabs } from "$app/components/ui/Tabs";
 
 import { Product } from "./cartState";
 

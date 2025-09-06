@@ -32,12 +32,12 @@ import { PriceInput } from "$app/components/PriceInput";
 import { Select } from "$app/components/Select";
 import { showAlert } from "$app/components/server-components/Alert";
 import { TypeSafeOptionSelect } from "$app/components/TypeSafeOptionSelect";
+import { PageHeader } from "$app/components/ui/PageHeader";
 import { useDebouncedCallback } from "$app/components/useDebouncedCallback";
 import { useGlobalEventListener } from "$app/components/useGlobalEventListener";
 import { useOriginalLocation } from "$app/components/useOriginalLocation";
 import { useUserAgentInfo } from "$app/components/UserAgent";
 import { useSortingTableDriver, Sort } from "$app/components/useSortingTableDriver";
-import { PageHeader } from "$app/components/ui/PageHeader";
 
 import placeholder from "$assets/images/placeholders/discounts.png";
 
@@ -807,8 +807,8 @@ const Form = ({
 
   return (
     <main>
-      <PageHeader 
-        title={title} 
+      <PageHeader
+        title={title}
         actions={
           <div className="actions">
             <Button onClick={cancel} disabled={isLoading}>

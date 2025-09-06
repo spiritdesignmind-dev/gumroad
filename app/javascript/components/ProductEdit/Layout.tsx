@@ -17,9 +17,9 @@ import { useImageUploadSettings } from "$app/components/RichTextEditor";
 import { showAlert } from "$app/components/server-components/Alert";
 import { newEmailPath } from "$app/components/server-components/EmailsPage";
 import { SubtitleFile } from "$app/components/SubtitleList/Row";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 import { useRefToLatest } from "$app/components/useRefToLatest";
 import { WithTooltip } from "$app/components/WithTooltip";
-import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 import { FileEntry, useProductEditContext } from "./state";
 

@@ -1,8 +1,8 @@
 import * as React from "react";
 
-import { useOnScrollToBottom } from "$app/components/useOnScrollToBottom";
 import { PageHeader } from "$app/components/ui/PageHeader";
 import { Tabs, Tab } from "$app/components/ui/Tabs";
+import { useOnScrollToBottom } from "$app/components/useOnScrollToBottom";
 
 export const Layout = ({
   selectedTab,
@@ -32,10 +32,7 @@ export const Layout = ({
             {followingWishlistsEnabled ? "Saved" : "Wishlists"}
           </Tab>
           {followingWishlistsEnabled ? (
-            <Tab
-              href={Routes.wishlists_following_index_path()}
-              isSelected={selectedTab === "following_wishlists"}
-            >
+            <Tab href={Routes.wishlists_following_index_path()} isSelected={selectedTab === "following_wishlists"}>
               Following
             </Tab>
           ) : null}

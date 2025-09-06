@@ -14,10 +14,10 @@ import { Popover } from "$app/components/Popover";
 import { Progress } from "$app/components/Progress";
 import { showAlert } from "$app/components/server-components/Alert";
 import { ExportSubscribersPopover } from "$app/components/server-components/FollowersPage/ExportSubscribersPopover";
-import { useUserAgentInfo } from "$app/components/UserAgent";
-import { WithTooltip } from "$app/components/WithTooltip";
 import { PageHeader } from "$app/components/ui/PageHeader";
 import { Tabs, Tab } from "$app/components/ui/Tabs";
+import { useUserAgentInfo } from "$app/components/UserAgent";
+import { WithTooltip } from "$app/components/WithTooltip";
 
 import placeholder from "$assets/images/placeholders/followers.png";
 
@@ -49,7 +49,7 @@ const Layout = ({
               </Tab>
             </>
           ) : null}
-          <Tab href={Routes.followers_path()} isSelected={true}>
+          <Tab href={Routes.followers_path()} isSelected>
             Subscribers
           </Tab>
         </Tabs>

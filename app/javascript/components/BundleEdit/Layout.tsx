@@ -14,8 +14,8 @@ import { useDomains } from "$app/components/DomainSettings";
 import { Icon } from "$app/components/Icons";
 import { Preview } from "$app/components/Preview";
 import { showAlert } from "$app/components/server-components/Alert";
-import { WithTooltip } from "$app/components/WithTooltip";
 import { Tabs, Tab } from "$app/components/ui/Tabs";
+import { WithTooltip } from "$app/components/WithTooltip";
 
 export const useProductUrl = (params = {}) => {
   const { bundle, uniquePermalink } = useBundleEditContext();

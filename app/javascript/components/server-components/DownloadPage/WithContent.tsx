@@ -27,12 +27,12 @@ import { FileEmbed } from "$app/components/ProductEdit/ContentTab/FileEmbed";
 import { showAlert } from "$app/components/server-components/Alert";
 import { LicenseKey } from "$app/components/TiptapExtensions/LicenseKey";
 import { PostsProvider } from "$app/components/TiptapExtensions/Posts";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 import { useAddThirdPartyAnalytics } from "$app/components/useAddThirdPartyAnalytics";
 import { useIsAboveBreakpoint } from "$app/components/useIsAboveBreakpoint";
 import { useOriginalLocation } from "$app/components/useOriginalLocation";
 import { useRunOnce } from "$app/components/useRunOnce";
 import { WithTooltip } from "$app/components/WithTooltip";
-import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 import { Layout, LayoutProps } from "./Layout";
 
@@ -282,11 +282,7 @@ const WithContent = ({
         showPageList && isDesktop ? (
           <Tabs className="pagelist" aria-label="Table of Contents">
             {pages.map((page, index) => (
-              <Tab
-                key={page.page_id}
-                isSelected={index === activePageIndex}
-                onClick={() => setActivePageIndex(index)}
-              >
+              <Tab key={page.page_id} isSelected={index === activePageIndex} onClick={() => setActivePageIndex(index)}>
                 <Icon
                   name={pageIcons[index] ?? "file-text"}
                   aria-label={pageIcons[index] ? PAGE_ICON_LABEL[pageIcons[index]] : "file-text"}

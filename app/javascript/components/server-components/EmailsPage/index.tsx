@@ -26,9 +26,9 @@ import { DraftsTab } from "$app/components/server-components/EmailsPage/DraftsTa
 import { EmailForm } from "$app/components/server-components/EmailsPage/EmailForm";
 import { PublishedTab } from "$app/components/server-components/EmailsPage/PublishedTab";
 import { ScheduledTab } from "$app/components/server-components/EmailsPage/ScheduledTab";
-import { WithTooltip } from "$app/components/WithTooltip";
 import { PageHeader } from "$app/components/ui/PageHeader";
 import { Tabs, Tab } from "$app/components/ui/Tabs";
+import { WithTooltip } from "$app/components/WithTooltip";
 
 const TABS = ["published", "scheduled", "drafts", "subscribers"] as const;
 
@@ -52,8 +52,8 @@ export const Layout = ({
 
   return (
     <main>
-      <PageHeader 
-        title="Emails" 
+      <PageHeader
+        title="Emails"
         actions={
           <div className="actions">
             <Popover

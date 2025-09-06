@@ -52,12 +52,12 @@ import { Pagination } from "$app/components/Pagination";
 import { Popover } from "$app/components/Popover";
 import { Progress } from "$app/components/Progress";
 import { showAlert } from "$app/components/server-components/Alert";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 import { useDebouncedCallback } from "$app/components/useDebouncedCallback";
 import { useLocalPagination } from "$app/components/useLocalPagination";
 import { useUserAgentInfo } from "$app/components/UserAgent";
 import { Sort, useClientSortingTableDriver, useSortingTableDriver } from "$app/components/useSortingTableDriver";
 import { WithTooltip } from "$app/components/WithTooltip";
-import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 import placeholder from "$assets/images/placeholders/affiliated.png";
 

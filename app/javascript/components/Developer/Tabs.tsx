@@ -1,7 +1,8 @@
 import * as React from "react";
 
-import { Icon } from "../Icons";
 import { Tabs as UITabs, Tab } from "$app/components/ui/Tabs";
+
+import { Icon } from "../Icons";
 
 export type Tab = "overlay" | "embed";
 
@@ -34,11 +35,7 @@ export const Tabs = ({
           <small>Pop up product information with a familiar and trusted buying experience.</small>
         </div>
       </Tab>
-      <Tab
-        onClick={(evt) => selectTab(evt, "embed")}
-        isSelected={tab === "embed"}
-        aria-controls={embedTabpanelUID}
-      >
+      <Tab onClick={(evt) => selectTab(evt, "embed")} isSelected={tab === "embed"} aria-controls={embedTabpanelUID}>
         <Icon name="code-square" />
         <div>
           <h4 className="tab-title">Embed</h4>
