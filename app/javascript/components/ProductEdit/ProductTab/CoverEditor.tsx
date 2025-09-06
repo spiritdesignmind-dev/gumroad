@@ -238,10 +238,9 @@ const CoverUploader = ({
 };
 
 const CoversTabList = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>((props, ref) => (
-  <div
+  <Tabs
     ref={ref}
-    role="tablist"
-    className="tab-buttons scrollable"
+    className="scrollable"
     style={
       /*
         `overflow-y: visible` would be interpreted as `overflow-y: auto` since `overflow-x` is `auto` on this element
@@ -249,9 +248,10 @@ const CoversTabList = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivEl
       */
       { paddingTop: "calc(var(--big-icon-size) / 2)", marginTop: "calc(var(--big-icon-size) / -2)" }
     }
+    {...props}
   >
     {props.children}
-  </div>
+  </Tabs>
 ));
 CoversTabList.displayName = "CoversTabList";
 

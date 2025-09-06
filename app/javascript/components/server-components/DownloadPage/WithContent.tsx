@@ -32,6 +32,7 @@ import { useIsAboveBreakpoint } from "$app/components/useIsAboveBreakpoint";
 import { useOriginalLocation } from "$app/components/useOriginalLocation";
 import { useRunOnce } from "$app/components/useRunOnce";
 import { WithTooltip } from "$app/components/WithTooltip";
+import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 import { Layout, LayoutProps } from "./Layout";
 
@@ -279,12 +280,11 @@ const WithContent = ({
       }
       pageList={
         showPageList && isDesktop ? (
-          <div role="tablist" className="pagelist" aria-label="Table of Contents">
+          <Tabs className="pagelist" aria-label="Table of Contents">
             {pages.map((page, index) => (
-              <div
+              <Tab
                 key={page.page_id}
-                role="tab"
-                aria-selected={index === activePageIndex}
+                isSelected={index === activePageIndex}
                 onClick={() => setActivePageIndex(index)}
               >
                 <Icon
@@ -292,9 +292,9 @@ const WithContent = ({
                   aria-label={pageIcons[index] ? PAGE_ICON_LABEL[pageIcons[index]] : "file-text"}
                 />
                 <span className="content">{page.title ?? "Untitled"}</span>
-              </div>
+              </Tab>
             ))}
-          </div>
+          </Tabs>
         ) : null
       }
     >

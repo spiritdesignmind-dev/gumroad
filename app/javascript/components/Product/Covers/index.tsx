@@ -79,7 +79,9 @@ export const Covers = ({
                 e.preventDefault();
                 setActiveCoverId(cover.id);
               }}
-            />
+            >
+              {/* Empty tab for cover selection */}
+            </Tab>
           ))}
         </Tabs>
       ) : null}

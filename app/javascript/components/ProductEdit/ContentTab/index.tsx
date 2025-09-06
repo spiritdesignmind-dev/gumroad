@@ -595,31 +595,33 @@ const ContentTabContent = ({ selectedVariantId }: { selectedVariantId: string | 
 
                 <Modal open={showEmbedModal} onClose={() => setShowEmbedModal(false)} title="Embed media">
                   <p>Paste a video link or upload images or videos.</p>
-                  <div role="tablist" className="tab-buttons small">
-                    <Button role="tab" aria-controls={`${uid}-embed-tab`} aria-selected>
+                  <Tabs>
+                    <Tab isSelected={true} aria-controls={`${uid}-embed-tab`}>
                       <Icon name="link" />
                       <h4>Embed link</h4>
-                    </Button>
-                    <label className="button" role="tab">
-                      <input
-                        type="file"
-                        accept="image/*,video/*"
-                        multiple
-                        onChange={(e) => {
-                          if (!e.target.files) return;
-                          const [images, nonImages] = partition([...e.target.files], (file) =>
-                            file.type.startsWith("image"),
-                          );
-                          uploadImages({ view: editor.view, files: images, imageSettings });
-                          uploadFiles(nonImages);
-                          e.target.value = "";
-                          setShowEmbedModal(false);
-                        }}
-                      />
-                      <Icon name="upload-fill" />
-                      <h4>Upload</h4>
-                    </label>
-                  </div>
+                    </Tab>
+                    <Tab isSelected={false}>
+                      <label className="button">
+                        <input
+                          type="file"
+                          accept="image/*,video/*"
+                          multiple
+                          onChange={(e) => {
+                            if (!e.target.files) return;
+                            const [images, nonImages] = partition([...e.target.files], (file) =>
+                              file.type.startsWith("image"),
+                            );
+                            uploadImages({ view: editor.view, files: images, imageSettings });
+                            uploadFiles(nonImages);
+                            e.target.value = "";
+                            setShowEmbedModal(false);
+                          }}
+                        />
+                        <Icon name="upload-fill" />
+                        <h4>Upload</h4>
+                      </label>
+                    </Tab>
+                  </Tabs>
                   <div id={`${uid}-embed-tab`}>
                     <EmbedMediaForm
                       type="embed"
