@@ -52,6 +52,7 @@ import { Pagination } from "$app/components/Pagination";
 import { Popover } from "$app/components/Popover";
 import { Progress } from "$app/components/Progress";
 import { showAlert } from "$app/components/server-components/Alert";
+import { PageHeader } from "$app/components/ui/PageHeader";
 import { Tabs, Tab } from "$app/components/ui/Tabs";
 import { useDebouncedCallback } from "$app/components/useDebouncedCallback";
 import { useLocalPagination } from "$app/components/useLocalPagination";
@@ -93,11 +94,9 @@ const Header = ({
   actions?: React.ReactNode;
   navigation?: React.ReactNode;
 }) => (
-  <header className={cx({ "sticky-top": sticky })}>
-    <h1>{title}</h1>
-    {actions ? <div className="actions">{actions}</div> : null}
+  <PageHeader className={cx({ "sticky-top": sticky })} title={title} actions={actions}>
     {navigation ?? null}
-  </header>
+  </PageHeader>
 );
 
 export const AffiliatesNavigation = () => {
@@ -761,7 +760,7 @@ const Form = ({ title, headerLabel, submitLabel }: FormProps) => {
       hasStickyHeader
     >
       <form>
-        <section>
+        <section className="space-y-4 !p-8">
           <header dangerouslySetInnerHTML={{ __html: headerLabel }} />
           <fieldset className={cx({ danger: errors.has("email") })}>
             <legend>

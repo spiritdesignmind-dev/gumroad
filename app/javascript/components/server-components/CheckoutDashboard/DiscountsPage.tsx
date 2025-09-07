@@ -320,7 +320,7 @@ const DiscountsPage = ({
         </>
       }
     >
-      <section className="paragraphs">
+      <section className="space-y-4 p-8">
         {offerCodes.length > 0 ? (
           <>
             <table aria-live="polite" aria-busy={isLoading}>

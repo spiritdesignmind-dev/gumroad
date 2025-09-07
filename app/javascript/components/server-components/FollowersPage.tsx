@@ -168,7 +168,7 @@ export const FollowersPage = ({ followers: initialFollowers, per_page, total }: 
         </>
       }
     >
-      <div>
+      <div className="space-y-4 p-8">
         {loading ? (
           <Progress width="5rem" />
         ) : followers.length > 0 ? (

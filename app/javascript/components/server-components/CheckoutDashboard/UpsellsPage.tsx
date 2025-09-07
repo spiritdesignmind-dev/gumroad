@@ -231,7 +231,7 @@ const UpsellsPage = (props: {
         </>
       }
     >
-      <section className="paragraphs">
+      <section className="space-y-4 p-8">
         {upsells.length > 0 ? (
           <>
             <table aria-busy={isLoading} aria-label="Upsells">
@@ -627,7 +627,7 @@ const Form = ({
   useLoadCartItem(selectedProductIds.value[0] ?? null);
 
   return (
-    <div className="fixed-aside" style={{ display: "contents" }}>
+    <div className="lg:grid lg:grid-cols-[1fr_30vw]">
       <header className="sticky-top">
         <h1>{title}</h1>
         <div className="actions">

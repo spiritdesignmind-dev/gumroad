@@ -17,6 +17,7 @@ import { useImageUploadSettings } from "$app/components/RichTextEditor";
 import { showAlert } from "$app/components/server-components/Alert";
 import { newEmailPath } from "$app/components/server-components/EmailsPage";
 import { SubtitleFile } from "$app/components/SubtitleList/Row";
+import { PageHeader } from "$app/components/ui/PageHeader";
 import { Tabs, Tab } from "$app/components/ui/Tabs";
 import { useRefToLatest } from "$app/components/useRefToLatest";
 import { WithTooltip } from "$app/components/WithTooltip";
@@ -217,10 +218,11 @@ export const Layout = ({
       <NotifyAboutProductUpdatesAlert />
       {/* TODO: remove this legacy uploader stuff */}
       <form hidden data-id={uniquePermalink} id="edit-link-basic-form" />
-      <header className="sticky-top">
-        <h1>{product.name || "Untitled"}</h1>
-        <div className="actions">
-          {product.is_published ? (
+      <PageHeader
+        className="sticky-top"
+        title={product.name || "Untitled"}
+        actions={
+          product.is_published ? (
             <>
               <Button disabled={isBusy} onClick={() => void setPublished(false)}>
                 {isPublishing ? "Unpublishing..." : "Unpublish"}
@@ -254,8 +256,9 @@ export const Layout = ({
                 </Button>
               </WithTooltip>
             </>
-          )}
-        </div>
+          )
+        }
+      >
         <Tabs style={{ gridColumn: 1 }}>
           <Tab href={rootPath} isSelected={tab === "product"} onClick={onTabClick}>
             Product
@@ -284,38 +287,40 @@ export const Layout = ({
           </Tab>
         </Tabs>
         {headerActions}
-      </header>
-      {children}
-      {preview ? (
-        <aside aria-label="Preview">
-          <header>
-            <h2>Preview</h2>
-            <WithTooltip tip="Preview">
-              <NavigationButton
-                aria-label="Preview"
-                disabled={isBusy}
-                href={url}
-                onClick={(evt) => {
-                  evt.preventDefault();
-                  void save().then(() => window.open(url, "_blank"));
-                }}
-              >
-                <Icon name="arrow-diagonal-up-right" />
-              </NavigationButton>
-            </WithTooltip>
-          </header>
-          <Preview
-            scaleFactor={0.4}
-            style={{
-              border: "var(--border)",
-              backgroundColor: "rgb(var(--filled))",
-              borderRadius: "var(--border-radius-2)",
-            }}
-          >
-            {preview}
-          </Preview>
-        </aside>
-      ) : null}
+      </PageHeader>
+      <div className={preview ? "fixed-aside lg:grid lg:grid-cols-[1fr_30vw]" : ""}>
+        {children}
+        {preview ? (
+          <aside aria-label="Preview">
+            <header>
+              <h2>Preview</h2>
+              <WithTooltip tip="Preview">
+                <NavigationButton
+                  aria-label="Preview"
+                  disabled={isBusy}
+                  href={url}
+                  onClick={(evt) => {
+                    evt.preventDefault();
+                    void save().then(() => window.open(url, "_blank"));
+                  }}
+                >
+                  <Icon name="arrow-diagonal-up-right" />
+                </NavigationButton>
+              </WithTooltip>
+            </header>
+            <Preview
+              scaleFactor={0.4}
+              style={{
+                border: "var(--border)",
+                backgroundColor: "rgb(var(--filled))",
+                borderRadius: "var(--border-radius-2)",
+              }}
+            >
+              {preview}
+            </Preview>
+          </aside>
+        ) : null}
+      </div>
     </>
   );
 };

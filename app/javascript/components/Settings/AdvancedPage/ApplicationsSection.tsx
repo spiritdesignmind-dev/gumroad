@@ -78,7 +78,7 @@ const ApplicationRow = ({ application, onRemove }: { application: Application; o
 };
 
 const ApplicationsSection = (props: { applications: Application[] }) => (
-  <section>
+  <section className="space-y-4 !p-8">
     <CreateApplication />
     <ApplicationList applications={props.applications} />
   </section>

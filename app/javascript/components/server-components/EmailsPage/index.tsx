@@ -55,7 +55,7 @@ export const Layout = ({
       <PageHeader
         title="Emails"
         actions={
-          <div className="actions">
+          <>
             <Popover
               open={isSearchPopoverOpen}
               onToggle={setIsSearchPopoverOpen}
@@ -81,7 +81,7 @@ export const Layout = ({
             </Popover>
 
             <NewEmailButton />
-          </div>
+          </>
         }
       >
         <Tabs>

@@ -4,6 +4,7 @@ import * as React from "react";
 import { SettingPage as Page } from "$app/parsers/settings";
 
 import { Button } from "$app/components/Button";
+import { PageHeader } from "$app/components/ui/PageHeader";
 import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 const PAGE_TITLES = {
@@ -28,15 +29,19 @@ type Props = {
 
 export const Layout = ({ onSave, pages, currentPage, children, hasAside, canUpdate }: Props) => (
   <>
-    <header className="sticky-top">
-      <h1>Settings</h1>
-      {onSave ? (
-        <div className="actions">
-          <Button color="accent" onClick={onSave} disabled={!canUpdate}>
-            Update settings
-          </Button>
-        </div>
-      ) : null}
+    <PageHeader
+      className="sticky-top"
+      title="Settings"
+      actions={
+        onSave ? (
+          <div className="actions">
+            <Button color="accent" onClick={onSave} disabled={!canUpdate}>
+              Update settings
+            </Button>
+          </div>
+        ) : null
+      }
+    >
       <Tabs>
         {pages.map((page) => (
           <Tab key={page} href={Routes[`settings_${page}_path`]()} isSelected={currentPage === page}>
@@ -44,7 +49,7 @@ export const Layout = ({ onSave, pages, currentPage, children, hasAside, canUpda
           </Tab>
         ))}
       </Tabs>
-    </header>
+    </PageHeader>
     <main className={cx({ squished: hasAside })}>{children}</main>
   </>
 );

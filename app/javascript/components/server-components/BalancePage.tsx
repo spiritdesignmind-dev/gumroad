@@ -729,7 +729,7 @@ const BalancePage = ({
           ) : undefined
         }
       />
-      <div style={{ display: "grid", gap: "var(--spacer-7)" }}>
+      <div className="space-y-8 p-8">
         {!instant_payout ? (
           show_instant_payouts_notice ? (
             <div className="info" role="status">

@@ -21,6 +21,7 @@ import WorkflowEmails from "$app/components/server-components/WorkflowsPage/Work
 import WorkflowForm, { WorkflowTrigger } from "$app/components/server-components/WorkflowsPage/WorkflowForm";
 import WorkflowList from "$app/components/server-components/WorkflowsPage/WorkflowList";
 import { Toggle } from "$app/components/Toggle";
+import { PageHeader } from "$app/components/ui/PageHeader";
 import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 type LayoutProps = {
@@ -31,31 +32,23 @@ type LayoutProps = {
   preview?: React.ReactNode;
 };
 
-export const Layout = ({ title, actions, navigation, children, preview }: LayoutProps) => {
-  const { pathname } = useLocation();
-  const [pageLoaded, setPageLoaded] = React.useState(false);
-
-  React.useEffect(() => {
-    const bodyClassList = document.querySelector("body")?.classList;
-    if (bodyClassList) bodyClassList[preview ? "add" : "remove"]("fixed-aside");
-
-    setPageLoaded(true);
-  }, [pathname]);
-
-  if (!pageLoaded) return null;
-
-  return (
-    <>
-      <header className="sticky-top">
-        <h1>{title}</h1>
-        {actions ? <div className="actions">{actions}</div> : null}
-        {navigation ?? null}
-      </header>
+export const Layout = ({ title, actions, navigation, children, preview }: LayoutProps) => (
+  <>
+    <PageHeader className="sticky-top" title={title} actions={actions}>
+      {navigation ?? null}
+    </PageHeader>
+    {preview ? (
+      <div className="fixed-aside lg:grid lg:grid-cols-[1fr_30vw]">
+        <main>{children}</main>
+        <aside className="hidden lg:block" aria-label="Preview">
+          {preview}
+        </aside>
+      </div>
+    ) : (
       <main>{children}</main>
-      {preview ? <aside aria-label="Preview">{preview}</aside> : null}
-    </>
-  );
-};
+    )}
+  </>
+);
 
 type PublishButtonProps = {
   isPublished: boolean;

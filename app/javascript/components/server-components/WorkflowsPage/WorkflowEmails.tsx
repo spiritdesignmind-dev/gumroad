@@ -343,7 +343,7 @@ const WorkflowEmails = () => {
             <EvaporateUploaderProvider value={evaporateUploader}>
               <ImageUploadSettingsContext.Provider value={imageSettings}>
                 <FilesDispatchProvider value={filesDispatch}>
-                  <div className="paragraphs">
+                  <div className="space-y-4 p-8">
                     {emails.length === 0 ? (
                       <div className="placeholder">
                         <h2>Create emails for your workflow</h2>

@@ -631,7 +631,7 @@ export const EmailForm = () => {
       <PageHeader
         title={installment?.external_id ? "Edit email" : "New email"}
         actions={
-          <div className="actions">
+          <>
             {channel.email && channel.profile ? (
               <Popover
                 trigger={
@@ -740,10 +740,10 @@ export const EmailForm = () => {
             <Button color="accent" disabled={isBusy} onClick={() => save()}>
               Save
             </Button>
-          </div>
+          </>
         }
       />
-      <section>
+      <section className="space-y-4 p-8">
         <div className="with-sidebar">
           <div className="stack">
             <div>

@@ -249,7 +249,7 @@ const CustomersPage = ({
       <PageHeader
         title="Sales"
         actions={
-          <div className="actions">
+          <>
             <Popover
               aria-label="Search"
               onToggle={() => searchInputRef.current?.focus()}
@@ -426,10 +426,10 @@ const CustomersPage = ({
                 )}
               </div>
             </Popover>
-          </div>
+          </>
         }
       />
-      <section className="paragraphs">
+      <section className="space-y-4 p-8">
         {customers.length > 0 ? (
           <>
             <table aria-live="polite" aria-busy={isLoading}>

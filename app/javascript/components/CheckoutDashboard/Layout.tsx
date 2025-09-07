@@ -1,6 +1,7 @@
 import cx from "classnames";
 import * as React from "react";
 
+import { PageHeader } from "$app/components/ui/PageHeader";
 import { Tabs, Tab } from "$app/components/ui/Tabs";
 
 const pageNames = {
@@ -46,9 +47,7 @@ const Header = ({
   actions?: React.ReactNode;
   sticky?: boolean;
 }) => (
-  <header className={cx({ "sticky-top": sticky })}>
-    <h1>Checkout</h1>
-    {actions ? <div className="actions">{actions}</div> : null}
+  <PageHeader className={cx({ "sticky-top": sticky })} title="Checkout" actions={actions}>
     <Tabs>
       {pages.map((page) => (
         <Tab key={page} href={Routes[`checkout_${page}_path`]()} isSelected={page === currentPage}>
@@ -56,5 +55,5 @@ const Header = ({
         </Tab>
       ))}
     </Tabs>
-  </header>
+  </PageHeader>
 );

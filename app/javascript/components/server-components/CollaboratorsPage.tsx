@@ -199,7 +199,7 @@ const Collaborators = () => {
     >
       {collaborators.length > 0 ? (
         <>
-          <section className="paragraphs">
+          <section className="p-8">
             <table>
               <thead>
                 <tr>
@@ -286,7 +286,7 @@ const Collaborators = () => {
           ) : null}
         </>
       ) : (
-        <section>
+        <section className="p-8">
           <div className="placeholder">
             <figure>
               <img src={placeholder} />

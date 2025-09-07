@@ -152,6 +152,7 @@ const AnalyticsPage = ({ products: initialProducts, country_codes, state_names }
             <select
               aria-label="Aggregate by"
               onChange={(e) => setAggregateBy(e.target.value === "daily" ? "daily" : "monthly")}
+              className="w-auto"
             >
               <option value="daily">Daily</option>
               <option value="monthly">Monthly</option>
@@ -163,7 +164,7 @@ const AnalyticsPage = ({ products: initialProducts, country_codes, state_names }
       }
     >
       {hasContent ? (
-        <div style={{ display: "grid", gap: "var(--spacer-7)" }}>
+        <div className="space-y-8 p-8">
           <SalesQuickStats total={mainData?.total} />
           {mainData ? (
             <>
