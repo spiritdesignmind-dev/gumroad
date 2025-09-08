@@ -3,8 +3,6 @@
 require "spec_helper"
 
 describe "Admin::AffiliatesController Scenario", type: :system, js: true do
-  include CapybaraHelpers
-
   let(:admin) { create(:admin_user, has_risk_privilege: true) }
   let(:affiliate_user) { create(:affiliate_user) }
 
