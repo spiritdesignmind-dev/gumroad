@@ -56,11 +56,11 @@ type UpsellCardHeaderProps = {
 const UpsellCardHeader = ({ product, variant }: UpsellCardHeaderProps) => (
   <header>
     <h3>
-      {product?.name}
+      {product.name}
       {variant ? <span className="text-muted ml-2">({variant.name})</span> : null}
     </h3>
   </header>
-)
+);
 
 export const UpsellCard = TiptapNode.create({
   name: "upsellCard",
@@ -152,7 +152,7 @@ const UpsellCardNodeView = ({ node, selected, editor }: NodeViewProps) => {
 
   const variantPrice = variant ? variant.price_difference_cents : 0;
   const productPrice = product ? product.price_cents + variantPrice : 0;
-  const oldPrice = discount ? productPrice : undefined
+  const oldPrice = discount ? productPrice : undefined;
   const price = discount ? applyOfferCodeToCents(discount, productPrice) : productPrice;
 
   return (
