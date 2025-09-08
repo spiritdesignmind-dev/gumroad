@@ -104,41 +104,41 @@ describe("Purchase from a product page", type: :system, js: true) do
     visit product.long_url
     add_to_cart(product)
 
-    click_on "Pay"
+    click_on "Pay", exact_text: true
     within_fieldset "Card information" do
       within_frame { expect_focused find_field("Card number") }
     end
 
     fill_in_credit_card(expiry: nil, cvc: nil)
-    click_on "Pay"
+    click_on "Pay", exact_text: true
     within_fieldset "Card information" do
       within_frame { expect_focused find_field("MM / YY") }
     end
 
     fill_in_credit_card(cvc: nil)
-    click_on "Pay"
+    click_on "Pay", exact_text: true
     within_fieldset "Card information" do
       within_frame { expect_focused find_field("CVC") }
     end
 
     fill_in_credit_card
-    click_on "Pay"
+    click_on "Pay", exact_text: true
     expect_focused find_field("Your email address")
 
     fill_in "Your email address", with: "gumroad@example.com"
-    click_on "Pay"
+    click_on "Pay", exact_text: true
     expect_focused find_field("Full name")
 
     fill_in "Full name", with: "G McGumroadson"
-    click_on "Pay"
+    click_on "Pay", exact_text: true
     expect_focused find_field("Street address")
 
     fill_in "Street address", with: "123 Main St"
-    click_on "Pay"
+    click_on "Pay", exact_text: true
     expect_focused find_field("City")
 
     fill_in "City", with: "San Francisco"
-    click_on "Pay"
+    click_on "Pay", exact_text: true
     expect_focused find_field("ZIP code")
   end
 end
