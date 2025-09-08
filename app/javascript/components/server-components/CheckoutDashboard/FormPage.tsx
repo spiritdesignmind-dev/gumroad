@@ -109,7 +109,7 @@ const FormPage = ({
       }
       hasAside
     >
-      <div className="-mt-8 lg:grid lg:grid-cols-[1fr_30vw]">
+      <div className="fixed-aside flex-1 lg:grid lg:grid-cols-[1fr_30vw]">
         <div>
           <section className="space-y-4 p-8">
             <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

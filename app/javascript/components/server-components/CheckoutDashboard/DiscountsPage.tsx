@@ -810,7 +810,7 @@ const Form = ({
       <PageHeader
         title={title}
         actions={
-          <div className="actions">
+          <>
             <Button onClick={cancel} disabled={isLoading}>
               <Icon name="x-square" />
               Cancel
@@ -818,11 +818,11 @@ const Form = ({
             <Button color="accent" onClick={handleSubmit} disabled={isLoading}>
               {submitLabel}
             </Button>
-          </div>
+          </>
         }
       />
       <form>
-        <section>
+        <section className="!p-8">
           <header>
             <div className="paragraphs">
               <div>Create a discount code so your audience can buy your products at a reduced price.</div>

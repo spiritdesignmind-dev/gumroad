@@ -288,7 +288,7 @@ export const Layout = ({
         </Tabs>
         {headerActions}
       </PageHeader>
-      <div className={preview ? "fixed-aside lg:grid lg:grid-cols-[1fr_30vw]" : ""}>
+      <div className={preview ? "fixed-aside flex-1 lg:grid lg:grid-cols-[1fr_30vw]" : "flex-1"}>
         {children}
         {preview ? (
           <aside aria-label="Preview">

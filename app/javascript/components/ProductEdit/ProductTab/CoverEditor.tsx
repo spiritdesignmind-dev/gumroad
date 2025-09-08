@@ -50,7 +50,7 @@ export const CoverEditor = ({
   };
 
   return (
-    <section>
+    <section className="space-y-4 !p-8">
       <header>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h2>Cover</h2>
