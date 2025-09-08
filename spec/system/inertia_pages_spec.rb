@@ -53,7 +53,10 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
 
       # Wait for the async operation to complete
       expect(page).to have_content("Welcome to Gumroad", wait: 5)
-      sleep(2)
+
+      # Wait for the fetch request to complete by checking if the variable is set
+      expect(page).to have_selector("body", wait: 5)
+      expect { page.evaluate_script("window.customersCount") }.not_to raise_error
 
       customers_count = page.evaluate_script("window.customersCount")
       expect(customers_count).not_to be_nil
@@ -99,7 +102,8 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
       ")
 
       # Wait for async operation
-      sleep(2)
+      expect(page).to have_selector("body", wait: 5)
+      expect { page.evaluate_script("window.paginationData") }.not_to raise_error
 
       pagination_data = page.evaluate_script("window.paginationData")
       expect(pagination_data).not_to be_nil
@@ -118,7 +122,8 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
       ")
 
       # Wait for async operation
-      sleep(2)
+      expect(page).to have_selector("body", wait: 5)
+      expect { page.evaluate_script("window.searchResults") }.not_to raise_error
 
       search_results = page.evaluate_script("window.searchResults")
       expect(search_results).not_to be_nil
@@ -157,7 +162,8 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
       ")
 
       # Wait for async operation
-      sleep(2)
+      expect(page).to have_selector("body", wait: 5)
+      expect { page.evaluate_script("window.analyticsData") }.not_to raise_error
 
       analytics_data = page.evaluate_script("window.analyticsData")
       expect(analytics_data).not_to be_nil
@@ -185,7 +191,9 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
       ")
 
       # Wait for async operations
-      sleep(2)
+      expect(page).to have_selector("body", wait: 5)
+      expect { page.evaluate_script("window.stateData") }.not_to raise_error
+      expect { page.evaluate_script("window.referralData") }.not_to raise_error
 
       state_data = page.evaluate_script("window.stateData")
       referral_data = page.evaluate_script("window.referralData")
@@ -239,7 +247,8 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
       ")
 
       # Wait for async operation
-      sleep(2)
+      expect(page).to have_selector("body", wait: 5)
+      expect { page.evaluate_script("window.customersData") }.not_to raise_error
 
       customers_data = page.evaluate_script("window.customersData")
       expect(customers_data).not_to be_nil
@@ -258,7 +267,8 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
       ")
 
       # Wait for async operation
-      sleep(2)
+      expect(page).to have_selector("body", wait: 5)
+      expect { page.evaluate_script("window.searchResults") }.not_to raise_error
 
       search_results = page.evaluate_script("window.searchResults")
       expect(search_results).not_to be_nil
@@ -277,7 +287,8 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
       ")
 
       # Wait for async operation
-      sleep(2)
+      expect(page).to have_selector("body", wait: 5)
+      expect { page.evaluate_script("window.customerCharges") }.not_to raise_error
 
       customer_charges = page.evaluate_script("window.customerCharges")
       expect(customer_charges).not_to be_nil
@@ -323,7 +334,8 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
       ")
 
       # Wait for async operation
-      sleep(2)
+      expect(page).to have_selector("body", wait: 5)
+      expect { page.evaluate_script("window.paymentsData") }.not_to raise_error
 
       payments_data = page.evaluate_script("window.paymentsData")
       expect(payments_data).not_to be_nil
