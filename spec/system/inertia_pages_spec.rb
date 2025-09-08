@@ -165,6 +165,9 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
       expect(page).to have_selector("body", wait: 5)
       expect { page.evaluate_script("window.analyticsData") }.not_to raise_error
 
+      # Wait for fetch to complete
+      expect(page).to have_content("", wait: 10)
+
       analytics_data = page.evaluate_script("window.analyticsData")
       expect(analytics_data).not_to be_nil
     end
@@ -194,6 +197,9 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
       expect(page).to have_selector("body", wait: 5)
       expect { page.evaluate_script("window.stateData") }.not_to raise_error
       expect { page.evaluate_script("window.referralData") }.not_to raise_error
+
+      # Wait for fetch to complete
+      expect(page).to have_content("", wait: 10)
 
       state_data = page.evaluate_script("window.stateData")
       referral_data = page.evaluate_script("window.referralData")
@@ -250,6 +256,9 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
       expect(page).to have_selector("body", wait: 5)
       expect { page.evaluate_script("window.customersData") }.not_to raise_error
 
+      # Wait for fetch to complete
+      expect(page).to have_content("", wait: 10)
+
       customers_data = page.evaluate_script("window.customersData")
       expect(customers_data).not_to be_nil
     end
@@ -270,6 +279,9 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
       expect(page).to have_selector("body", wait: 5)
       expect { page.evaluate_script("window.searchResults") }.not_to raise_error
 
+      # Wait for fetch to complete
+      expect(page).to have_content("", wait: 10)
+
       search_results = page.evaluate_script("window.searchResults")
       expect(search_results).not_to be_nil
     end
@@ -289,6 +301,9 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
       # Wait for async operation
       expect(page).to have_selector("body", wait: 5)
       expect { page.evaluate_script("window.customerCharges") }.not_to raise_error
+
+      # Wait for fetch to complete
+      expect(page).to have_content("", wait: 10)
 
       customer_charges = page.evaluate_script("window.customerCharges")
       expect(customer_charges).not_to be_nil
