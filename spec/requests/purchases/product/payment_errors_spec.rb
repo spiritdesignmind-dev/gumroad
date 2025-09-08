@@ -65,15 +65,15 @@ describe("Purchase from a product page", type: :system, js: true) do
     fill_in "ZIP code", with: "94107"
 
     fill_in_credit_card(number: "", expiry: "", cvc: "")
-    click_on "Pay"
+    click_on "Pay", exact_text: true
     expect(page).to have_selector("[aria-label='Card information'][aria-invalid='true']")
 
     fill_in_credit_card(expiry: "", cvc: "")
-    click_on "Pay"
+    click_on "Pay", exact_text: true
     expect(page).to have_selector("[aria-label='Card information'][aria-invalid='true']")
 
     fill_in_credit_card(cvc: "")
-    click_on "Pay"
+    click_on "Pay", exact_text: true
     expect(page).to have_selector("[aria-label='Card information'][aria-invalid='true']")
 
     check_out(@product)
