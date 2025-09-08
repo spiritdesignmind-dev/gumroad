@@ -162,8 +162,7 @@ describe("Dispute evidence page", type: :system, js: true) do
         click_on "Upload customer communication"
       end
       wait_for_ajax
-      # For some reason, the signed_id is not passed to the server until we wait for a few seconds (wait_for_ajax is not enough)
-      sleep(3)
+      expect(page).to have_content("Submit", wait: 10)
       click_on("Submit")
 
       expect(page).to have_text("Thank you!")
