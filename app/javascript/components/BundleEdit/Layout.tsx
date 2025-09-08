@@ -14,6 +14,7 @@ import { useDomains } from "$app/components/DomainSettings";
 import { Icon } from "$app/components/Icons";
 import { Preview } from "$app/components/Preview";
 import { showAlert } from "$app/components/server-components/Alert";
+import { PageHeader } from "$app/components/ui/PageHeader";
 import { Tabs, Tab } from "$app/components/ui/Tabs";
 import { WithTooltip } from "$app/components/WithTooltip";
 
@@ -77,13 +78,22 @@ export const Layout = ({
   );
   const isUploadingFilesOrImages = isLoading || isUploadingFiles;
   const isBusy = isUploadingFilesOrImages || isSaving || isPublishing;
+  const saveButtonTooltip = isUploadingFiles
+    ? "Files are still uploading..."
+    : isUploadingFilesOrImages
+      ? "Images are still uploading..."
+      : isBusy
+        ? "Please wait..."
+        : undefined;
 
   const navigate = useNavigate();
 
   const saveButton = (
-    <Button color="primary" disabled={isBusy} onClick={asyncVoid(handleSave)}>
-      {isSaving ? "Saving changes..." : "Save changes"}
-    </Button>
+    <WithTooltip tip={saveButtonTooltip}>
+      <Button color="primary" disabled={isBusy} onClick={asyncVoid(handleSave)}>
+        {isSaving ? "Saving changes..." : "Save changes"}
+      </Button>
+    </WithTooltip>
   );
 
   const onTabClick = (e: React.MouseEvent<HTMLAnchorElement>, callback?: () => void) => {
@@ -104,16 +114,17 @@ export const Layout = ({
 
   return (
     <>
-      <header className="sticky-top">
-        <h1>{bundle.name}</h1>
-        <div className="actions">
-          {bundle.is_published ? (
+      <PageHeader
+        className="sticky-top"
+        title={bundle.name || "Untitled"}
+        actions={
+          bundle.is_published ? (
             <>
               <Button disabled={isBusy} onClick={() => void setPublished(false)}>
                 {isPublishing ? "Unpublishing..." : "Unpublish"}
               </Button>
               {saveButton}
-              <CopyToClipboard text={url}>
+              <CopyToClipboard text={url} copyTooltip="Copy product URL">
                 <Button>
                   <Icon name="link" />
                 </Button>
@@ -130,17 +141,16 @@ export const Layout = ({
           ) : (
             <>
               {saveButton}
-              <Button
-                color="accent"
-                disabled={isBusy}
-                onClick={() => void setPublished(true).then(() => navigate(`/bundles/${id}/share`))}
-              >
-                {isPublishing ? "Publishing..." : "Publish and continue"}
-              </Button>
+              <WithTooltip tip={saveButtonTooltip}>
+                <Button color="accent" disabled={isBusy} onClick={() => void setPublished(true)}>
+                  {isPublishing ? "Publishing..." : "Publish and continue"}
+                </Button>
+              </WithTooltip>
             </>
-          )}
-        </div>
-        <Tabs>
+          )
+        }
+      >
+        <Tabs style={{ gridColumn: 1 }}>
           <Tab href={`/bundles/${id}`} isSelected={tab === "product"} onClick={onTabClick}>
             Product
           </Tab>
@@ -150,7 +160,7 @@ export const Layout = ({
           <Tab
             href={`/bundles/${id}/share`}
             isSelected={tab === "share"}
-            onClick={(evt) => {
+            onClick={(evt: React.MouseEvent<HTMLAnchorElement>) => {
               onTabClick(evt, () => {
                 if (!bundle.is_published) {
                   evt.preventDefault();
@@ -165,28 +175,35 @@ export const Layout = ({
             Share
           </Tab>
         </Tabs>
-      </header>
-      <main className="squished">{children}</main>
-      <aside aria-label="Preview">
-        <header>
-          <h2>Preview</h2>
-          <WithTooltip tip="Preview">
-            <Button
-              onClick={() => void handleSave().then(() => window.open(url))}
-              disabled={isBusy}
-              aria-label="Preview"
+      </PageHeader>
+      <div className={preview ? "fixed-aside flex-1 lg:grid lg:grid-cols-[1fr_30vw]" : "flex-1"}>
+        {children}
+        {preview ? (
+          <aside aria-label="Preview">
+            <header>
+              <h2>Preview</h2>
+              <WithTooltip tip="Preview">
+                <Button
+                  onClick={() => void handleSave().then(() => window.open(url))}
+                  disabled={isBusy}
+                  aria-label="Preview"
+                >
+                  <Icon name="arrow-diagonal-up-right" />
+                </Button>
+              </WithTooltip>
+            </header>
+            <Preview
+              scaleFactor={0.4}
+              style={{
+                border: "var(--border)",
+                backgroundColor: "rgb(var(--filled))",
+              }}
             >
-              <Icon name="arrow-diagonal-up-right" />
-            </Button>
-          </WithTooltip>
-        </header>
-        <Preview
-          scaleFactor={0.4}
-          style={{ border: "var(--border)", backgroundColor: "var(--body-bg)", borderRadius: "var(--border-radius-2)" }}
-        >
-          {preview}
-        </Preview>
-      </aside>
+              {preview}
+            </Preview>
+          </aside>
+        ) : null}
+      </div>
     </>
   );
 };
