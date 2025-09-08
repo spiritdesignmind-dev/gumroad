@@ -44,19 +44,18 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
 
       # Test customers count endpoint with proper waiting
       page.execute_script("
-        window.customersCount = null;
+        window.customersCount = 0;
+        window.customersCountReady = false;
         fetch('/dashboard/customers_count')
           .then(response => response.json())
           .then(data => window.customersCount = data.value || 0)
           .catch(error => window.customersCount = 0)
+          .finally(() => window.customersCountReady = true)
       ")
 
-      # Wait for the async operation to complete
       expect(page).to have_content("Welcome to Gumroad", wait: 5)
-
-      # Wait for the fetch request to complete by checking if the variable is set
-      expect(page).to have_selector("body", wait: 5)
-      expect { page.evaluate_script("window.customersCount") }.not_to raise_error
+      expect(page).to have_content("", wait: 10)
+      expect(page.evaluate_script("window.customersCountReady")).to be true
 
       customers_count = page.evaluate_script("window.customersCount")
       expect(customers_count).not_to be_nil
@@ -94,16 +93,18 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
 
       # Test pagination API endpoint with proper waiting
       page.execute_script("
-        window.paginationData = null;
+        window.paginationData = { entries: [] };
+        window.paginationReady = false;
         fetch('/products/products_paged?page=2')
           .then(response => response.json())
           .then(data => window.paginationData = data)
           .catch(error => window.paginationData = { entries: [] })
+          .finally(() => window.paginationReady = true)
       ")
 
-      # Wait for async operation
       expect(page).to have_selector("body", wait: 5)
-      expect { page.evaluate_script("window.paginationData") }.not_to raise_error
+      expect(page).to have_content("", wait: 10)
+      expect(page.evaluate_script("window.paginationReady")).to be true
 
       pagination_data = page.evaluate_script("window.paginationData")
       expect(pagination_data).not_to be_nil
@@ -114,16 +115,18 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
 
       # Test search functionality via API with proper waiting
       page.execute_script("
-        window.searchResults = null;
+        window.searchResults = { entries: [] };
+        window.searchReady = false;
         fetch('/products/products_paged?query=Product%201')
           .then(response => response.json())
           .then(data => window.searchResults = data)
           .catch(error => window.searchResults = { entries: [] })
+          .finally(() => window.searchReady = true)
       ")
 
-      # Wait for async operation
       expect(page).to have_selector("body", wait: 5)
-      expect { page.evaluate_script("window.searchResults") }.not_to raise_error
+      expect(page).to have_content("", wait: 10)
+      expect(page.evaluate_script("window.searchReady")).to be true
 
       search_results = page.evaluate_script("window.searchResults")
       expect(search_results).not_to be_nil
@@ -154,19 +157,18 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
 
       # Test data by date endpoint with proper waiting
       page.execute_script("
-        window.analyticsData = null;
+        window.analyticsData = { revenue_data: [] };
+        window.analyticsReady = false;
         fetch('/analytics/data_by_date?start_time=#{1.week.ago.to_date}&end_time=#{Date.current}')
           .then(response => response.json())
           .then(data => window.analyticsData = data)
           .catch(error => window.analyticsData = { revenue_data: [] })
+          .finally(() => window.analyticsReady = true)
       ")
 
-      # Wait for async operation
       expect(page).to have_selector("body", wait: 5)
-      expect { page.evaluate_script("window.analyticsData") }.not_to raise_error
-
-      # Wait for fetch to complete
       expect(page).to have_content("", wait: 10)
+      expect(page.evaluate_script("window.analyticsReady")).to be true
 
       analytics_data = page.evaluate_script("window.analyticsData")
       expect(analytics_data).not_to be_nil
@@ -177,29 +179,30 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
 
       # Test data by state endpoint with proper waiting
       page.execute_script("
-        window.stateData = null;
+        window.stateData = { state_data: [] };
+        window.referralData = { referral_data: [] };
+        window.stateReady = false;
+        window.referralReady = false;
+        
         fetch('/analytics/data_by_state?start_time=#{1.week.ago.to_date}&end_time=#{Date.current}')
           .then(response => response.json())
           .then(data => window.stateData = data)
           .catch(error => window.stateData = { state_data: [] })
+          .finally(() => window.stateReady = true)
       ")
 
-      # Test referral data endpoint with proper waiting
       page.execute_script("
-        window.referralData = null;
         fetch('/analytics/referral_data?start_time=#{1.week.ago.to_date}&end_time=#{Date.current}')
           .then(response => response.json())
           .then(data => window.referralData = data)
           .catch(error => window.referralData = { referral_data: [] })
+          .finally(() => window.referralReady = true)
       ")
 
-      # Wait for async operations
       expect(page).to have_selector("body", wait: 5)
-      expect { page.evaluate_script("window.stateData") }.not_to raise_error
-      expect { page.evaluate_script("window.referralData") }.not_to raise_error
-
-      # Wait for fetch to complete
       expect(page).to have_content("", wait: 10)
+      expect(page.evaluate_script("window.stateReady")).to be true
+      expect(page.evaluate_script("window.referralReady")).to be true
 
       state_data = page.evaluate_script("window.stateData")
       referral_data = page.evaluate_script("window.referralData")
@@ -245,19 +248,18 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
 
       # Test pagination endpoint with proper waiting
       page.execute_script("
-        window.customersData = null;
+        window.customersData = { customers: [] };
+        window.customersReady = false;
         fetch('/customers/paged?page=1')
           .then(response => response.json())
           .then(data => window.customersData = data)
           .catch(error => window.customersData = { customers: [] })
+          .finally(() => window.customersReady = true)
       ")
 
-      # Wait for async operation
       expect(page).to have_selector("body", wait: 5)
-      expect { page.evaluate_script("window.customersData") }.not_to raise_error
-
-      # Wait for fetch to complete
       expect(page).to have_content("", wait: 10)
+      expect(page.evaluate_script("window.customersReady")).to be true
 
       customers_data = page.evaluate_script("window.customersData")
       expect(customers_data).not_to be_nil
@@ -268,19 +270,18 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
 
       # Test search functionality with proper waiting
       page.execute_script("
-        window.searchResults = null;
+        window.searchResults = { customers: [] };
+        window.searchReady = false;
         fetch('/customers/paged?query=customer@example.com')
           .then(response => response.json())
           .then(data => window.searchResults = data)
           .catch(error => window.searchResults = { customers: [] })
+          .finally(() => window.searchReady = true)
       ")
 
-      # Wait for async operation
       expect(page).to have_selector("body", wait: 5)
-      expect { page.evaluate_script("window.searchResults") }.not_to raise_error
-
-      # Wait for fetch to complete
       expect(page).to have_content("", wait: 10)
+      expect(page.evaluate_script("window.searchReady")).to be true
 
       search_results = page.evaluate_script("window.searchResults")
       expect(search_results).not_to be_nil
@@ -291,19 +292,18 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
 
       # Test customer charges endpoint with proper waiting
       page.execute_script("
-        window.customerCharges = null;
+        window.customerCharges = [];
+        window.chargesReady = false;
         fetch('/customers/customer_charges?purchase_id=test123&purchase_email=test@example.com')
           .then(response => response.json())
           .then(data => window.customerCharges = data)
           .catch(error => window.customerCharges = [])
+          .finally(() => window.chargesReady = true)
       ")
 
-      # Wait for async operation
       expect(page).to have_selector("body", wait: 5)
-      expect { page.evaluate_script("window.customerCharges") }.not_to raise_error
-
-      # Wait for fetch to complete
       expect(page).to have_content("", wait: 10)
+      expect(page.evaluate_script("window.chargesReady")).to be true
 
       customer_charges = page.evaluate_script("window.customerCharges")
       expect(customer_charges).not_to be_nil
@@ -341,22 +341,18 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
 
       # Test payments pagination endpoint with proper waiting
       page.execute_script("
-        window.paymentsData = null;
+        window.paymentsData = { payouts: [] };
+        window.paymentsReady = false;
         fetch('/balance/payments_paged?page=1')
           .then(response => response.json())
           .then(data => window.paymentsData = data)
           .catch(error => window.paymentsData = { payouts: [] })
+          .finally(() => window.paymentsReady = true)
       ")
 
-      # Wait for async operation
       expect(page).to have_selector("body", wait: 5)
-
-      # Wait for the fetch request to complete by polling until paymentsData is no longer null
-      expect(page).to have_content("", wait: 10) # Wait for any content to ensure page is loaded
-      expect { page.evaluate_script("window.paymentsData") }.not_to raise_error
-
-      # Wait for fetch to complete by checking if paymentsData is populated
-      expect(page).to have_content("", wait: 10) # Additional wait for fetch
+      expect(page).to have_content("", wait: 10)
+      expect(page.evaluate_script("window.paymentsReady")).to be true
 
       payments_data = page.evaluate_script("window.paymentsData")
       expect(payments_data).not_to be_nil
