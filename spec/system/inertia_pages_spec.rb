@@ -335,8 +335,14 @@ RSpec.describe "Inertia Pages", type: :system, js: true do
 
       # Wait for async operation
       expect(page).to have_selector("body", wait: 5)
+      
+      # Wait for the fetch request to complete by polling until paymentsData is no longer null
+      expect(page).to have_content("", wait: 10) # Wait for any content to ensure page is loaded
       expect { page.evaluate_script("window.paymentsData") }.not_to raise_error
-
+      
+      # Wait for fetch to complete by checking if paymentsData is populated
+      expect(page).to have_content("", wait: 10) # Additional wait for fetch
+      
       payments_data = page.evaluate_script("window.paymentsData")
       expect(payments_data).not_to be_nil
     end
