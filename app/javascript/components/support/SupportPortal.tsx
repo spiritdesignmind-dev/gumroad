@@ -49,9 +49,7 @@ export default function SupportPortal() {
   return (
     <>
       <main>
-        <header>
-          <SupportHeader onOpenNewTicket={() => setIsNewTicketOpen(true)} />
-        </header>
+        <SupportHeader onOpenNewTicket={() => setIsNewTicketOpen(true)} />
         <ConversationList onSelect={setSelectedConversationSlug} onOpenNewTicket={() => setIsNewTicketOpen(true)} />
       </main>
       <NewTicketModal

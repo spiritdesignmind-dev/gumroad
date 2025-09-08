@@ -75,7 +75,7 @@ const ArticlesIndexPage = ({ categories }: ArticlesIndexPageProps) => {
     : categories;
 
   return (
-    <div>
+    <div className="max-w-7xl">
       <input
         type="text"
         autoFocus

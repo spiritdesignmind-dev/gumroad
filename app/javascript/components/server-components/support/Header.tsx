@@ -6,6 +6,7 @@ import { register } from "$app/utils/serverComponentUtil";
 
 import { Button } from "$app/components/Button";
 import { UnreadTicketsBadge } from "$app/components/support/UnreadTicketsBadge";
+import { PageHeader } from "$app/components/ui/PageHeader";
 import { Tabs, Tab } from "$app/components/ui/Tabs";
 import { useOriginalLocation } from "$app/components/useOriginalLocation";
 
@@ -21,10 +22,10 @@ export function SupportHeader({
     pathname.startsWith(Routes.help_center_root_path()) && pathname !== Routes.help_center_root_path();
 
   return (
-    <>
-      <h1 className="text-2xl">Help Center</h1>
-      <div className="actions">
-        {isHelpArticle ? (
+    <PageHeader
+      title="Help Center"
+      actions={
+        isHelpArticle ? (
           <a href={Routes.help_center_root_path()} className="button" aria-label="Search" title="Search">
             <span className="icon icon-solid-search"></span>
           </a>
@@ -32,28 +33,21 @@ export function SupportHeader({
           <Button color="accent" onClick={onOpenNewTicket}>
             New ticket
           </Button>
-        ) : null}
-      </div>
+        ) : null
+      }
+    >
       {hasHelperSession ? (
         <Tabs>
-          <Tab
-            href={Routes.help_center_root_path()}
-            isSelected={pathname.startsWith(Routes.help_center_root_path())}
-            className="pb-2"
-          >
+          <Tab href={Routes.help_center_root_path()} isSelected={pathname.startsWith(Routes.help_center_root_path())}>
             Articles
           </Tab>
-          <Tab
-            href={Routes.support_index_path()}
-            isSelected={pathname.startsWith(Routes.support_index_path())}
-            className="flex items-center gap-2 border-b-2 pb-2"
-          >
+          <Tab href={Routes.support_index_path()} isSelected={pathname.startsWith(Routes.support_index_path())}>
             Support tickets
             <UnreadTicketsBadge />
           </Tab>
         </Tabs>
       ) : null}
-    </>
+    </PageHeader>
   );
 }
 

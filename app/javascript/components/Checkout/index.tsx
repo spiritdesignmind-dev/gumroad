@@ -359,7 +359,7 @@ export const Checkout = ({
           </div>
         </div>
       ) : (
-        <div>
+        <div className="p-8">
           <div className="placeholder">
             <figure>
               <img src={placeholder} />
