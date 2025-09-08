@@ -13,7 +13,10 @@ export const Tab = ({
   ...props
 }: { children: React.ReactNode; isSelected: boolean } & React.HTMLProps<HTMLAnchorElement>) => (
   <a
-    className={cx("shrink-0 rounded-full px-3 py-2 no-underline", isSelected && "border border-border bg-background")}
+    className={cx(
+      "shrink-0 rounded-full px-3 py-2 no-underline",
+      isSelected && "border border-border bg-background text-foreground",
+    )}
     role="tab"
     aria-selected={isSelected}
     {...props}
