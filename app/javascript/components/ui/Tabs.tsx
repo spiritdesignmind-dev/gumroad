@@ -15,7 +15,7 @@ export const Tab = ({
   <a
     className={cx(
       "shrink-0 rounded-full px-3 py-2 no-underline",
-      isSelected && "border border-border bg-background text-foreground",
+      isSelected && "border-border bg-background text-foreground border",
     )}
     role="tab"
     aria-selected={isSelected}
