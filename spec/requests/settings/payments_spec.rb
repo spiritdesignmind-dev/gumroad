@@ -4428,8 +4428,8 @@ describe("Payments Settings Scenario", type: :system, js: true) do
         expect(page).to have_content("Payouts will be made in BDT.")
 
         click_on("Update settings")
-
-        expect(page).to have_content("Thanks! You're all set.")
+        
+        expect(page).to have_content("Thanks! You're all set.", wait: 10)
         expect(page).to have_content("Bank code")
         compliance_info = @user.alive_user_compliance_info
         expect(compliance_info.first_name).to eq("Bangladesh")

@@ -2304,8 +2304,8 @@ describe Purchase, :vcr do
       end
 
       pending describe "when the purchase has sales tax that gumroad is collecting and will pay as the merchant" do
-        let(:purchase) do
-          create(:purchase, seller: user, link:, price_cents: link.price_cents, fee_cents: 30, purchase_state: "in_progress", merchant_account: nil, chargeable:,
+        before do
+          @purchase = create(:purchase, seller: user, link:, price_cents: link.price_cents, fee_cents: 30, purchase_state: "in_progress", merchant_account: nil, chargeable:,
                             full_name: "Edgar Gumstein", street_address: "123 Gum Road", city: "London", zip_code: "94017", country: "United Kingdom", ip_country: "United Kingdom")
         end
 
@@ -2315,10 +2315,10 @@ describe Purchase, :vcr do
         end
 
         it "is charged using a Gumroad merchant account for suppliers" do
-          purchase.process!
-          expect(purchase.errors).to be_empty
-          expect(purchase.merchant_account).not_to eq(nil)
-          expect(purchase.merchant_account).to eq(merchant_account)
+          @purchase.process!
+          expect(@purchase.errors).to be_empty
+          expect(@purchase.merchant_account).not_to eq(nil)
+          expect(@purchase.merchant_account).to eq(merchant_account)
         end
       end
     end
